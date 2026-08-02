@@ -1,0 +1,5 @@
+{
+  "id": "item_duplicate_fixture",
+  "display_name": "Duplicate Item",
+  "description": "Uses an ID shared by another fixture Definition."
+}

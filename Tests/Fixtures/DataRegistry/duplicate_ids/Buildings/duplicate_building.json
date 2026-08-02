@@ -1,0 +1,10 @@
+{
+  "id": "item_duplicate_fixture",
+  "display_name": "Duplicate Building",
+  "description": "Uses an ID shared by another fixture Definition.",
+  "footprint_width": 1,
+  "footprint_height": 1,
+  "build_cost": {
+    "item_duplicate_fixture": 1
+  }
+}

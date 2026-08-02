@@ -1,3 +1,5 @@
 [gd_scene format=3]
 
 [node name="BattleSandbox" type="Node2D"]
+metadata/sandbox_status = "placeholder"
+metadata/sandbox_next_stage = "S6"

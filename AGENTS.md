@@ -42,7 +42,7 @@
 4. 提交前运行 `git diff --check`，并运行适用的自动测试。
 5. 快速验证使用 `./Tools/verify_project.ps1 -GodotPath <Godot可执行文件>`；完整验证追加 `-Full`。
 
-GUT 与统一验证脚本将在 F19 / F20 引入；引入后必须使用统一命令完成完整测试。
+自动测试与统一验证脚本已在 F19 / F20 引入；涉及 Gameplay / Core / Data / Save 的改动必须使用 `./Tools/verify_project.ps1 -GodotPath <Godot可执行文件> -Full` 完成完整测试。
 
 ## 禁止事项
 

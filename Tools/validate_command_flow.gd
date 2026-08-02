@@ -19,18 +19,27 @@ func _init() -> void:
 		_fail("new_game_created did not contain the new seed.")
 		return
 
-	var state_before_rejection: GameState = session.get_state()
 	var place_result: CommandResult = system.execute(
 		session,
 		PlaceBuildingCommand.new(&"building_rain_collector", Vector2i.ZERO, 0),
 	)
-	if place_result.succeeded or place_result.error_code != &"unsupported_command":
-		_fail("Unsupported command did not report a clear failure.")
+	if not place_result.succeeded:
+		_fail("PlaceBuildingCommand did not create a valid building.")
 		return
-	if session.get_state() != state_before_rejection or session.get_world_seed() != 12345:
-		_fail("Rejected command partially changed session state.")
+	if session.get_item_amount(&"item_wood") != 7:
+		_fail("PlaceBuildingCommand did not spend the configured cost.")
 		return
-	if _rejected_command_type != &"place_building" or _rejection_error_code != &"unsupported_command":
+	var rejected_result: CommandResult = system.execute(
+		session,
+		PlaceBuildingCommand.new(&"building_rain_collector", Vector2i.ZERO, 0),
+	)
+	if rejected_result.succeeded or rejected_result.error_code != &"invalid_placement":
+		_fail("Overlapping placement did not report a clear failure.")
+		return
+	if session.get_item_amount(&"item_wood") != 7:
+		_fail("Rejected command partially spent resources.")
+		return
+	if _rejected_command_type != &"place_building" or _rejection_error_code != &"invalid_placement":
 		_fail("command_rejected payload was incorrect.")
 		return
 

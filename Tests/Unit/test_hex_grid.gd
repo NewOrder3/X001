@@ -1,4 +1,4 @@
-extends GutTest
+extends "res://Tests/TestCase.gd"
 
 func test_neighbors_have_distance_one() -> void:
 	var origin: HexCoord = HexCoord.new(0, 0)

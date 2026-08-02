@@ -6,22 +6,47 @@ extends RefCounted
 var _state: GameState = null
 var _world_seed: int = 0
 var _is_disposed: bool = false
+var _data_registry: DataRegistry
+var _inventory_system: InventorySystem
+var _building_system: BuildingSystem
+var _last_error: String = ""
 
 
-func create_new_game(world_seed: int) -> void:
+func _init() -> void:
+	_data_registry = DataRegistry.new()
+	_inventory_system = InventorySystem.new(_data_registry)
+	_building_system = BuildingSystem.new(_data_registry, _inventory_system)
+
+
+func create_new_game(world_seed: int) -> bool:
+	if not _data_registry.load_all():
+		_last_error = _data_registry.get_last_error()
+		return false
 	_world_seed = world_seed
 	_state = GameState.new(world_seed)
 	_is_disposed = false
+	_last_error = ""
+	if not _inventory_system.add(_state.inventory_state, &"item_wood", 10):
+		_last_error = "Could not grant starting resources."
+		_state = null
+		_is_disposed = true
+		return false
+	return true
 
 
-func load_state(state: GameState) -> void:
+func load_state(state: GameState) -> bool:
 	assert(state != null, "GameSession.load_state requires a GameState.")
 	if state == null:
-		return
+		return false
+	if not _data_registry.load_all():
+		_last_error = _data_registry.get_last_error()
+		return false
 
 	_state = state
 	_world_seed = state.world_seed
 	_is_disposed = false
+	_last_error = ""
+	return true
 
 
 func dispose() -> void:
@@ -41,3 +66,35 @@ func get_state() -> GameState:
 
 func get_world_seed() -> int:
 	return _world_seed
+
+
+func get_last_error() -> String:
+	return _last_error
+
+
+func get_raft_state() -> RaftState:
+	if not has_active_state():
+		return null
+	return _state.raft_state
+
+
+func get_item_amount(item_id: StringName) -> int:
+	if not has_active_state():
+		return 0
+	return _inventory_system.get_amount(_state.inventory_state, item_id)
+
+
+func get_building_definition(building_id: StringName) -> BuildingDefinition:
+	if _data_registry == null or not _data_registry.has_building(building_id):
+		return null
+	return _data_registry.get_building(building_id)
+
+
+func get_building_system() -> BuildingSystem:
+	return _building_system
+
+
+func execute_place_building(command: PlaceBuildingCommand) -> CommandResult:
+	if not has_active_state():
+		return CommandResult.failure(&"inactive_session", "Start a game before building.")
+	return _building_system.execute(_state, command)

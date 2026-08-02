@@ -117,11 +117,16 @@ func _create_building_definition(data: Dictionary, source_path: String) -> Build
 	if not _last_error.is_empty():
 		return null
 
+	var build_cost: Dictionary[StringName, int] = _read_item_amounts(data, "build_cost", source_path)
+	if not _last_error.is_empty():
+		return null
+
 	return BuildingDefinition.new(
 		id,
 		display_name,
 		description,
 		Vector2i(footprint_width, footprint_height),
+		build_cost,
 	)
 
 
@@ -161,6 +166,38 @@ func _read_positive_int(data: Dictionary, field_name: String, source_path: Strin
 		return 0
 
 	return int(value)
+
+
+func _read_item_amounts(data: Dictionary, field_name: String, source_path: String) -> Dictionary[StringName, int]:
+	var raw_amounts: Variant = data.get(field_name)
+	if not raw_amounts is Dictionary:
+		_set_error("Definition '%s' requires an object field named '%s'." % [source_path, field_name])
+		return {}
+	if raw_amounts.is_empty():
+		_set_error("Definition '%s' requires at least one '%s' entry." % [source_path, field_name])
+		return {}
+
+	var amounts: Dictionary[StringName, int] = {}
+	for raw_item_id: Variant in raw_amounts:
+		if typeof(raw_item_id) != TYPE_STRING:
+			_set_error("Definition '%s' has a non-string item ID in '%s'." % [source_path, field_name])
+			return {}
+		var item_id: StringName = StringName(raw_item_id)
+		var validation_error: String = IdValidator.get_validation_error(item_id)
+		if not validation_error.is_empty() or not String(item_id).begins_with("item_"):
+			_set_error("Definition '%s' has an invalid item ID '%s' in '%s'." % [source_path, String(raw_item_id), field_name])
+			return {}
+		var raw_amount: Variant = raw_amounts[raw_item_id]
+		if typeof(raw_amount) != TYPE_INT and typeof(raw_amount) != TYPE_FLOAT:
+			_set_error("Definition '%s' requires a positive integer cost for '%s'." % [source_path, String(item_id)])
+			return {}
+		var amount: float = float(raw_amount)
+		if amount <= 0.0 or amount != floor(amount):
+			_set_error("Definition '%s' requires a positive integer cost for '%s'." % [source_path, String(item_id)])
+			return {}
+		amounts[item_id] = int(amount)
+
+	return amounts
 
 
 func _set_error(message: String) -> void:

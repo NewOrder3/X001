@@ -38,4 +38,4 @@ DataRegistry.has_definition(id: StringName) -> bool
 godot --headless --path . --script res://Tools/validate_data_registry.gd
 ```
 
-F19 后将以 fixture 和自动化测试覆盖成功、未知 ID、重复 ID 和非法 JSON；F20 后由统一验证命令调用该检查。
+自动化测试以 fixture 覆盖成功、未知 ID、重复 ID 和非法 JSON；`Tools/verify_project.ps1 -Full` 通过仓库内置测试运行器执行这些用例。

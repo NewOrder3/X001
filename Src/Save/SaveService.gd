@@ -1,7 +1,7 @@
 class_name SaveService
 extends RefCounted
 
-const CURRENT_SAVE_VERSION: int = 1
+const CURRENT_SAVE_VERSION: int = 2
 const SAVE_DIRECTORY: String = "user://saves"
 
 var _active_state: GameState = null
@@ -114,7 +114,7 @@ func _serialize_game_state(state: GameState) -> Dictionary:
 	return {
 		"world_seed": state.world_seed,
 		"raft_state": state.raft_state.to_save_data(),
-		"inventory_state": {},
+		"inventory_state": state.inventory_state.to_save_data(),
 		"survivor_state": {},
 		"world_state": {},
 		"battle_state": {},
@@ -131,11 +131,33 @@ func _deserialize_game_state(data: Dictionary) -> GameState:
 	if not raw_raft_state is Dictionary or not state.raft_state.load_from_save_data(raw_raft_state):
 		_fail("Save game_state contains an invalid raft_state.")
 		return null
+	var raw_inventory_state: Variant = data.get("inventory_state", {})
+	if not raw_inventory_state is Dictionary or not state.inventory_state.load_from_save_data(raw_inventory_state):
+		_fail("Save game_state contains an invalid inventory_state.")
+		return null
 	return state
 
 
 func _v1_to_v2(data: Dictionary) -> Dictionary:
-	return data
+	var migrated_data: Dictionary = data.duplicate(true)
+	var raw_game_state: Variant = migrated_data.get("game_state")
+	if not raw_game_state is Dictionary:
+		_fail("Version 1 save is missing a valid game_state object.")
+		return {}
+
+	var game_state_data: Dictionary = raw_game_state.duplicate(true)
+	for state_key: String in [
+		"inventory_state",
+		"survivor_state",
+		"world_state",
+		"battle_state",
+		"progression_state",
+	]:
+		if not game_state_data.has(state_key):
+			game_state_data[state_key] = {}
+
+	migrated_data["game_state"] = game_state_data
+	return migrated_data
 
 
 func _get_save_path(slot_id: StringName) -> String:

@@ -22,9 +22,16 @@ func execute(session: GameSession, command: GameCommand) -> CommandResult:
 
 	if command is CreateNewGameCommand:
 		var create_command: CreateNewGameCommand = command as CreateNewGameCommand
-		session.create_new_game(create_command.world_seed)
+		if not session.create_new_game(create_command.world_seed):
+			return _reject(command, &"content_load_failed", session.get_last_error())
 		events.new_game_created.emit(create_command.world_seed)
 		return CommandResult.success("Created a new game session.")
+	if command is PlaceBuildingCommand:
+		var place_command: PlaceBuildingCommand = command as PlaceBuildingCommand
+		var place_result: CommandResult = session.execute_place_building(place_command)
+		if not place_result.succeeded:
+			events.command_rejected.emit(place_command.get_command_type(), place_result.error_code)
+		return place_result
 
 	return _reject(
 		command,

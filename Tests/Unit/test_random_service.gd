@@ -1,4 +1,4 @@
-extends GutTest
+extends "res://Tests/TestCase.gd"
 
 func test_same_seed_produces_same_value() -> void:
 	var first: RandomService = RandomService.new()

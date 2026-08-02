@@ -3,5 +3,8 @@
   "display_name": "Rain Collector",
   "description": "Collects rainwater for the raft.",
   "footprint_width": 1,
-  "footprint_height": 1
+  "footprint_height": 1,
+  "build_cost": {
+    "item_wood": 3
+  }
 }

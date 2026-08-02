@@ -51,4 +51,4 @@ godot --headless --path . --editor --quit
 godot --headless --path . --quit
 ```
 
-F19 引入 GUT 后，涉及 Gameplay / Core / Data / Save 的改动必须运行相关测试；F20 引入统一验证脚本后，以该脚本作为完整检查入口。
+涉及 Gameplay / Core / Data / Save 的改动必须运行相关测试；以 `Tools/verify_project.ps1 -Full` 作为完整检查入口。测试由仓库内置的 `Tools/run_tests.gd` 运行，不依赖编辑器插件或本机缓存。

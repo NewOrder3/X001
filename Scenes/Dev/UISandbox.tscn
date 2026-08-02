@@ -3,5 +3,7 @@
 [ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="1_ui"]
 
 [node name="UISandbox" type="Node"]
+metadata/sandbox_status = "runnable_shell"
+metadata/sandbox_next_stage = "S2"
 
 [node name="UIRoot" parent="." instance=ExtResource("1_ui")]

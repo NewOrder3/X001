@@ -24,7 +24,14 @@ godot --headless --path . --editor --quit
 godot --headless --path . --quit
 ```
 
-完整自动化验证命令将在 F20 阶段统一提供。
+完整验证使用仓库内置的零依赖测试运行器，不需要安装编辑器插件：
+
+```powershell
+.\Tools\verify_project.ps1 -GodotPath <Godot可执行文件>
+.\Tools\verify_project.ps1 -GodotPath <Godot可执行文件> -Full
+```
+
+第一条命令运行项目加载与基础流程验证；`-Full` 额外运行 `Tests/Unit/` 下的自动化用例。
 
 ## Git 约定
 

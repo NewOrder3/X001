@@ -1,0 +1,5 @@
+{
+  "id": "item_fixture_wood",
+  "display_name": "Fixture Wood",
+  "description": "A fixture item for DataRegistry tests."
+}

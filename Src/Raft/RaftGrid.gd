@@ -54,6 +54,13 @@ func is_walkable(cell: Vector2i) -> bool:
 	return _deck_cells.has(cell) and not _occupied_cells.has(cell)
 
 
+func get_deck_cells() -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for cell: Vector2i in _deck_cells:
+		cells.append(cell)
+	return cells
+
+
 func to_save_data() -> Dictionary:
 	var deck_cells: Array[Dictionary] = []
 	var occupied_cells: Array[Dictionary] = []

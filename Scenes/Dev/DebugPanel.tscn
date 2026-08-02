@@ -3,6 +3,8 @@
 [ext_resource type="Script" path="res://Src/Core/Debug/DebugPanel.gd" id="1_debug"]
 
 [node name="DebugPanel" type="Control"]
+metadata/sandbox_status = "runnable_shell"
+metadata/sandbox_next_stage = "S1"
 script = ExtResource("1_debug")
 
 [node name="Title" type="Label" parent="."]

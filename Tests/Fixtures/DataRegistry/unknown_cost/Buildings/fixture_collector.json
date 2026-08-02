@@ -1,0 +1,10 @@
+{
+  "id": "building_fixture_collector",
+  "display_name": "Fixture Collector",
+  "description": "Test building.",
+  "footprint_width": 1,
+  "footprint_height": 1,
+  "build_cost": {
+    "item_missing_wood": 1
+  }
+}

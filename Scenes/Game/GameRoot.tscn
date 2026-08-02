@@ -1,9 +1,73 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://Src/SceneFlow/GameRoot.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="2_ui"]
+[ext_resource type="Script" path="res://Src/Building/View/RaftBuildView.gd" id="3_build_view"]
+[ext_resource type="Script" path="res://Src/Building/View/RaftBuildPanel.gd" id="4_build_panel"]
+[ext_resource type="Texture2D" path="res://Assets/UI/Backgrounds/temp_ocean_building.png" id="5_ocean"]
 
 [node name="GameRoot" type="Node"]
 script = ExtResource("1_game")
 
+[node name="OceanBackground" type="TextureRect" parent="."]
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("5_ocean")
+expand_mode = 1
+stretch_mode = 6
+mouse_filter = 2
+
+[node name="RaftBuildView" type="Node2D" parent="."]
+position = Vector2(960, 520)
+script = ExtResource("3_build_view")
+
 [node name="UIRoot" parent="." instance=ExtResource("2_ui")]
+
+[node name="RaftBuildPanel" type="PanelContainer" parent="UIRoot/HUDLayer"]
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 430.0
+offset_bottom = 282.0
+script = ExtResource("4_build_panel")
+build_view_path = NodePath("../../../RaftBuildView")
+
+[node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/RaftBuildPanel"]
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="Content" type="VBoxContainer" parent="UIRoot/HUDLayer/RaftBuildPanel/Margin"]
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="UIRoot/HUDLayer/RaftBuildPanel/Margin/Content"]
+theme_override_font_sizes/font_size = 26
+text = "竹筏建造（S1）"
+
+[node name="WoodLabel" type="Label" parent="UIRoot/HUDLayer/RaftBuildPanel/Margin/Content"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 20
+text = "木材：0"
+
+[node name="SelectRainCollectorButton" type="Button" parent="UIRoot/HUDLayer/RaftBuildPanel/Margin/Content"]
+unique_name_in_owner = true
+text = "选择：雨水收集器（3 木材）"
+
+[node name="BuildActions" type="HBoxContainer" parent="UIRoot/HUDLayer/RaftBuildPanel/Margin/Content"]
+theme_override_constants/separation = 12
+
+[node name="ConfirmBuildButton" type="Button" parent="UIRoot/HUDLayer/RaftBuildPanel/Margin/Content/BuildActions"]
+unique_name_in_owner = true
+size_flags_horizontal = 3
+text = "确认建造"
+
+[node name="CancelBuildButton" type="Button" parent="UIRoot/HUDLayer/RaftBuildPanel/Margin/Content/BuildActions"]
+unique_name_in_owner = true
+size_flags_horizontal = 3
+text = "取消"
+
+[node name="BuildStatusLabel" type="Label" parent="UIRoot/HUDLayer/RaftBuildPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 48)
+autowrap_mode = 2
+text = "选择建筑，点击竹筏格位开始。"
