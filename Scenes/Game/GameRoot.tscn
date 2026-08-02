@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Src/SceneFlow/GameRoot.gd" id="1_game"]
+[ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="2_ui"]
+
+[node name="GameRoot" type="Node"]
+script = ExtResource("1_game")
+
+[node name="UIRoot" parent="." instance=ExtResource("2_ui")]

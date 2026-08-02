@@ -28,6 +28,8 @@ View / UI  →  Command / System  →  State / Instance  →  Definition
 
 允许 View 读取只读查询结果以显示内容，但不得写入状态。System 不得依赖具体场景、节点路径、按钮、相机或触摸事件。跨玩法模块的调用通过公开 System 接口、Command 或 Signal 完成，不能直接操作另一模块的内部容器。
 
+Command 的创建、处理、失败结果和 Signal payload 规则见 [CommandAndEvents.md](CommandAndEvents.md)。
+
 ## 生命周期与全局服务
 
 - `GameSession`（F05）代表一次新游戏或读档运行，持有玩法 State 与玩法 System；切换场景时由 SceneRouter（F12）管理其保留或销毁。

@@ -1,6 +1,13 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://Src/Core/Bootstrap.gd" id="1_bootstrap"]
+[ext_resource type="Script" path="res://Src/SceneFlow/SceneRouter.gd" id="2_router"]
 
 [node name="Bootstrap" type="Node"]
 script = ExtResource("1_bootstrap")
+
+[node name="SceneHost" type="Node" parent="."]
+
+[node name="SceneRouter" type="Node" parent="." node_paths=PackedStringArray("scene_host")]
+script = ExtResource("2_router")
+scene_host = NodePath("../SceneHost")

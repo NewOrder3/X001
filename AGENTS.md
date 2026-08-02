@@ -1,6 +1,6 @@
 # X001 工程规则
 
-本文件约束所有对本仓库的代码与内容修改。详细说明见 `Docs/游戏程序相关/架构/Architecture.md`、`Docs/游戏程序相关/架构/CodingStandard.md`、`Docs/游戏程序相关/架构/DataDesign.md` 与 `Docs/游戏程序相关/架构/DataLoading.md`。
+本文件约束所有对本仓库的代码与内容修改。详细说明见 `Docs/游戏程序相关/架构/Architecture.md`、`Docs/游戏程序相关/架构/CodingStandard.md`、`Docs/游戏程序相关/架构/DataDesign.md`、`Docs/游戏程序相关/架构/DataLoading.md` 与 `Docs/游戏程序相关/架构/CommandAndEvents.md`。
 
 ## 技术基线
 
@@ -40,7 +40,7 @@
 2. 修改规则或数据模型时，同时新增或更新相应单元测试；随机逻辑必须可注入固定 Seed。
 3. 不混入无关重构，不改变其他模块公开接口，除非任务要求。
 4. 提交前运行 `git diff --check`，并运行适用的自动测试。
-5. 至少执行 Godot 加载检查：`godot --headless --path . --editor --quit`。若修改启动流程，再执行 `godot --headless --path . --quit`。
+5. 快速验证使用 `./Tools/verify_project.ps1 -GodotPath <Godot可执行文件>`；完整验证追加 `-Full`。
 
 GUT 与统一验证脚本将在 F19 / F20 引入；引入后必须使用统一命令完成完整测试。
 

@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Src/Core/Debug/DebugPanel.gd" id="1_debug"]
+
+[node name="DebugPanel" type="Control"]
+script = ExtResource("1_debug")
+
+[node name="Title" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+text = "Debug Panel (F3)"

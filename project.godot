@@ -11,21 +11,18 @@ config_version=5
 [application]
 
 config/name="X001"
+run/main_scene="res://Scenes/Bootstrap/Bootstrap.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
-run/main_scene="res://Scenes/Bootstrap/Bootstrap.tscn"
 
 [display]
 
-[display/window]
-
-size/viewport_width=1920
-size/viewport_height=1080
-size/window_width_override=1280
-size/window_height_override=720
-size/resizable=true
-window/stretch/mode="canvas_items"
-window/stretch/aspect="expand"
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/window/stretch/mode="canvas_items"
+window/window/stretch/aspect="expand"
 
 [input]
 
@@ -42,6 +39,19 @@ cancel={
 open_debug={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":4194324,"physical_keycode":0,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+pan_map={
+"deadzone": 0.5,
+"events": []
+}
+zoom_map={
+"deadzone": 0.5,
+"events": []
+}
+place_building={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":32,"physical_keycode":0,"key_label":0,"unicode":32,"location":0,"echo":false,"script":null)
 ]
 }
 
