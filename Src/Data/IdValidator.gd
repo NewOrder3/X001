@@ -3,7 +3,7 @@ extends RefCounted
 
 ## Validates stable Definition and save-reference IDs without depending on data format.
 
-const ALLOWED_PREFIXES: PackedStringArray = PackedStringArray([
+const ALLOWED_PREFIXES: Array[String] = [
 	"item",
 	"building",
 	"recipe",
@@ -14,7 +14,7 @@ const ALLOWED_PREFIXES: PackedStringArray = PackedStringArray([
 	"event",
 	"quest",
 	"progression",
-])
+]
 
 
 static func is_valid_id(id: StringName) -> bool:
