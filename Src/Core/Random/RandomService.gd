@@ -7,8 +7,8 @@ var _world_seed: int = 0
 var _streams: Dictionary[StringName, RandomNumberGenerator] = {}
 
 
-func set_world_seed(seed: int) -> void:
-	_world_seed = seed
+func set_world_seed(world_seed: int) -> void:
+	_world_seed = world_seed
 	_streams.clear()
 
 

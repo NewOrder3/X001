@@ -8,8 +8,8 @@ var _active_state: GameState = null
 var _last_error: String = ""
 
 
-func new_game(seed: int = 0) -> void:
-	_active_state = GameState.new(seed)
+func new_game(world_seed: int = 0) -> void:
+	_active_state = GameState.new(world_seed)
 	_last_error = ""
 
 

@@ -8,9 +8,9 @@ var _world_seed: int = 0
 var _is_disposed: bool = false
 
 
-func create_new_game(seed: int) -> void:
-	_world_seed = seed
-	_state = GameState.new(seed)
+func create_new_game(world_seed: int) -> void:
+	_world_seed = world_seed
+	_state = GameState.new(world_seed)
 	_is_disposed = false
 
 

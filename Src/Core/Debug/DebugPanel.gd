@@ -18,7 +18,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-func create_new_game(seed: int) -> CommandResult:
+func create_new_game(world_seed: int) -> CommandResult:
 	if _session == null:
 		return CommandResult.failure(&"invalid_session", "Debug panel has no GameSession.")
-	return DebugCommandService.new().new_game(_session, seed)
+	return DebugCommandService.new().new_game(_session, world_seed)
