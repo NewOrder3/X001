@@ -1,3 +1,30 @@
-# Godot 4+ specific ignores
+# Godot 4+ editor cache and imported-resource metadata.
 .godot/
+
+# Locally generated export packages and platform build directories.
 /android/
+/build/
+/exports/
+/export/
+/dist/
+*.pck
+
+# Local game data. Saves use user:// at runtime and must never become source data.
+/savegames/
+/saves/
+/user_data/
+*.savegame
+*.savegame.bak
+
+# Per-machine editor and IDE settings.
+.vscode/
+.idea/
+.vs/
+*.suo
+*.user
+*.userprefs
+
+# OS and log files.
+.DS_Store
+Thumbs.db
+*.log
