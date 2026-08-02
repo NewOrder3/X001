@@ -5,6 +5,7 @@
 ```text
 X001/
 ├── Assets/                 # 美术、音频、字体及其他原始资源
+│   └── UI/Backgrounds/      # 菜单与界面背景图
 ├── Data/                   # 可版本控制的静态 Definition JSON
 │   ├── Items/ Buildings/ Recipes/ Survivors/ Skills/
 │   └── Bosses/ Regions/ Events/ Progression/
