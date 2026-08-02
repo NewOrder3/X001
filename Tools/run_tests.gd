@@ -8,6 +8,7 @@ const TEST_SCRIPTS: Array[String] = [
 	"res://Tests/Unit/test_save_service.gd",
 	"res://Tests/Unit/test_data_registry.gd",
 	"res://Tests/Unit/test_building_system.gd",
+	"res://Tests/Unit/test_raft_build_view.gd",
 ]
 
 var _failed_test_count: int = 0
