@@ -36,6 +36,16 @@
 - Instance / State 仅保存对 Definition 的 `id` 与自身运行时字段，不能复制显示名或持有 View。
 - 面向用户的名称、描述、图标和本地化文本属于 Definition / View 数据，可自由调整，不参与存档主键或逻辑判断。
 
+### 字段归属
+
+| 归属 | 允许字段 | 不允许字段 |
+| --- | --- | --- |
+| Definition | 稳定 `id`、显示文本、图标路径、静态规格（例如建筑 footprint） | 玩家等级、放置位置、Node、场景内引用 |
+| Instance / State | 实例 ID、Definition ID、位置、等级、分配等运行时且可存档字段 | `Node`、`Control`、`Sprite2D`、从 Definition 复制的显示文本 |
+| View | 绑定的实例 ID、临时动画/选中/节点引用等可重建表现数据 | 权威运行时状态、存档数据、直接写入 State 的逻辑 |
+
+`BuildingDefinition` 可以对应多个 `BuildingInstance`。View 的最低契约是接收实例 ID、通过 Session / System 查询状态并监听领域 Signal；重建或销毁 View 不得改变 Instance。具体 `BuildingView` 实现与解绑规则在 F17 完成。
+
 ## 校验与加载
 
 `IdValidator` 提供：

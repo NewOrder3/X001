@@ -1,0 +1,7 @@
+{
+  "id": "building_rain_collector",
+  "display_name": "Rain Collector",
+  "description": "Collects rainwater for the raft.",
+  "footprint_width": 1,
+  "footprint_height": 1
+}

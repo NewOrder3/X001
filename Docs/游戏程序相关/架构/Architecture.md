@@ -37,7 +37,7 @@ View / UI  →  Command / System  →  State / Instance  →  Definition
 ## 数据与存档
 
 - Definition 与显示文本分离；稳定 ID 使用 `StringName`，文件名与 ID 使用 `snake_case`。具体格式与前缀见 [DataDesign.md](DataDesign.md)。
-- JSON / Resource 的具体 Definition 格式由 F07 统一选择，Gameplay 不得自行扫描配置目录或硬编码资源路径。
+- 第一批 Definition 使用 JSON，具体目录与字段见 [DataLoading.md](DataLoading.md)。Gameplay 不得自行扫描配置目录或硬编码资源路径。
 - SaveService（F11）仅序列化 State 和 Instance，并包含 `save_version`；存档迁移由明确版本步骤处理。
 
 ## 设计约束
