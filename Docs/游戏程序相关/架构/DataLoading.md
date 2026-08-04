@@ -8,6 +8,7 @@ F07 选择 JSON 作为第一批 Definition 格式。它便于版本审查、fixt
 | --- | --- | --- |
 | Item | `Data/Items/` | `id`、`display_name`、`description` |
 | Building | `Data/Buildings/` | `id`、`display_name`、`description`、`footprint_width`、`footprint_height` |
+| SurvivalConfig | `Data/Survival/` | `id`、补给/耐久消耗与阈值、被动恢复、体力配置 |
 
 每个文件是一个 JSON 对象，文件名使用 `snake_case`。ID 规则见 [DataDesign.md](DataDesign.md)。例如：
 
@@ -28,6 +29,7 @@ DataRegistry.load_all() -> bool
 DataRegistry.get_item(id: StringName) -> ItemDefinition
 DataRegistry.get_building(id: StringName) -> BuildingDefinition
 DataRegistry.has_definition(id: StringName) -> bool
+DataRegistry.get_survival_config(id: StringName) -> SurvivalConfigDefinition
 ```
 
 加载按稳定文件名排序，确保错误结果可复现。加载期间会验证 JSON 结构、必需字段、ID 格式和跨类型重复 ID；任一步失败都会返回 `false`，并可通过 `get_last_error()` 获得包含文件与字段的错误，且不会保留部分已注册的数据。未知的 `get_item` / `get_building` 查询会输出 `DATA` 分类错误并返回 `null`。

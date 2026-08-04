@@ -27,6 +27,7 @@
 | `event` | 事件 Definition | `event_storm_warning` |
 | `quest` | 任务 Definition | `quest_first_sail` |
 | `progression` | 解锁与进度节点 | `progression_building_tier_1` |
+| `survival` | 生存规则配置 Definition | `survival_default` |
 
 新增前缀必须同时修改本表和 `IdValidator.ALLOWED_PREFIXES`，并说明对应的 Definition / State 归属。
 

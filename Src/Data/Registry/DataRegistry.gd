@@ -5,11 +5,14 @@ extends RefCounted
 
 const ITEM_DIRECTORY: String = "res://Data/Items"
 const BUILDING_DIRECTORY: String = "res://Data/Buildings"
+const SURVIVAL_DIRECTORY: String = "res://Data/Survival"
 
 var _item_directory: String
 var _building_directory: String
+var _survival_directory: String
 var _items: Dictionary[StringName, ItemDefinition] = {}
 var _buildings: Dictionary[StringName, BuildingDefinition] = {}
+var _survival_configs: Dictionary[StringName, SurvivalConfigDefinition] = {}
 var _registered_ids: Dictionary[StringName, bool] = {}
 var _last_error: String = ""
 
@@ -17,9 +20,11 @@ var _last_error: String = ""
 func _init(
 	new_item_directory: String = ITEM_DIRECTORY,
 	new_building_directory: String = BUILDING_DIRECTORY,
+	new_survival_directory: String = SURVIVAL_DIRECTORY,
 ) -> void:
 	_item_directory = new_item_directory
 	_building_directory = new_building_directory
+	_survival_directory = new_survival_directory
 
 
 func load_all() -> bool:
@@ -38,6 +43,13 @@ func load_all() -> bool:
 		return _fail_load(loader.get_last_error())
 	for definition: BuildingDefinition in building_definitions:
 		if not _register_building(definition):
+			return _fail_load(_last_error)
+
+	var survival_definitions: Array[SurvivalConfigDefinition] = loader.load_survival_configs(_survival_directory)
+	if not loader.get_last_error().is_empty():
+		return _fail_load(loader.get_last_error())
+	for definition: SurvivalConfigDefinition in survival_definitions:
+		if not _register_survival_config(definition):
 			return _fail_load(_last_error)
 	if not _validate_building_item_references():
 		return _fail_load(_last_error)
@@ -59,6 +71,13 @@ func get_building(id: StringName) -> BuildingDefinition:
 	return _buildings[id]
 
 
+func get_survival_config(id: StringName) -> SurvivalConfigDefinition:
+	if not _survival_configs.has(id):
+		push_error("DATA: Unknown survival Definition ID '%s'." % String(id))
+		return null
+	return _survival_configs[id]
+
+
 func has_definition(id: StringName) -> bool:
 	return _registered_ids.has(id)
 
@@ -69,6 +88,10 @@ func has_item(id: StringName) -> bool:
 
 func has_building(id: StringName) -> bool:
 	return _buildings.has(id)
+
+
+func has_survival_config(id: StringName) -> bool:
+	return _survival_configs.has(id)
 
 
 func get_last_error() -> String:
@@ -83,6 +106,10 @@ func get_building_count() -> int:
 	return _buildings.size()
 
 
+func get_survival_config_count() -> int:
+	return _survival_configs.size()
+
+
 func _register_item(definition: ItemDefinition) -> bool:
 	if not _register_id(definition.id):
 		return false
@@ -94,6 +121,13 @@ func _register_building(definition: BuildingDefinition) -> bool:
 	if not _register_id(definition.id):
 		return false
 	_buildings[definition.id] = definition
+	return true
+
+
+func _register_survival_config(definition: SurvivalConfigDefinition) -> bool:
+	if not _register_id(definition.id):
+		return false
+	_survival_configs[definition.id] = definition
 	return true
 
 
@@ -117,6 +151,7 @@ func _validate_building_item_references() -> bool:
 func _clear() -> void:
 	_items.clear()
 	_buildings.clear()
+	_survival_configs.clear()
 	_registered_ids.clear()
 	_last_error = ""
 
@@ -124,6 +159,7 @@ func _clear() -> void:
 func _fail_load(message: String) -> bool:
 	_items.clear()
 	_buildings.clear()
+	_survival_configs.clear()
 	_registered_ids.clear()
 	_last_error = message
 	return false

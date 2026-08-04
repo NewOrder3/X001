@@ -20,6 +20,11 @@ func get_session() -> GameSession:
 	return _session
 
 
+func _process(delta: float) -> void:
+	if _session != null:
+		_session.advance_simulation(delta)
+
+
 func _bind_views() -> void:
 	if not is_node_ready() or _session == null:
 		return

@@ -6,6 +6,7 @@ extends RefCounted
 var world_seed: int
 var raft_state: RaftState
 var inventory_state: InventoryState
+var survival_state: SurvivalState
 var survivor_state: SurvivorState
 var world_state: WorldState
 var battle_state: BattleState
@@ -16,6 +17,7 @@ func _init(initial_world_seed: int = 0) -> void:
 	world_seed = initial_world_seed
 	raft_state = RaftState.new()
 	inventory_state = InventoryState.new()
+	survival_state = SurvivalState.new()
 	survivor_state = SurvivorState.new()
 	world_state = WorldState.new()
 	battle_state = BattleState.new()

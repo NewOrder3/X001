@@ -9,6 +9,8 @@ var _is_disposed: bool = false
 var _data_registry: DataRegistry
 var _inventory_system: InventorySystem
 var _building_system: BuildingSystem
+var _simulation_clock: SimulationClock
+var _survival_system: SurvivalSystem
 var _last_error: String = ""
 
 
@@ -16,6 +18,8 @@ func _init() -> void:
 	_data_registry = DataRegistry.new()
 	_inventory_system = InventorySystem.new(_data_registry)
 	_building_system = BuildingSystem.new(_data_registry, _inventory_system)
+	_simulation_clock = SimulationClock.new()
+	_survival_system = SurvivalSystem.new(_data_registry, _simulation_clock)
 
 
 func create_new_game(world_seed: int) -> bool:
@@ -24,6 +28,15 @@ func create_new_game(world_seed: int) -> bool:
 		return false
 	_world_seed = world_seed
 	_state = GameState.new(world_seed)
+	if not _survival_system.initialize_new_state(
+		_state.survival_state,
+		&"survival_default",
+		int(Time.get_unix_time_from_system()),
+	):
+		_last_error = "Could not initialize the survival state."
+		_state = null
+		_is_disposed = true
+		return false
 	_is_disposed = false
 	_last_error = ""
 	if not _inventory_system.add(_state.inventory_state, &"item_wood", 10):
@@ -31,6 +44,7 @@ func create_new_game(world_seed: int) -> bool:
 		_state = null
 		_is_disposed = true
 		return false
+	_simulation_clock.start()
 	return true
 
 
@@ -43,9 +57,14 @@ func load_state(state: GameState) -> bool:
 		return false
 
 	_state = state
+	if not _survival_system.activate_loaded_state(_state.survival_state, int(Time.get_unix_time_from_system())):
+		_last_error = "Could not activate the survival state."
+		_state = null
+		return false
 	_world_seed = state.world_seed
 	_is_disposed = false
 	_last_error = ""
+	_simulation_clock.start()
 	return true
 
 
@@ -53,6 +72,7 @@ func dispose() -> void:
 	_state = null
 	_world_seed = 0
 	_is_disposed = true
+	_simulation_clock.pause()
 
 
 func has_active_state() -> bool:
@@ -92,6 +112,28 @@ func get_building_definition(building_id: StringName) -> BuildingDefinition:
 
 func get_building_system() -> BuildingSystem:
 	return _building_system
+
+
+func get_survival_state() -> SurvivalState:
+	if not has_active_state():
+		return null
+	return _state.survival_state
+
+
+func get_survival_system() -> SurvivalSystem:
+	return _survival_system
+
+
+func get_simulation_clock() -> SimulationClock:
+	return _simulation_clock
+
+
+func advance_simulation(delta_seconds: float) -> int:
+	if not has_active_state():
+		return 0
+	var emitted_tick_count: int = _simulation_clock.advance(delta_seconds)
+	_survival_system.advance(_state.survival_state)
+	return emitted_tick_count
 
 
 func execute_place_building(command: PlaceBuildingCommand) -> CommandResult:

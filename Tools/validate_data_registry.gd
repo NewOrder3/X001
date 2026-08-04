@@ -9,9 +9,10 @@ func _init() -> void:
 		return
 
 	print(
-		"Loaded %d item Definition(s) and %d building Definition(s)." % [
+		"Loaded %d item Definition(s), %d building Definition(s), and %d survival config Definition(s)." % [
 			registry.get_item_count(),
 			registry.get_building_count(),
+			registry.get_survival_config_count(),
 		]
 	)
 	quit(0)
