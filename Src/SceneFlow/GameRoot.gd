@@ -2,9 +2,9 @@ class_name GameRoot
 extends Node
 
 @onready var _build_view: RaftBuildView = $RaftBuildView
-@onready var _build_panel: RaftBuildPanel = $UIRoot/HUDLayer/RaftBuildPanel
-@onready var _survival_hud: SurvivalHUD = $UIRoot/HUDLayer/SurvivalHUD
-@onready var _production_panel: ProductionPanel = $UIRoot/HUDLayer/ProductionPanel
+@onready var _build_panel: RaftBuildPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel
+@onready var _survival_hud: SurvivalHUD = $UIRoot/HUDLayer/GameHudLayout/SurvivalHUD
+@onready var _production_panel: ProductionPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel
 
 var _session: GameSession = null
 

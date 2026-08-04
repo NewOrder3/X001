@@ -50,7 +50,7 @@ custom_minimum_size = Vector2(0, 338)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("4_build_panel")
-build_view_path = NodePath("../../../RaftBuildView")
+build_view_path = NodePath("../../../../../../RaftBuildView")
 
 [node name="SurvivalHUD" type="PanelContainer" parent="UIRoot/HUDLayer/GameHudLayout"]
 layout_mode = 0
@@ -142,77 +142,76 @@ custom_minimum_size = Vector2(0, 48)
 autowrap_mode = 2
 text = "选择建筑，点击竹筏格位开始。"
 
-[node name="ProductionPanel" type="PanelContainer" parent="UIRoot/HUDLayer"]
-offset_left = 32.0
-offset_top = 310.0
-offset_right = 500.0
-offset_bottom = 680.0
+[node name="ProductionPanel" type="PanelContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn"]
+custom_minimum_size = Vector2(0, 370)
+layout_mode = 2
+size_flags_horizontal = 3
 script = ExtResource("7_production_panel")
 
-[node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/ProductionPanel"]
+[node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel"]
 theme_override_constants/margin_left = 18
 theme_override_constants/margin_top = 14
 theme_override_constants/margin_right = 18
 theme_override_constants/margin_bottom = 14
 
-[node name="Content" type="VBoxContainer" parent="UIRoot/HUDLayer/ProductionPanel/Margin"]
+[node name="Content" type="VBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin"]
 theme_override_constants/separation = 8
 
-[node name="Title" type="Label" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content"]
+[node name="Title" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 theme_override_font_sizes/font_size = 22
 text = "采集与生产（S3）"
 
-[node name="InventoryLabel" type="Label" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content"]
+[node name="InventoryLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 unique_name_in_owner = true
 text = "库存：--"
 
-[node name="GatherActions" type="HBoxContainer" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content"]
+[node name="GatherActions" type="HBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 theme_override_constants/separation = 6
 
-[node name="GatherWoodButton" type="Button" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content/GatherActions"]
+[node name="GatherWoodButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/GatherActions"]
 unique_name_in_owner = true
 text = "采木材"
 
-[node name="GatherFishButton" type="Button" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content/GatherActions"]
+[node name="GatherFishButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/GatherActions"]
 unique_name_in_owner = true
 text = "采生鱼"
 
-[node name="GatherWaterButton" type="Button" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content/GatherActions"]
+[node name="GatherWaterButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/GatherActions"]
 unique_name_in_owner = true
 text = "采海水"
 
-[node name="UseActions" type="HBoxContainer" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content"]
+[node name="UseActions" type="HBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 theme_override_constants/separation = 6
 
-[node name="UseWaterButton" type="Button" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content/UseActions"]
+[node name="UseWaterButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/UseActions"]
 unique_name_in_owner = true
 text = "使用淡水 +10"
 
-[node name="UseFishButton" type="Button" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content/UseActions"]
+[node name="UseFishButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/UseActions"]
 unique_name_in_owner = true
 text = "使用烤鱼 +15"
 
-[node name="ToggleActions" type="HBoxContainer" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content"]
+[node name="ToggleActions" type="HBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 theme_override_constants/separation = 6
 
-[node name="ToggleCollectorButton" type="Button" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content/ToggleActions"]
+[node name="ToggleCollectorButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/ToggleActions"]
 unique_name_in_owner = true
 text = "启停集雨器"
 
-[node name="ToggleCampfireButton" type="Button" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content/ToggleActions"]
+[node name="ToggleCampfireButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/ToggleActions"]
 unique_name_in_owner = true
 text = "启停篝火"
 
-[node name="ToggleRepairButton" type="Button" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content/ToggleActions"]
+[node name="ToggleRepairButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/ToggleActions"]
 unique_name_in_owner = true
 text = "启停维修站"
 
-[node name="FacilityLabel" type="Label" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content"]
+[node name="FacilityLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 unique_name_in_owner = true
 autowrap_mode = 2
 text = "设施：--"
 
-[node name="ProductionStatusLabel" type="Label" parent="UIRoot/HUDLayer/ProductionPanel/Margin/Content"]
+[node name="ProductionStatusLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 unique_name_in_owner = true
 autowrap_mode = 2
 text = "采集原料，建造设施后开始生产。"
