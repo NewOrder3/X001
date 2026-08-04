@@ -114,6 +114,10 @@ func get_building_system() -> BuildingSystem:
 	return _building_system
 
 
+func get_inventory_system() -> InventorySystem:
+	return _inventory_system
+
+
 func get_survival_state() -> SurvivalState:
 	if not has_active_state():
 		return null

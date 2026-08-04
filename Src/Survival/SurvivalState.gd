@@ -54,7 +54,7 @@ func load_from_save_data(data: Dictionary) -> bool:
 	var raw_last_settlement: Variant = data.get("last_offline_settlement_unix_seconds")
 	var raw_pending: Variant = data.get("offline_settlement_pending")
 
-	if typeof(raw_config_id) != TYPE_STRING or String(raw_config_id).is_empty():
+	if typeof(raw_config_id) != TYPE_STRING:
 		return false
 	if not _is_nonnegative_number(raw_supply) or not _is_nonnegative_number(raw_durability):
 		return false

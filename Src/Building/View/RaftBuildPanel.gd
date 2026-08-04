@@ -13,6 +13,7 @@ extends Control
 
 var _session: GameSession = null
 var _build_view: RaftBuildView = null
+var _inventory_system: InventorySystem = null
 var _selected_building_id: StringName = &""
 var _selected_cell: Vector2i = Vector2i.ZERO
 var _has_selected_cell: bool = false
@@ -30,6 +31,9 @@ func _ready() -> void:
 
 func bind_session(session: GameSession) -> void:
 	_session = session
+	_inventory_system = _session.get_inventory_system() if _session != null else null
+	if _inventory_system != null and not _inventory_system.item_amount_changed.is_connected(_on_item_amount_changed):
+		_inventory_system.item_amount_changed.connect(_on_item_amount_changed)
 	if _session != null and _session.get_building_system() != null:
 		var building_system: BuildingSystem = _session.get_building_system()
 		if not building_system.building_placed.is_connected(_on_building_placed):
@@ -82,6 +86,10 @@ func _on_building_placed(_instance_id: StringName, _building_id: StringName, _or
 		_build_view.queue_redraw()
 
 
+func _on_item_amount_changed(_item_id: StringName, _new_amount: int) -> void:
+	_refresh()
+
+
 func _refresh() -> void:
 	if not is_instance_valid(_wood_label):
 		return
@@ -89,5 +97,18 @@ func _refresh() -> void:
 	if _session != null:
 		wood_amount = _session.get_item_amount(&"item_wood")
 	_wood_label.text = "木材：%d" % wood_amount
+	_select_button.text = _get_select_button_text()
 	_confirm_button.disabled = _selected_building_id == &"" or not _has_selected_cell
 	_select_button.disabled = _session == null
+
+
+func _get_select_button_text() -> String:
+	if _session == null:
+		return "选择建筑"
+	var definition: BuildingDefinition = _session.get_building_definition(&"building_rain_collector")
+	if definition == null:
+		return "雨水收集器不可用"
+	var cost_entries: PackedStringArray = []
+	for item_id: StringName in definition.build_cost:
+		cost_entries.append("%s×%d" % [String(item_id).trim_prefix("item_"), definition.build_cost[item_id]])
+	return "选择：%s（%s）" % [definition.display_name, "、".join(cost_entries)]

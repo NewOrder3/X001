@@ -25,6 +25,26 @@ func test_save_load_restores_inventory_amounts() -> void:
 	assert_eq(loaded_state.inventory_state.item_amounts.get(&"item_wood", 0), 7)
 
 
+func test_save_load_restores_survival_state() -> void:
+	var state: GameState = GameState.new(8642)
+	state.survival_state.config_id = &"survival_default"
+	state.survival_state.supply = 47.5
+	state.survival_state.durability = 12.0
+	state.survival_state.stamina = 3
+	state.survival_state.stamina_recovery_remainder_seconds = 120.0
+	state.survival_state.offline_settlement_pending = true
+	var service: SaveService = SaveService.new()
+	service.set_active_state(state)
+	assert_true(service.save_game(&"save_survival_test"))
+	var loaded_state: GameState = service.load_game(&"save_survival_test")
+	assert_not_null(loaded_state)
+	assert_eq(loaded_state.survival_state.config_id, &"survival_default")
+	assert_eq(loaded_state.survival_state.supply, 47.5)
+	assert_eq(loaded_state.survival_state.durability, 12.0)
+	assert_eq(loaded_state.survival_state.stamina, 3)
+	assert_true(loaded_state.survival_state.offline_settlement_pending)
+
+
 func test_migrate_v1_adds_missing_state_sections() -> void:
 	var source_state: GameState = GameState.new(2468)
 	var v1_data: Dictionary = {
@@ -44,3 +64,4 @@ func test_migrate_v1_adds_missing_state_sections() -> void:
 	assert_true(game_state_data.has("world_state"))
 	assert_true(game_state_data.has("battle_state"))
 	assert_true(game_state_data.has("progression_state"))
+	assert_true(game_state_data.has("survival_state"))

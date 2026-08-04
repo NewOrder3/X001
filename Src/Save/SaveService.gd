@@ -1,7 +1,7 @@
 class_name SaveService
 extends RefCounted
 
-const CURRENT_SAVE_VERSION: int = 2
+const CURRENT_SAVE_VERSION: int = 3
 const SAVE_DIRECTORY: String = "user://saves"
 
 var _active_state: GameState = null
@@ -99,6 +99,9 @@ func migrate(data: Dictionary) -> Dictionary:
 		if version == 1:
 			migrated_data = _v1_to_v2(migrated_data)
 			version = 2
+		elif version == 2:
+			migrated_data = _v2_to_v3(migrated_data)
+			version = 3
 		else:
 			_fail("No migration exists for save version %d." % version)
 			return {}
@@ -115,6 +118,7 @@ func _serialize_game_state(state: GameState) -> Dictionary:
 		"world_seed": state.world_seed,
 		"raft_state": state.raft_state.to_save_data(),
 		"inventory_state": state.inventory_state.to_save_data(),
+		"survival_state": state.survival_state.to_save_data(),
 		"survivor_state": {},
 		"world_state": {},
 		"battle_state": {},
@@ -134,6 +138,13 @@ func _deserialize_game_state(data: Dictionary) -> GameState:
 	var raw_inventory_state: Variant = data.get("inventory_state", {})
 	if not raw_inventory_state is Dictionary or not state.inventory_state.load_from_save_data(raw_inventory_state):
 		_fail("Save game_state contains an invalid inventory_state.")
+		return null
+	var raw_survival_state: Variant = data.get("survival_state", {})
+	if not raw_survival_state is Dictionary:
+		_fail("Save game_state contains an invalid survival_state.")
+		return null
+	if not raw_survival_state.is_empty() and not state.survival_state.load_from_save_data(raw_survival_state):
+		_fail("Save game_state contains an invalid survival_state.")
 		return null
 	return state
 
@@ -156,6 +167,20 @@ func _v1_to_v2(data: Dictionary) -> Dictionary:
 		if not game_state_data.has(state_key):
 			game_state_data[state_key] = {}
 
+	migrated_data["game_state"] = game_state_data
+	return migrated_data
+
+
+func _v2_to_v3(data: Dictionary) -> Dictionary:
+	var migrated_data: Dictionary = data.duplicate(true)
+	var raw_game_state: Variant = migrated_data.get("game_state")
+	if not raw_game_state is Dictionary:
+		_fail("Version 2 save is missing a valid game_state object.")
+		return {}
+
+	var game_state_data: Dictionary = raw_game_state.duplicate(true)
+	if not game_state_data.has("survival_state"):
+		game_state_data["survival_state"] = {}
 	migrated_data["game_state"] = game_state_data
 	return migrated_data
 
