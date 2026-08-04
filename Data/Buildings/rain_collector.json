@@ -6,5 +6,7 @@
   "footprint_height": 1,
   "build_cost": {
     "item_wood": 3
-  }
+  },
+  "capability_tags": ["water_collection"],
+  "recipe_id": "recipe_collect_fresh_water"
 }

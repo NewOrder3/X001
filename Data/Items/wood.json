@@ -1,5 +1,6 @@
 {
   "id": "item_wood",
   "display_name": "Wood",
-  "description": "A basic building material."
+  "description": "A basic building material.",
+  "base_capacity": 99
 }

@@ -1,0 +1,6 @@
+{
+  "id": "item_seawater",
+  "display_name": "Seawater",
+  "description": "Salt water collected from the sea.",
+  "base_capacity": 10
+}

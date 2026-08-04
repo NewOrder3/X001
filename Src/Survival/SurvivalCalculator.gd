@@ -10,6 +10,8 @@ static func calculate_online(
 	elapsed_seconds: float,
 	supply_modifier_sum: float = 0.0,
 	durability_modifier_sum: float = 0.0,
+	durability_recovery_per_minute: float = 0.0,
+	durability_recovery_accelerated_multiplier: float = 1.0,
 ) -> SurvivalCalculationResult:
 	assert(state != null, "SurvivalCalculator.calculate_online requires a SurvivalState.")
 	assert(config != null, "SurvivalCalculator.calculate_online requires a SurvivalConfigDefinition.")
@@ -30,7 +32,13 @@ static func calculate_online(
 	if final_supply >= config.passive_recovery_accelerated_threshold:
 		recovery_accelerated = false
 
-	var final_durability: float = clampf(state.durability - durability_loss, 0.0, config.max_durability)
+	var durability_after_loss: float = maxf(state.durability - durability_loss, 0.0)
+	var durability_accelerated: bool = state.durability_recovery_accelerated or durability_after_loss <= 0.0
+	var durability_multiplier: float = durability_recovery_accelerated_multiplier if durability_accelerated else 1.0
+	var durability_recovery: float = maxf(durability_recovery_per_minute, 0.0) * maxf(durability_multiplier, 1.0) * elapsed_seconds / 60.0
+	var final_durability: float = clampf(durability_after_loss + durability_recovery, 0.0, config.max_durability)
+	if final_durability > 0.0:
+		durability_accelerated = false
 	var stamina_data: Dictionary[StringName, Variant] = _recover_stamina(
 		state.stamina,
 		state.stamina_recovery_remainder_seconds,
@@ -48,6 +56,7 @@ static func calculate_online(
 		_get_status(float(final_stamina), float(config.stamina_warning_threshold)),
 		recovery_accelerated,
 		final_remainder,
+		durability_accelerated,
 	)
 
 
@@ -127,4 +136,5 @@ static func _result_from_state(state: SurvivalState) -> SurvivalCalculationResul
 		state.stamina_status,
 		state.supply_recovery_accelerated,
 		state.stamina_recovery_remainder_seconds,
+		state.durability_recovery_accelerated,
 	)

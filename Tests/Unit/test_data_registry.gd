@@ -74,3 +74,10 @@ func test_load_all_rejects_survival_threshold_above_its_maximum() -> void:
 	assert_false(registry.load_all())
 	assert_true(registry.get_last_error().begins_with("Definition 'res://Tests/Fixtures/DataRegistry/invalid_survival/Survival/invalid_threshold.json' has a supply value above max_supply."))
 	assert_eq(registry.get_survival_config_count(), 0)
+
+
+func test_default_registry_loads_s3_recipe_definitions() -> void:
+	var registry: DataRegistry = DataRegistry.new()
+	assert_true(registry.load_all(), registry.get_last_error())
+	assert_eq(registry.get_recipe_count(), 2)
+	assert_not_null(registry.get_recipe(&"recipe_grill_fish"))

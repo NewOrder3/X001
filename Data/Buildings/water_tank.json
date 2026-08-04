@@ -1,0 +1,13 @@
+{
+  "id": "building_water_tank",
+  "display_name": "Water Tank",
+  "description": "Stores additional fresh water.",
+  "footprint_width": 1,
+  "footprint_height": 1,
+  "build_cost": {
+    "item_wood": 4
+  },
+  "storage_capacity_bonus": {
+    "item_fresh_water": 30
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "id": "item_grilled_fish",
+  "display_name": "Grilled Fish",
+  "description": "A warm meal prepared over a fire.",
+  "base_capacity": 10,
+  "supply_restore_amount": 15
+}

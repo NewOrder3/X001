@@ -65,3 +65,22 @@ func test_migrate_v1_adds_missing_state_sections() -> void:
 	assert_true(game_state_data.has("battle_state"))
 	assert_true(game_state_data.has("progression_state"))
 	assert_true(game_state_data.has("survival_state"))
+
+
+func test_migrate_v3_adds_empty_production_state() -> void:
+	var source_state: GameState = GameState.new(9753)
+	var v3_data: Dictionary = {
+		"save_version": 3,
+		"world_seed": 9753,
+		"game_state": {
+			"world_seed": 9753,
+			"raft_state": source_state.raft_state.to_save_data(),
+			"inventory_state": source_state.inventory_state.to_save_data(),
+			"survival_state": {},
+		},
+	}
+	var service: SaveService = SaveService.new()
+	var migrated_data: Dictionary = service.migrate(v3_data)
+	assert_eq(int(migrated_data.get("save_version", 0)), SaveService.CURRENT_SAVE_VERSION)
+	var game_state_data: Dictionary = migrated_data.get("game_state", {}) as Dictionary
+	assert_eq(game_state_data.get("production_state", {}), {})

@@ -1,0 +1,10 @@
+{
+  "id": "recipe_collect_fresh_water",
+  "display_name": "Collect Fresh Water",
+  "cycle_seconds": 30,
+  "input_items": {},
+  "output_items": {
+    "item_fresh_water": 1
+  },
+  "required_capability_tag": "water_collection"
+}

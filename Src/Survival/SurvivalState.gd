@@ -17,6 +17,7 @@ var supply_status: IndicatorStatus = IndicatorStatus.NORMAL
 var durability_status: IndicatorStatus = IndicatorStatus.NORMAL
 var stamina_status: IndicatorStatus = IndicatorStatus.NORMAL
 var supply_recovery_accelerated: bool = false
+var durability_recovery_accelerated: bool = false
 var stamina_recovery_remainder_seconds: float = 0.0
 var last_online_unix_seconds: int = 0
 var last_offline_settlement_unix_seconds: int = 0
@@ -33,6 +34,7 @@ func to_save_data() -> Dictionary:
 		"durability_status": int(durability_status),
 		"stamina_status": int(stamina_status),
 		"supply_recovery_accelerated": supply_recovery_accelerated,
+		"durability_recovery_accelerated": durability_recovery_accelerated,
 		"stamina_recovery_remainder_seconds": stamina_recovery_remainder_seconds,
 		"last_online_unix_seconds": last_online_unix_seconds,
 		"last_offline_settlement_unix_seconds": last_offline_settlement_unix_seconds,
@@ -49,6 +51,7 @@ func load_from_save_data(data: Dictionary) -> bool:
 	var raw_durability_status: Variant = data.get("durability_status")
 	var raw_stamina_status: Variant = data.get("stamina_status")
 	var raw_supply_recovery_accelerated: Variant = data.get("supply_recovery_accelerated")
+	var raw_durability_recovery_accelerated: Variant = data.get("durability_recovery_accelerated", false)
 	var raw_remainder: Variant = data.get("stamina_recovery_remainder_seconds")
 	var raw_last_online: Variant = data.get("last_online_unix_seconds")
 	var raw_last_settlement: Variant = data.get("last_offline_settlement_unix_seconds")
@@ -63,6 +66,8 @@ func load_from_save_data(data: Dictionary) -> bool:
 	if not _is_valid_status(raw_durability_status) or not _is_valid_status(raw_stamina_status):
 		return false
 	if typeof(raw_supply_recovery_accelerated) != TYPE_BOOL:
+		return false
+	if typeof(raw_durability_recovery_accelerated) != TYPE_BOOL:
 		return false
 	if not _is_nonnegative_number(raw_remainder):
 		return false
@@ -79,6 +84,7 @@ func load_from_save_data(data: Dictionary) -> bool:
 	durability_status = int(raw_durability_status) as IndicatorStatus
 	stamina_status = int(raw_stamina_status) as IndicatorStatus
 	supply_recovery_accelerated = bool(raw_supply_recovery_accelerated)
+	durability_recovery_accelerated = bool(raw_durability_recovery_accelerated)
 	stamina_recovery_remainder_seconds = float(raw_remainder)
 	last_online_unix_seconds = int(raw_last_online)
 	last_offline_settlement_unix_seconds = int(raw_last_settlement)

@@ -40,6 +40,19 @@ func load_buildings(directory_path: String) -> Array[BuildingDefinition]:
 	return definitions
 
 
+func load_recipes(directory_path: String) -> Array[RecipeDefinition]:
+	var definitions: Array[RecipeDefinition] = []
+	var entries: Array[Dictionary] = _load_json_entries(directory_path)
+	if not _last_error.is_empty():
+		return definitions
+	for entry: Dictionary in entries:
+		var definition: RecipeDefinition = _create_recipe_definition(entry["data"], entry["source_path"])
+		if definition == null:
+			return []
+		definitions.append(definition)
+	return definitions
+
+
 func load_survival_configs(directory_path: String) -> Array[SurvivalConfigDefinition]:
 	var definitions: Array[SurvivalConfigDefinition] = []
 	var entries: Array[Dictionary] = _load_json_entries(directory_path)
@@ -110,7 +123,11 @@ func _create_item_definition(data: Dictionary, source_path: String) -> ItemDefin
 	if not _last_error.is_empty():
 		return null
 
-	return ItemDefinition.new(id, display_name, description)
+	var base_capacity: int = _read_optional_positive_int(data, "base_capacity", source_path, 99)
+	var supply_restore_amount: float = _read_optional_nonnegative_float(data, "supply_restore_amount", source_path, 0.0)
+	if not _last_error.is_empty():
+		return null
+	return ItemDefinition.new(id, display_name, description, base_capacity, supply_restore_amount)
 
 
 func _create_building_definition(data: Dictionary, source_path: String) -> BuildingDefinition:
@@ -137,6 +154,13 @@ func _create_building_definition(data: Dictionary, source_path: String) -> Build
 	var build_cost: Dictionary[StringName, int] = _read_item_amounts(data, "build_cost", source_path)
 	if not _last_error.is_empty():
 		return null
+	var capability_tags: Array[StringName] = _read_optional_tags(data, "capability_tags", source_path)
+	var recipe_id: StringName = _read_optional_prefixed_id(data, "recipe_id", "recipe_", source_path)
+	var storage_capacity_bonus: Dictionary[StringName, int] = _read_optional_item_amounts(data, "storage_capacity_bonus", source_path)
+	var durability_recovery: float = _read_optional_nonnegative_float(data, "durability_recovery_per_minute", source_path, 0.0)
+	var recovery_multiplier: float = _read_optional_positive_float(data, "durability_recovery_accelerated_multiplier", source_path, 1.0)
+	if not _last_error.is_empty():
+		return null
 
 	return BuildingDefinition.new(
 		id,
@@ -144,7 +168,26 @@ func _create_building_definition(data: Dictionary, source_path: String) -> Build
 		description,
 		Vector2i(footprint_width, footprint_height),
 		build_cost,
+		capability_tags,
+		recipe_id,
+		storage_capacity_bonus,
+		durability_recovery,
+		recovery_multiplier,
 	)
+
+
+func _create_recipe_definition(data: Dictionary, source_path: String) -> RecipeDefinition:
+	var id: StringName = _read_id(data, source_path)
+	if _last_error.is_empty() and not String(id).begins_with("recipe_"):
+		_set_error("Definition '%s' requires an ID beginning with 'recipe_'." % source_path)
+	var display_name: String = _read_required_string(data, "display_name", source_path)
+	var cycle_seconds: float = _read_positive_float(data, "cycle_seconds", source_path)
+	var input_items: Dictionary[StringName, int] = _read_optional_item_amounts(data, "input_items", source_path)
+	var output_items: Dictionary[StringName, int] = _read_item_amounts(data, "output_items", source_path)
+	var required_tag: String = _read_required_string(data, "required_capability_tag", source_path)
+	if not _last_error.is_empty() or required_tag.is_empty():
+		return null
+	return RecipeDefinition.new(id, display_name, cycle_seconds, input_items, output_items, StringName(required_tag))
 
 
 func _create_survival_config_definition(
@@ -253,6 +296,12 @@ func _read_positive_int(data: Dictionary, field_name: String, source_path: Strin
 	return int(value)
 
 
+func _read_optional_positive_int(data: Dictionary, field_name: String, source_path: String, default_value: int) -> int:
+	if not data.has(field_name):
+		return default_value
+	return _read_positive_int(data, field_name, source_path)
+
+
 func _read_nonnegative_int(data: Dictionary, field_name: String, source_path: String) -> int:
 	var value: float = _read_number(data, field_name, source_path)
 	if not _last_error.is_empty():
@@ -281,6 +330,48 @@ func _read_nonnegative_float(data: Dictionary, field_name: String, source_path: 
 		_set_error("Definition '%s' requires a non-negative number field named '%s'." % [source_path, field_name])
 		return 0.0
 	return value
+
+
+func _read_optional_nonnegative_float(data: Dictionary, field_name: String, source_path: String, default_value: float) -> float:
+	if not data.has(field_name):
+		return default_value
+	return _read_nonnegative_float(data, field_name, source_path)
+
+
+func _read_optional_positive_float(data: Dictionary, field_name: String, source_path: String, default_value: float) -> float:
+	if not data.has(field_name):
+		return default_value
+	return _read_positive_float(data, field_name, source_path)
+
+
+func _read_optional_prefixed_id(data: Dictionary, field_name: String, prefix: String, source_path: String) -> StringName:
+	if not data.has(field_name):
+		return &""
+	var raw_value: Variant = data.get(field_name)
+	if typeof(raw_value) != TYPE_STRING or not String(raw_value).begins_with(prefix):
+		_set_error("Definition '%s' requires '%s' to be a %s ID." % [source_path, field_name, prefix])
+		return &""
+	var id: StringName = StringName(raw_value)
+	if not IdValidator.get_validation_error(id).is_empty():
+		_set_error("Definition '%s' has an invalid ID in '%s'." % [source_path, field_name])
+		return &""
+	return id
+
+
+func _read_optional_tags(data: Dictionary, field_name: String, source_path: String) -> Array[StringName]:
+	var tags: Array[StringName] = []
+	if not data.has(field_name):
+		return tags
+	var raw_value: Variant = data.get(field_name)
+	if not raw_value is Array:
+		_set_error("Definition '%s' requires '%s' to be an array." % [source_path, field_name])
+		return tags
+	for raw_tag: Variant in raw_value:
+		if typeof(raw_tag) != TYPE_STRING or String(raw_tag).is_empty():
+			_set_error("Definition '%s' has an invalid capability tag." % source_path)
+			return []
+		tags.append(StringName(raw_tag))
+	return tags
 
 
 func _read_number(data: Dictionary, field_name: String, source_path: String) -> float:
@@ -329,6 +420,15 @@ func _read_item_amounts(data: Dictionary, field_name: String, source_path: Strin
 		amounts[item_id] = int(amount)
 
 	return amounts
+
+
+func _read_optional_item_amounts(data: Dictionary, field_name: String, source_path: String) -> Dictionary[StringName, int]:
+	if not data.has(field_name):
+		return {}
+	var raw_amounts: Variant = data.get(field_name)
+	if raw_amounts is Dictionary and raw_amounts.is_empty():
+		return {}
+	return _read_item_amounts(data, field_name, source_path)
 
 
 func _set_error(message: String) -> void:

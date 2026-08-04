@@ -1,0 +1,7 @@
+{
+  "id": "item_fresh_water",
+  "display_name": "Fresh Water",
+  "description": "Clean drinking water from the rain collector.",
+  "base_capacity": 20,
+  "supply_restore_amount": 10
+}

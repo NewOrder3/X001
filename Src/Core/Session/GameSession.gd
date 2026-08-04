@@ -9,8 +9,10 @@ var _is_disposed: bool = false
 var _data_registry: DataRegistry
 var _inventory_system: InventorySystem
 var _building_system: BuildingSystem
+var _gathering_system: GatheringSystem
 var _simulation_clock: SimulationClock
 var _survival_system: SurvivalSystem
+var _production_system: ProductionSystem
 var _last_error: String = ""
 
 
@@ -18,8 +20,10 @@ func _init() -> void:
 	_data_registry = DataRegistry.new()
 	_inventory_system = InventorySystem.new(_data_registry)
 	_building_system = BuildingSystem.new(_data_registry, _inventory_system)
+	_gathering_system = GatheringSystem.new(_data_registry, _inventory_system)
 	_simulation_clock = SimulationClock.new()
 	_survival_system = SurvivalSystem.new(_data_registry, _simulation_clock)
+	_production_system = ProductionSystem.new(_data_registry, _inventory_system, _simulation_clock)
 
 
 func create_new_game(world_seed: int) -> bool:
@@ -110,6 +114,12 @@ func get_building_definition(building_id: StringName) -> BuildingDefinition:
 	return _data_registry.get_building(building_id)
 
 
+func get_recipe_definition(recipe_id: StringName) -> RecipeDefinition:
+	if _data_registry == null or not _data_registry.has_recipe(recipe_id):
+		return null
+	return _data_registry.get_recipe(recipe_id)
+
+
 func get_building_system() -> BuildingSystem:
 	return _building_system
 
@@ -136,7 +146,9 @@ func advance_simulation(delta_seconds: float) -> int:
 	if not has_active_state():
 		return 0
 	var emitted_tick_count: int = _simulation_clock.advance(delta_seconds)
-	_survival_system.advance(_state.survival_state)
+	_production_system.advance(_state)
+	var durability_recovery: Dictionary[StringName, float] = _production_system.get_durability_recovery(_state)
+	_survival_system.advance(_state.survival_state, durability_recovery[&"rate"], durability_recovery[&"accelerated_multiplier"])
 	return emitted_tick_count
 
 
@@ -144,3 +156,38 @@ func execute_place_building(command: PlaceBuildingCommand) -> CommandResult:
 	if not has_active_state():
 		return CommandResult.failure(&"inactive_session", "Start a game before building.")
 	return _building_system.execute(_state, command)
+
+
+func execute_gather_resources(command: GatherResourcesCommand) -> CommandResult:
+	if not has_active_state():
+		return CommandResult.failure(&"inactive_session", "Start a game before gathering.")
+	return _gathering_system.execute(_state, command)
+
+
+func execute_use_food(command: UseFoodCommand) -> CommandResult:
+	if not has_active_state() or command == null:
+		return CommandResult.failure(&"inactive_session", "Start a game before using supplies.")
+	if not _data_registry.has_item(command.item_id):
+		return CommandResult.failure(&"unknown_item", "This item is unavailable.")
+	var definition: ItemDefinition = _data_registry.get_item(command.item_id)
+	if definition.supply_restore_amount <= 0.0:
+		return CommandResult.failure(&"not_food", "This item cannot restore supplies.")
+	var config: SurvivalConfigDefinition = _survival_system.get_config(_state.survival_state)
+	if config == null or _state.survival_state.supply >= config.max_supply:
+		return CommandResult.failure(&"supply_full", "Supplies are already full.")
+	var cost: Dictionary[StringName, int] = {command.item_id: 1}
+	if not _inventory_system.spend_cost(_state.inventory_state, cost):
+		return CommandResult.failure(&"insufficient_resources", "No food is available.")
+	if not _survival_system.restore_supply(_state.survival_state, definition.supply_restore_amount):
+		return CommandResult.failure(&"supply_full", "Supplies are already full.")
+	return CommandResult.success("Supplies restored by %.0f." % definition.supply_restore_amount)
+
+
+func execute_set_production_enabled(command: SetProductionEnabledCommand) -> CommandResult:
+	if not has_active_state():
+		return CommandResult.failure(&"inactive_session", "Start a game before operating facilities.")
+	return _production_system.set_enabled(_state, command.building_instance_id, command.is_enabled)
+
+
+func get_production_system() -> ProductionSystem:
+	return _production_system

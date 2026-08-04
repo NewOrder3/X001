@@ -10,6 +10,7 @@ var supply_status: SurvivalState.IndicatorStatus
 var durability_status: SurvivalState.IndicatorStatus
 var stamina_status: SurvivalState.IndicatorStatus
 var supply_recovery_accelerated: bool
+var durability_recovery_accelerated: bool
 var stamina_recovery_remainder_seconds: float
 
 
@@ -22,6 +23,7 @@ func _init(
 	new_stamina_status: SurvivalState.IndicatorStatus,
 	new_supply_recovery_accelerated: bool,
 	new_stamina_recovery_remainder_seconds: float,
+	new_durability_recovery_accelerated: bool = false,
 ) -> void:
 	supply = new_supply
 	durability = new_durability
@@ -31,3 +33,4 @@ func _init(
 	stamina_status = new_stamina_status
 	supply_recovery_accelerated = new_supply_recovery_accelerated
 	stamina_recovery_remainder_seconds = new_stamina_recovery_remainder_seconds
+	durability_recovery_accelerated = new_durability_recovery_accelerated

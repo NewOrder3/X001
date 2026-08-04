@@ -34,6 +34,7 @@ func initialize_new_state(
 	state.durability_status = SurvivalState.IndicatorStatus.NORMAL
 	state.stamina_status = SurvivalState.IndicatorStatus.NORMAL
 	state.supply_recovery_accelerated = false
+	state.durability_recovery_accelerated = false
 	state.stamina_recovery_remainder_seconds = 0.0
 	state.last_online_unix_seconds = maxi(current_unix_seconds, 0)
 	state.last_offline_settlement_unix_seconds = 0
@@ -60,11 +61,32 @@ func get_config(state: SurvivalState) -> SurvivalConfigDefinition:
 	return _get_config(state.config_id)
 
 
+func restore_supply(state: SurvivalState, amount: float) -> bool:
+	var config: SurvivalConfigDefinition = get_config(state)
+	if state == null or config == null or amount <= 0.0 or state.supply >= config.max_supply:
+		return false
+	state.supply = minf(config.max_supply, state.supply + amount)
+	if state.supply <= 0.0:
+		state.supply_status = SurvivalState.IndicatorStatus.DEPLETED
+	elif state.supply <= config.supply_warning_threshold:
+		state.supply_status = SurvivalState.IndicatorStatus.WARNING
+	else:
+		state.supply_status = SurvivalState.IndicatorStatus.NORMAL
+	if state.supply >= config.passive_recovery_accelerated_threshold:
+		state.supply_recovery_accelerated = false
+	survival_changed.emit(state.supply, state.durability, state.stamina)
+	return true
+
+
 func _on_simulation_tick(delta_seconds: float) -> void:
 	_accumulated_seconds += delta_seconds
 
 
-func advance(state: SurvivalState) -> int:
+func advance(
+	state: SurvivalState,
+	durability_recovery_per_minute: float = 0.0,
+	durability_recovery_accelerated_multiplier: float = 1.0,
+) -> int:
 	var config: SurvivalConfigDefinition = get_config(state)
 	if state == null or config == null:
 		return 0
@@ -76,6 +98,10 @@ func advance(state: SurvivalState) -> int:
 			state,
 			config,
 			config.simulation_interval_seconds,
+			0.0,
+			0.0,
+			durability_recovery_per_minute,
+			durability_recovery_accelerated_multiplier,
 		)
 		_apply_result(state, result)
 		settled_interval_count += 1
@@ -98,4 +124,5 @@ func _apply_result(state: SurvivalState, result: SurvivalCalculationResult) -> v
 	state.durability_status = result.durability_status
 	state.stamina_status = result.stamina_status
 	state.supply_recovery_accelerated = result.supply_recovery_accelerated
+	state.durability_recovery_accelerated = result.durability_recovery_accelerated
 	state.stamina_recovery_remainder_seconds = result.stamina_recovery_remainder_seconds

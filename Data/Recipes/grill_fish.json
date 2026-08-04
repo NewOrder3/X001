@@ -1,0 +1,12 @@
+{
+  "id": "recipe_grill_fish",
+  "display_name": "Grill Fish",
+  "cycle_seconds": 20,
+  "input_items": {
+    "item_raw_fish": 1
+  },
+  "output_items": {
+    "item_grilled_fish": 1
+  },
+  "required_capability_tag": "cooking"
+}

@@ -4,6 +4,7 @@ extends Node
 @onready var _build_view: RaftBuildView = $RaftBuildView
 @onready var _build_panel: RaftBuildPanel = $UIRoot/HUDLayer/RaftBuildPanel
 @onready var _survival_hud: SurvivalHUD = $UIRoot/HUDLayer/SurvivalHUD
+@onready var _production_panel: ProductionPanel = $UIRoot/HUDLayer/ProductionPanel
 
 var _session: GameSession = null
 
@@ -32,3 +33,4 @@ func _bind_views() -> void:
 	_build_view.bind_session(_session)
 	_build_panel.bind_session(_session)
 	_survival_hud.bind_session(_session)
+	_production_panel.bind_session(_session)

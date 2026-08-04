@@ -1,0 +1,12 @@
+{
+  "id": "building_campfire",
+  "display_name": "Campfire",
+  "description": "Cooks fresh fish into a filling meal.",
+  "footprint_width": 1,
+  "footprint_height": 1,
+  "build_cost": {
+    "item_wood": 4
+  },
+  "capability_tags": ["cooking"],
+  "recipe_id": "recipe_grill_fish"
+}
