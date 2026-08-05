@@ -47,13 +47,13 @@ func bind_session(session: GameSession) -> void:
 func _gather(item_id: StringName) -> void:
 	if _session == null:
 		return
-	_set_status(_session.execute_gather_resources(GatherResourcesCommand.new(item_id, 1)))
+	_set_status(_session.execute_command(GatherResourcesCommand.new(item_id, 1)))
 
 
 func _use_food(item_id: StringName) -> void:
 	if _session == null:
 		return
-	_set_status(_session.execute_use_food(UseFoodCommand.new(item_id)))
+	_set_status(_session.execute_command(UseFoodCommand.new(item_id)))
 
 
 func _toggle_facility(building_id: StringName) -> void:
@@ -64,7 +64,7 @@ func _toggle_facility(building_id: StringName) -> void:
 			continue
 		var production: ProductionInstance = _session.get_production_system().get_instance(_session.get_state(), building.instance_id)
 		if production != null:
-			_set_status(_session.execute_set_production_enabled(SetProductionEnabledCommand.new(building.instance_id, not production.is_enabled)))
+			_set_status(_session.execute_command(SetProductionEnabledCommand.new(building.instance_id, not production.is_enabled)))
 			return
 	_status_label.text = "先建造对应设施。"
 

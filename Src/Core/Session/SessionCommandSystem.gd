@@ -28,10 +28,16 @@ func execute(session: GameSession, command: GameCommand) -> CommandResult:
 		return CommandResult.success("Created a new game session.")
 	if command is PlaceBuildingCommand:
 		var place_command: PlaceBuildingCommand = command as PlaceBuildingCommand
-		var place_result: CommandResult = session.execute_place_building(place_command)
-		if not place_result.succeeded:
-			events.command_rejected.emit(place_command.get_command_type(), place_result.error_code)
-		return place_result
+		return _complete(command, session.execute_place_building(place_command))
+	if command is GatherResourcesCommand:
+		var gather_command: GatherResourcesCommand = command as GatherResourcesCommand
+		return _complete(command, session.execute_gather_resources(gather_command))
+	if command is UseFoodCommand:
+		var use_food_command: UseFoodCommand = command as UseFoodCommand
+		return _complete(command, session.execute_use_food(use_food_command))
+	if command is SetProductionEnabledCommand:
+		var set_production_command: SetProductionEnabledCommand = command as SetProductionEnabledCommand
+		return _complete(command, session.execute_set_production_enabled(set_production_command))
 
 	return _reject(
 		command,
@@ -47,3 +53,9 @@ func _reject(command: GameCommand, error_code: StringName, message: String) -> C
 
 	events.command_rejected.emit(command_type, error_code)
 	return CommandResult.failure(error_code, message)
+
+
+func _complete(command: GameCommand, result: CommandResult) -> CommandResult:
+	if result != null and not result.succeeded:
+		events.command_rejected.emit(command.get_command_type(), result.error_code)
+	return result

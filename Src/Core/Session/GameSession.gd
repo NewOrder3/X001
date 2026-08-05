@@ -13,7 +13,9 @@ var _gathering_system: GatheringSystem
 var _simulation_clock: SimulationClock
 var _survival_system: SurvivalSystem
 var _production_system: ProductionSystem
+var _session_command_system: SessionCommandSystem
 var _last_error: String = ""
+var _last_offline_settlement_report: OfflineSettlementReport = null
 
 
 func _init() -> void:
@@ -24,6 +26,7 @@ func _init() -> void:
 	_simulation_clock = SimulationClock.new()
 	_survival_system = SurvivalSystem.new(_data_registry, _simulation_clock)
 	_production_system = ProductionSystem.new(_data_registry, _inventory_system, _simulation_clock)
+	_session_command_system = SessionCommandSystem.new()
 
 
 func create_new_game(world_seed: int) -> bool:
@@ -43,6 +46,7 @@ func create_new_game(world_seed: int) -> bool:
 		return false
 	_is_disposed = false
 	_last_error = ""
+	_last_offline_settlement_report = null
 	if not _inventory_system.add(_state.inventory_state, &"item_wood", 10):
 		_last_error = "Could not grant starting resources."
 		_state = null
@@ -53,6 +57,10 @@ func create_new_game(world_seed: int) -> bool:
 
 
 func load_state(state: GameState) -> bool:
+	return load_state_at(state, int(Time.get_unix_time_from_system()))
+
+
+func load_state_at(state: GameState, current_unix_seconds: int) -> bool:
 	assert(state != null, "GameSession.load_state requires a GameState.")
 	if state == null:
 		return false
@@ -61,9 +69,14 @@ func load_state(state: GameState) -> bool:
 		return false
 
 	_state = state
-	if not _survival_system.activate_loaded_state(_state.survival_state, int(Time.get_unix_time_from_system())):
-		_last_error = "Could not activate the survival state."
+	_last_offline_settlement_report = _survival_system.activate_loaded_state(
+		_state.survival_state,
+		current_unix_seconds,
+	)
+	if _last_offline_settlement_report == null or not _last_offline_settlement_report.succeeded:
+		_last_error = _last_offline_settlement_report.message if _last_offline_settlement_report != null else "Could not activate the survival state."
 		_state = null
+		_last_offline_settlement_report = null
 		return false
 	_world_seed = state.world_seed
 	_is_disposed = false
@@ -77,6 +90,7 @@ func dispose() -> void:
 	_world_seed = 0
 	_is_disposed = true
 	_simulation_clock.pause()
+	_last_offline_settlement_report = null
 
 
 func has_active_state() -> bool:
@@ -94,6 +108,18 @@ func get_world_seed() -> int:
 
 func get_last_error() -> String:
 	return _last_error
+
+
+func get_last_offline_settlement_report() -> OfflineSettlementReport:
+	return _last_offline_settlement_report
+
+
+func execute_command(command: GameCommand) -> CommandResult:
+	return _session_command_system.execute(self, command)
+
+
+func get_session_events() -> SessionEvents:
+	return _session_command_system.events
 
 
 func get_raft_state() -> RaftState:
@@ -136,6 +162,36 @@ func get_survival_state() -> SurvivalState:
 
 func get_survival_system() -> SurvivalSystem:
 	return _survival_system
+
+
+func can_perform_survival_action(action_type: StringName) -> SurvivalActionResult:
+	if not has_active_state():
+		return SurvivalActionResult.failure(
+			action_type,
+			SurvivalSystem.ERROR_INVALID_SURVIVAL_STATE,
+			"Start a game before performing survival actions.",
+		)
+	return _survival_system.can_perform_action(_state.survival_state, action_type)
+
+
+func consume_survival_action_stamina(action_type: StringName) -> SurvivalActionResult:
+	if not has_active_state():
+		return SurvivalActionResult.failure(
+			action_type,
+			SurvivalSystem.ERROR_INVALID_SURVIVAL_STATE,
+			"Start a game before performing survival actions.",
+		)
+	return _survival_system.consume_action_stamina(_state.survival_state, action_type)
+
+
+func apply_survival_durability_loss(source_id: StringName, amount: float) -> SurvivalActionResult:
+	if not has_active_state():
+		return SurvivalActionResult.failure(
+			source_id,
+			SurvivalSystem.ERROR_INVALID_SURVIVAL_STATE,
+			"Start a game before applying durability loss.",
+		)
+	return _survival_system.apply_durability_loss(_state.survival_state, source_id, amount)
 
 
 func get_simulation_clock() -> SimulationClock:

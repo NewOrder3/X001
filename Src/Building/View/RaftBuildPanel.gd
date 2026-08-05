@@ -66,7 +66,7 @@ func _on_tile_selected(cell: Vector2i) -> void:
 func _on_confirm_pressed() -> void:
 	if _session == null or _selected_building_id == &"" or not _has_selected_cell:
 		return
-	var result: CommandResult = _session.execute_place_building(
+	var result: CommandResult = _session.execute_command(
 		PlaceBuildingCommand.new(_selected_building_id, _selected_cell, 0)
 	)
 	_status_label.text = result.message

@@ -16,9 +16,7 @@ func _on_start_button_pressed() -> void:
 		return
 
 	var session: GameSession = GameSession.new()
-	var system: SessionCommandSystem = SessionCommandSystem.new()
-	var result: CommandResult = system.execute(
-		session,
+	var result: CommandResult = session.execute_command(
 		CreateNewGameCommand.new(int(Time.get_unix_time_from_system())),
 	)
 	if not result.succeeded:

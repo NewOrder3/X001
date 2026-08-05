@@ -45,6 +45,20 @@ func test_save_load_restores_survival_state() -> void:
 	assert_true(loaded_state.survival_state.offline_settlement_pending)
 
 
+func test_save_marks_survival_state_for_offline_settlement() -> void:
+	var state: GameState = GameState.new(8643)
+	state.survival_state.config_id = &"survival_default"
+	var service: SaveService = SaveService.new()
+	service.set_active_state(state)
+
+	assert_true(service.save_game(&"save_offline_timestamp_test", 1_710_000_000))
+	var loaded_state: GameState = service.load_game(&"save_offline_timestamp_test")
+
+	assert_not_null(loaded_state)
+	assert_eq(loaded_state.survival_state.last_online_unix_seconds, 1_710_000_000)
+	assert_true(loaded_state.survival_state.offline_settlement_pending)
+
+
 func test_migrate_v1_adds_missing_state_sections() -> void:
 	var source_state: GameState = GameState.new(2468)
 	var v1_data: Dictionary = {
@@ -84,3 +98,32 @@ func test_migrate_v3_adds_empty_production_state() -> void:
 	assert_eq(int(migrated_data.get("save_version", 0)), SaveService.CURRENT_SAVE_VERSION)
 	var game_state_data: Dictionary = migrated_data.get("game_state", {}) as Dictionary
 	assert_eq(game_state_data.get("production_state", {}), {})
+
+
+func test_migrate_v4_adds_offline_settlement_defaults() -> void:
+	var source_state: GameState = GameState.new(9754)
+	var survival_data: Dictionary = source_state.survival_state.to_save_data()
+	survival_data["config_id"] = "survival_default"
+	survival_data.erase("last_online_unix_seconds")
+	survival_data.erase("last_offline_settlement_unix_seconds")
+	survival_data.erase("offline_settlement_pending")
+	var v4_data: Dictionary = {
+		"save_version": 4,
+		"world_seed": 9754,
+		"game_state": {
+			"world_seed": 9754,
+			"raft_state": source_state.raft_state.to_save_data(),
+			"inventory_state": source_state.inventory_state.to_save_data(),
+			"survival_state": survival_data,
+			"production_state": source_state.production_state.to_save_data(),
+		},
+	}
+	var service: SaveService = SaveService.new()
+	var migrated_data: Dictionary = service.migrate(v4_data)
+	var game_state_data: Dictionary = migrated_data.get("game_state", {}) as Dictionary
+	var migrated_survival_data: Dictionary = game_state_data.get("survival_state", {}) as Dictionary
+
+	assert_eq(int(migrated_data.get("save_version", 0)), SaveService.CURRENT_SAVE_VERSION)
+	assert_eq(migrated_survival_data.get("last_online_unix_seconds"), 0)
+	assert_eq(migrated_survival_data.get("last_offline_settlement_unix_seconds"), 0)
+	assert_false(migrated_survival_data.get("offline_settlement_pending", true))

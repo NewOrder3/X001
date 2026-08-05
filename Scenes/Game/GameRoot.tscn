@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://Src/SceneFlow/GameRoot.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="2_ui"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://Src/Survival/View/SurvivalHUD.gd" id="6_survival_hud"]
 [ext_resource type="Script" path="res://Src/Production/View/ProductionPanel.gd" id="7_production_panel"]
 [ext_resource type="Script" path="res://Src/UI/GameHudLayout.gd" id="8_hud_layout"]
+[ext_resource type="Script" path="res://Src/Survival/View/OfflineSettlementPanel.gd" id="9_offline_settlement_panel"]
 
 [node name="GameRoot" type="Node"]
 script = ExtResource("1_game")
@@ -35,6 +36,44 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("8_hud_layout")
+
+[node name="OfflineSettlementPanel" type="PanelContainer" parent="UIRoot/WindowLayer"]
+layout_mode = 0
+offset_left = 700.0
+offset_top = 320.0
+offset_right = 1220.0
+offset_bottom = 610.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("9_offline_settlement_panel")
+
+[node name="Margin" type="MarginContainer" parent="UIRoot/WindowLayer/OfflineSettlementPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="Content" type="VBoxContainer" parent="UIRoot/WindowLayer/OfflineSettlementPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="UIRoot/WindowLayer/OfflineSettlementPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "离线结算"
+
+[node name="OfflineSettlementSummaryLabel" type="Label" parent="UIRoot/WindowLayer/OfflineSettlementPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+
+[node name="OfflineSettlementCloseButton" type="Button" parent="UIRoot/WindowLayer/OfflineSettlementPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+text = "继续"
 
 [node name="LeftPanelScroll" type="ScrollContainer" parent="UIRoot/HUDLayer/GameHudLayout"]
 layout_mode = 0

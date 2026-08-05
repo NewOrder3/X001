@@ -37,7 +37,7 @@ Signal 使用过去式 `snake_case` 名称，并只携带接收方更新表现�
 
 ## 当前演示闭环
 
-`CreateNewGameCommand` 由 `SessionCommandSystem` 处理：它调用 `GameSession.create_new_game(seed)`，返回成功结果，并通过 `SessionEvents.new_game_created(world_seed)` 通知表现层。`PlaceBuildingCommand` 已定义为请求对象，但在 F15 的 `BuildingSystem` 实现前会明确返回 `unsupported_command`，且不会修改 State。
+`CreateNewGameCommand`、`PlaceBuildingCommand`、`GatherResourcesCommand`、`UseFoodCommand` 与 `SetProductionEnabledCommand` 均由 `SessionCommandSystem` 处理。它调用 `GameSession` 的公开规则入口并返回原始 `CommandResult`；任一失败都会通过 `SessionEvents.command_rejected(command_type, error_code)` 通知表现层。`new_game_created(world_seed)` 仅在新会话创建成功后发出。
 
 `SessionEvents` 由 `SessionCommandSystem` 持有或注入，不能注册为 Autoload。未来每个玩法 System 应拥有或接收自己所属的事件对象，避免万能全局事件总线。
 

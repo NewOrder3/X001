@@ -1,7 +1,7 @@
 class_name SaveService
 extends RefCounted
 
-const CURRENT_SAVE_VERSION: int = 4
+const CURRENT_SAVE_VERSION: int = 5
 const SAVE_DIRECTORY: String = "user://saves"
 
 var _active_state: GameState = null
@@ -21,7 +21,7 @@ func get_active_state() -> GameState:
 	return _active_state
 
 
-func save_game(slot_id: StringName) -> bool:
+func save_game(slot_id: StringName, saved_at_unix_seconds: int = -1) -> bool:
 	_last_error = ""
 	if _active_state == null:
 		return _fail("Cannot save without an active GameState.")
@@ -29,6 +29,7 @@ func save_game(slot_id: StringName) -> bool:
 		return _fail("Invalid save slot ID '%s'." % String(slot_id))
 	if DirAccess.make_dir_recursive_absolute(SAVE_DIRECTORY) != OK:
 		return _fail("Cannot create save directory '%s'." % SAVE_DIRECTORY)
+	_mark_survival_offline_pending(saved_at_unix_seconds)
 
 	var save_data: Dictionary = {
 		"save_version": CURRENT_SAVE_VERSION,
@@ -105,6 +106,9 @@ func migrate(data: Dictionary) -> Dictionary:
 		elif version == 3:
 			migrated_data = _v3_to_v4(migrated_data)
 			version = 4
+		elif version == 4:
+			migrated_data = _v4_to_v5(migrated_data)
+			version = 5
 		else:
 			_fail("No migration exists for save version %d." % version)
 			return {}
@@ -204,6 +208,41 @@ func _v3_to_v4(data: Dictionary) -> Dictionary:
 		game_state_data["production_state"] = {}
 	migrated_data["game_state"] = game_state_data
 	return migrated_data
+
+
+func _v4_to_v5(data: Dictionary) -> Dictionary:
+	var migrated_data: Dictionary = data.duplicate(true)
+	var raw_game_state: Variant = migrated_data.get("game_state")
+	if not raw_game_state is Dictionary:
+		_fail("Version 4 save is missing a valid game_state object.")
+		return {}
+	var game_state_data: Dictionary = raw_game_state.duplicate(true)
+	var raw_survival_state: Variant = game_state_data.get("survival_state", {})
+	if not raw_survival_state is Dictionary:
+		_fail("Version 4 save contains an invalid survival_state.")
+		return {}
+	var survival_state_data: Dictionary = raw_survival_state.duplicate(true)
+	if not survival_state_data.is_empty():
+		if not survival_state_data.has("last_online_unix_seconds"):
+			survival_state_data["last_online_unix_seconds"] = 0
+		if not survival_state_data.has("last_offline_settlement_unix_seconds"):
+			survival_state_data["last_offline_settlement_unix_seconds"] = 0
+		if not survival_state_data.has("offline_settlement_pending"):
+			survival_state_data["offline_settlement_pending"] = false
+	game_state_data["survival_state"] = survival_state_data
+	migrated_data["game_state"] = game_state_data
+	return migrated_data
+
+
+func _mark_survival_offline_pending(saved_at_unix_seconds: int) -> void:
+	if _active_state == null or _active_state.survival_state == null:
+		return
+	var saved_at: int = saved_at_unix_seconds
+	if saved_at < 0:
+		saved_at = int(Time.get_unix_time_from_system())
+	saved_at = maxi(saved_at, 0)
+	_active_state.survival_state.last_online_unix_seconds = saved_at
+	_active_state.survival_state.offline_settlement_pending = true
 
 
 func _get_save_path(slot_id: StringName) -> String:

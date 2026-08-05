@@ -8,3 +8,7 @@ var is_enabled: bool
 func _init(new_building_instance_id: StringName, new_is_enabled: bool) -> void:
 	building_instance_id = new_building_instance_id
 	is_enabled = new_is_enabled
+
+
+func get_command_type() -> StringName:
+	return &"set_production_enabled"

@@ -43,6 +43,21 @@ func _init() -> void:
 		_fail("command_rejected payload was incorrect.")
 		return
 
+	var gather_result: CommandResult = system.execute(
+		session,
+		GatherResourcesCommand.new(&"item_raw_fish", 1),
+	)
+	if not gather_result.succeeded or session.get_item_amount(&"item_raw_fish") != 1:
+		_fail("GatherResourcesCommand did not update inventory.")
+		return
+	var gather_rejected_result: CommandResult = system.execute(
+		session,
+		GatherResourcesCommand.new(&"item_missing", 1),
+	)
+	if gather_rejected_result.succeeded or _rejected_command_type != &"gather_resources" or _rejection_error_code != &"unknown_item":
+		_fail("GatherResourcesCommand rejection payload was incorrect.")
+		return
+
 	print("Command and Signal validation passed.")
 	quit(0)
 
