@@ -12,7 +12,7 @@ func _ready() -> void:
 func _on_start_button_pressed() -> void:
 	var router: SceneRouter = get_node("../../SceneRouter") as SceneRouter
 	if router == null:
-		_status_label.text = "启动流程不可用。"
+		_status_label.text = GameText.get_text(&"ui.main_menu.start_unavailable")
 		return
 
 	var session: GameSession = GameSession.new()

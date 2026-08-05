@@ -1,7 +1,7 @@
 {
   "id": "region_east_current",
-  "display_name": "East Current",
-  "description": "A bright current moving beyond the horizon.",
+  "display_name_key": "data.region.east_current.name",
+  "description_key": "data.region.east_current.description",
   "q": 1,
   "r": 0,
   "is_starting_region": false,

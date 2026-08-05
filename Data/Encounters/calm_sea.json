@@ -1,6 +1,6 @@
 {
   "id": "event_calm_sea",
-  "display_name": "Calm Sea",
-  "description": "Only a calm horizon answers the voyage.",
+  "display_name_key": "data.encounter.calm_sea.name",
+  "description_key": "data.encounter.calm_sea.description",
   "outcome_type": "empty"
 }

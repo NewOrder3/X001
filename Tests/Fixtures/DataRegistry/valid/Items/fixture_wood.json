@@ -1,5 +1,5 @@
 {
   "id": "item_fixture_wood",
-  "display_name": "Fixture Wood",
-  "description": "A fixture item for DataRegistry tests."
+  "display_name_key": "data.fixture.wood.name",
+  "description_key": "data.fixture.wood.description"
 }

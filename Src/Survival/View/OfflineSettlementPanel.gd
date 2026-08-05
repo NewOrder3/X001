@@ -23,16 +23,16 @@ func show_report(report: OfflineSettlementReport) -> void:
 func _get_summary_text(report: OfflineSettlementReport) -> String:
 	var hours: int = report.elapsed_seconds / 3600
 	var minutes: int = report.elapsed_seconds % 3600 / 60
-	var time_text: String = "%d 小时" % hours
+	var time_text: String = GameText.format(&"ui.offline_settlement.time_hours", [hours])
 	if minutes > 0:
-		time_text = "%s %d 分钟" % [time_text, minutes]
+		time_text = GameText.format(&"ui.offline_settlement.time_hours_minutes", [time_text, minutes])
 	var supply_change: float = report.supply_after - report.supply_before
 	var stamina_change: int = report.stamina_after - report.stamina_before
-	return "离线 %s\n补给：%.1f（%+.1f）\n耐久：%.1f\n体力：%d（%+d）" % [
+	return GameText.format(&"ui.offline_settlement.summary", [
 		time_text,
 		report.supply_after,
 		supply_change,
 		report.durability_after,
 		report.stamina_after,
 		stamina_change,
-	]
+	])

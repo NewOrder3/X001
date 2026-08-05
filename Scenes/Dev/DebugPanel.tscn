@@ -10,4 +10,4 @@ script = ExtResource("1_debug")
 [node name="Title" type="Label" parent="."]
 offset_left = 16.0
 offset_top = 16.0
-text = "Debug Panel (F3)"
+text = "ui.debug_panel.title"

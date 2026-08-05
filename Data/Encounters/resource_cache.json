@@ -1,7 +1,7 @@
 {
   "id": "event_resource_cache",
-  "display_name": "Drifting Cache",
-  "description": "A crate caught between the waves.",
+  "display_name_key": "data.encounter.resource_cache.name",
+  "description_key": "data.encounter.resource_cache.description",
   "outcome_type": "resource",
   "reward_items": {
     "item_wood": 3

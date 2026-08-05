@@ -20,5 +20,5 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func create_new_game(world_seed: int) -> CommandResult:
 	if _session == null:
-		return CommandResult.failure(&"invalid_session", "Debug panel has no GameSession.")
+		return CommandResult.failure(&"invalid_session", GameText.get_text(&"message.session.invalid"))
 	return DebugCommandService.new().new_game(_session, world_seed)

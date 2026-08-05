@@ -81,3 +81,15 @@ func test_default_registry_loads_s3_recipe_definitions() -> void:
 	assert_true(registry.load_all(), registry.get_last_error())
 	assert_eq(registry.get_recipe_count(), 2)
 	assert_not_null(registry.get_recipe(&"recipe_grill_fish"))
+
+
+func test_default_definition_text_uses_stable_key_and_chinese_translation() -> void:
+	GameText.initialize()
+	var registry: DataRegistry = DataRegistry.new()
+	assert_true(registry.load_all(), registry.get_last_error())
+	var wood: ItemDefinition = registry.get_item(&"item_wood")
+	assert_not_null(wood)
+	if wood == null:
+		return
+	assert_eq(wood.display_name_key, &"data.item.wood.name")
+	assert_eq(wood.get_display_name(), "木材")

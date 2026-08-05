@@ -66,7 +66,7 @@ func _toggle_facility(building_id: StringName) -> void:
 		if production != null:
 			_set_status(_session.execute_command(SetProductionEnabledCommand.new(building.instance_id, not production.is_enabled)))
 			return
-	_status_label.text = "先建造对应设施。"
+	_status_label.text = GameText.get_text(&"ui.production.need_facility")
 
 
 func _on_item_amount_changed(_item_id: StringName, _amount: int) -> void:
@@ -90,38 +90,43 @@ func _refresh() -> void:
 	if not is_instance_valid(_inventory_label):
 		return
 	if _session == null or not _session.has_active_state():
-		_inventory_label.text = "库存：--"
-		_facility_label.text = "设施：--"
+		_inventory_label.text = GameText.get_text(&"ui.production.inventory_empty")
+		_facility_label.text = GameText.get_text(&"ui.production.facility_empty")
 		return
-	_inventory_label.text = "木材 %d｜生鱼 %d｜海水 %d\n淡水 %d/%d｜烤鱼 %d/%d" % [
-		_session.get_item_amount(&"item_wood"),
-		_session.get_item_amount(&"item_raw_fish"),
-		_session.get_item_amount(&"item_seawater"),
-		_session.get_item_amount(&"item_fresh_water"),
+	_inventory_label.text = GameText.format(&"ui.production.inventory", [
+		_get_item_name(&"item_wood"), _session.get_item_amount(&"item_wood"),
+		_get_item_name(&"item_raw_fish"), _session.get_item_amount(&"item_raw_fish"),
+		_get_item_name(&"item_seawater"), _session.get_item_amount(&"item_seawater"),
+		_get_item_name(&"item_fresh_water"), _session.get_item_amount(&"item_fresh_water"),
 		_session.get_inventory_system().get_capacity(_session.get_state(), &"item_fresh_water"),
-		_session.get_item_amount(&"item_grilled_fish"),
+		_get_item_name(&"item_grilled_fish"), _session.get_item_amount(&"item_grilled_fish"),
 		_session.get_inventory_system().get_capacity(_session.get_state(), &"item_grilled_fish"),
-	]
+	])
 	var facility_lines: PackedStringArray = []
 	for building: BuildingInstance in _session.get_raft_state().building_instances.values():
 		var production: ProductionInstance = _session.get_production_system().get_instance(_session.get_state(), building.instance_id)
 		if production == null:
 			continue
 		var recipe: RecipeDefinition = _session.get_recipe_definition(production.recipe_id) if production.recipe_id != &"" else null
-		var display_name: String = recipe.display_name if recipe != null else "维修"
-		var reason: String = _get_stall_text(production.stall_reason)
-		facility_lines.append("%s：%s（%.0fs，%s）" % [display_name, "运行" if production.is_enabled else "已停", production.progress_seconds, reason])
-	_facility_label.text = "设施：\n%s" % "\n".join(facility_lines) if not facility_lines.is_empty() else "设施：建造集雨器、篝火或维修站后可运行。"
+		var display_name: String = recipe.get_display_name() if recipe != null else GameText.get_text(&"ui.production.repair")
+		var running_key: StringName = &"ui.production.running" if production.is_enabled else &"ui.production.stopped"
+		facility_lines.append(GameText.format(&"ui.production.facility_line", [display_name, GameText.get_text(running_key), production.progress_seconds, _get_localized_stall_text(production.stall_reason)]))
+	_facility_label.text = GameText.format(&"ui.production.facility_list", ["\n".join(facility_lines)]) if not facility_lines.is_empty() else GameText.get_text(&"ui.production.facility_none")
 
 
-func _get_stall_text(reason: ProductionInstance.StallReason) -> String:
+func _get_item_name(item_id: StringName) -> String:
+	var definition: ItemDefinition = _session.get_item_definition(item_id)
+	return definition.get_display_name() if definition != null else String(item_id)
+
+
+func _get_localized_stall_text(reason: ProductionInstance.StallReason) -> String:
 	match reason:
 		ProductionInstance.StallReason.MANUALLY_STOPPED:
-			return "已停"
+			return GameText.get_text(&"ui.production.stall_manually_stopped")
 		ProductionInstance.StallReason.SUPPLY_DEPLETED:
-			return "补给耗尽"
+			return GameText.get_text(&"ui.production.stall_supply_depleted")
 		ProductionInstance.StallReason.MISSING_INPUT:
-			return "缺原料"
+			return GameText.get_text(&"ui.production.stall_missing_input")
 		ProductionInstance.StallReason.OUTPUT_CAPACITY_REACHED:
-			return "产物满仓"
-	return "正常"
+			return GameText.get_text(&"ui.production.stall_output_full")
+	return GameText.get_text(&"ui.production.stall_normal")

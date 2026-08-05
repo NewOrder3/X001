@@ -1,5 +1,5 @@
 {
   "id": "item_duplicate_fixture",
-  "display_name": "Duplicate Item",
-  "description": "Uses an ID shared by another fixture Definition."
+  "display_name_key": "data.fixture.duplicate_item.name",
+  "description_key": "data.fixture.duplicate_item.description"
 }

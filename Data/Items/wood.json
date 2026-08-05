@@ -1,6 +1,6 @@
 {
   "id": "item_wood",
-  "display_name": "Wood",
-  "description": "A basic building material.",
+  "display_name_key": "data.item.wood.name",
+  "description_key": "data.item.wood.description",
   "base_capacity": 99
 }

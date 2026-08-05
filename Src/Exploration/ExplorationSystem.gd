@@ -73,18 +73,18 @@ func is_unlocked(state: GameState) -> bool:
 
 func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResult:
 	if state == null or command == null or state.world_state == null:
-		return ExplorationResult.failure(ERROR_INVALID_WORLD_STATE, "A world state is required before sailing.")
+		return ExplorationResult.failure(ERROR_INVALID_WORLD_STATE, GameText.get_text(&"message.exploration.no_world_state"))
 	if _data_registry == null or not _data_registry.has_region(command.target_region_id):
-		return ExplorationResult.failure(ERROR_UNKNOWN_REGION, "This sea region is unavailable.")
+		return ExplorationResult.failure(ERROR_UNKNOWN_REGION, GameText.get_text(&"message.exploration.region_unavailable"))
 	if not _has_required_rudder(state):
-		return ExplorationResult.failure(ERROR_EXPLORATION_LOCKED, "Build a ship rudder before sailing.")
+		return ExplorationResult.failure(ERROR_EXPLORATION_LOCKED, GameText.get_text(&"message.exploration.rudder_required"))
 	if not _data_registry.has_region(state.world_state.current_region_id):
-		return ExplorationResult.failure(ERROR_INVALID_WORLD_STATE, "The current sea region is unavailable.")
+		return ExplorationResult.failure(ERROR_INVALID_WORLD_STATE, GameText.get_text(&"message.exploration.current_region_unavailable"))
 
 	var origin: RegionDefinition = _data_registry.get_region(state.world_state.current_region_id)
 	var target: RegionDefinition = _data_registry.get_region(command.target_region_id)
 	if HexGrid.distance_to_coord(origin.coordinate, target.coordinate) != 1:
-		return ExplorationResult.failure(ERROR_NOT_ADJACENT, "Sail only to an adjacent sea region.")
+		return ExplorationResult.failure(ERROR_NOT_ADJACENT, GameText.get_text(&"message.exploration.not_adjacent"))
 
 	var action_check: SurvivalActionResult = _survival_system.can_perform_action(
 		state.survival_state,
@@ -95,7 +95,7 @@ func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResu
 
 	var encounter: EncounterDefinition = _resolve_encounter(state.world_state, target)
 	if encounter != null and not _can_receive_rewards(state, encounter.reward_items):
-		return ExplorationResult.failure(ERROR_INVENTORY_FULL, "Storage is full for this voyage reward.")
+		return ExplorationResult.failure(ERROR_INVENTORY_FULL, GameText.get_text(&"message.exploration.reward_inventory_full"))
 
 	# All fallible validation is complete before the action resource is consumed.
 	var consume_result: SurvivalActionResult = _survival_system.consume_action_stamina(
@@ -112,7 +112,7 @@ func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResu
 	var reward_items: Dictionary[StringName, int] = {}
 	var durability_loss: float = 0.0
 	var encounter_id: StringName = &""
-	var message: String = "Arrived at %s. The sea is quiet." % target.display_name
+	var message: String = GameText.format(&"message.exploration.arrived_calm", [target.get_display_name()])
 	if encounter != null:
 		encounter_id = encounter.id
 		state.world_state.mark_encounter_consumed(_get_consumed_key(target.id, encounter.id))
@@ -186,14 +186,15 @@ func _get_encounter_message(
 ) -> String:
 	match encounter.outcome_type:
 		EncounterDefinition.OutcomeType.RESOURCE:
-			return "Arrived at %s: %s" % [region.display_name, _format_rewards(rewards)]
+			return GameText.format(&"message.exploration.arrived_rewards", [region.get_display_name(), _format_rewards(rewards)])
 		EncounterDefinition.OutcomeType.STORM:
-			return "Arrived at %s: storm damage %.0f durability." % [region.display_name, durability_loss]
-	return "Arrived at %s: %s" % [region.display_name, encounter.description]
+			return GameText.format(&"message.exploration.arrived_storm", [region.get_display_name(), durability_loss])
+	return GameText.format(&"message.exploration.arrived_encounter", [region.get_display_name(), encounter.get_description()])
 
 
 func _format_rewards(rewards: Dictionary[StringName, int]) -> String:
 	var parts: PackedStringArray = []
 	for item_id: StringName in rewards:
-		parts.append("%s +%d" % [String(item_id).trim_prefix("item_"), rewards[item_id]])
-	return "Found " + ", ".join(parts) + "."
+		var item: ItemDefinition = _data_registry.get_item(item_id)
+		parts.append(GameText.format(&"message.exploration.reward_entry", [item.get_display_name(), rewards[item_id]]))
+	return GameText.format(&"message.exploration.found_rewards", ["、".join(parts)])

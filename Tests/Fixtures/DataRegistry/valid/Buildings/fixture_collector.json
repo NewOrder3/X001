@@ -1,7 +1,7 @@
 {
   "id": "building_fixture_collector",
-  "display_name": "Fixture Collector",
-  "description": "A fixture building for DataRegistry tests.",
+  "display_name_key": "data.fixture.collector.name",
+  "description_key": "data.fixture.collector.description",
   "footprint_width": 1,
   "footprint_height": 1,
   "build_cost": {

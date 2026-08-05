@@ -58,13 +58,13 @@ func initialize_new_state(
 
 func activate_loaded_state(state: SurvivalState, current_unix_seconds: int) -> OfflineSettlementReport:
 	if state == null:
-		return OfflineSettlementReport.skipped("Survival state is unavailable.")
+		return OfflineSettlementReport.skipped(GameText.get_text(&"message.survival.state_unavailable"))
 	if state.config_id == &"":
 		if not initialize_new_state(state, &"survival_default", current_unix_seconds):
-			return OfflineSettlementReport.skipped("Could not initialize the survival state.")
+			return OfflineSettlementReport.skipped(GameText.get_text(&"message.survival.state_unavailable"))
 		return OfflineSettlementReport.no_changes(state.supply, state.durability, state.stamina)
 	if _get_config(state.config_id) == null:
-		return OfflineSettlementReport.skipped("Survival configuration is unavailable.")
+		return OfflineSettlementReport.skipped(GameText.get_text(&"message.survival.state_unavailable"))
 	_accumulated_seconds = 0.0
 	return settle_offline(state, current_unix_seconds)
 
@@ -72,7 +72,7 @@ func activate_loaded_state(state: SurvivalState, current_unix_seconds: int) -> O
 func settle_offline(state: SurvivalState, current_unix_seconds: int) -> OfflineSettlementReport:
 	var config: SurvivalConfigDefinition = get_config(state)
 	if state == null or config == null:
-		return OfflineSettlementReport.skipped("Survival state is unavailable.")
+		return OfflineSettlementReport.skipped(GameText.get_text(&"message.survival.state_unavailable"))
 
 	var normalized_now: int = maxi(current_unix_seconds, 0)
 	var settlement_time: int = maxi(normalized_now, state.last_online_unix_seconds)
@@ -137,7 +137,7 @@ func can_perform_action(state: SurvivalState, action_type: StringName) -> Surviv
 		return SurvivalActionResult.failure(
 			action_type,
 			ERROR_INVALID_SURVIVAL_STATE,
-			"Survival state is unavailable.",
+			GameText.get_text(&"message.survival.state_unavailable"),
 		)
 
 	var stamina_cost: int = _get_action_stamina_cost(config, action_type)
@@ -145,20 +145,20 @@ func can_perform_action(state: SurvivalState, action_type: StringName) -> Surviv
 		return SurvivalActionResult.failure(
 			action_type,
 			ERROR_INVALID_ACTION,
-			"This survival action is unavailable.",
+			GameText.get_text(&"message.survival.action_unavailable"),
 		)
 	# Depleted supplies lower manual-operation efficiency but do not block actions.
 	if action_type == ACTION_BATTLE and state.durability <= 0.0:
 		return SurvivalActionResult.failure(
 			action_type,
 			ERROR_DURABILITY_DEPLETED,
-			"Repair durability before entering battle.",
+			GameText.get_text(&"message.survival.repair_before_battle"),
 		)
 	if state.stamina < stamina_cost:
 		return SurvivalActionResult.failure(
 			action_type,
 			ERROR_INSUFFICIENT_STAMINA,
-			"Not enough stamina for this action.",
+			GameText.get_text(&"message.survival.insufficient_stamina"),
 		)
 	return SurvivalActionResult.success(action_type, stamina_cost)
 
@@ -187,13 +187,13 @@ func apply_durability_loss(
 		return SurvivalActionResult.failure(
 			source_id,
 			ERROR_INVALID_SURVIVAL_STATE,
-			"Survival state is unavailable.",
+			GameText.get_text(&"message.survival.state_unavailable"),
 		)
 	if source_id == &"" or amount <= 0.0:
 		return SurvivalActionResult.failure(
 			source_id,
 			ERROR_INVALID_DURABILITY_LOSS,
-			"Durability loss requires a source and a positive amount.",
+			GameText.get_text(&"message.survival.invalid_durability_loss"),
 		)
 
 	var durability_loss: float = minf(state.durability, amount)

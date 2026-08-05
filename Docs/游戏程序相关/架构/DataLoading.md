@@ -6,8 +6,8 @@ F07 选择 JSON 作为第一批 Definition 格式。它便于版本审查、fixt
 
 | Definition | 目录 | 最小字段 |
 | --- | --- | --- |
-| Item | `Data/Items/` | `id`、`display_name`、`description` |
-| Building | `Data/Buildings/` | `id`、`display_name`、`description`、`footprint_width`、`footprint_height` |
+| Item | `Data/Items/` | `id`、`display_name_key`、`description_key` |
+| Building | `Data/Buildings/` | `id`、`display_name_key`、`description_key`、`footprint_width`、`footprint_height` |
 | SurvivalConfig | `Data/Survival/` | `id`、补给/耐久消耗与阈值、被动恢复、体力配置 |
 | Recipe | `Data/Recipes/` | `id`、生产周期、输入、输出、所需设施能力标签 |
 
@@ -16,10 +16,12 @@ F07 选择 JSON 作为第一批 Definition 格式。它便于版本审查、fixt
 ```json
 {
   "id": "item_wood",
-  "display_name": "Wood",
-  "description": "A basic building material."
+  "display_name_key": "data.item.wood.name",
+  "description_key": "data.item.wood.description"
 }
 ```
+
+`display_name_key` 与 `description_key` 是稳定的本地化文本键，必须以 `data.` 开头；Definition 和存档中不得保存面向玩家的译文。当前默认语言资源为 `Translations/game_text.csv` 的 `zh_CN` 列；新增语言时在同一资源新增 locale 列，或添加同键的翻译资源，无需修改 Definition、State 或玩法 System。
 
 ## 注册与查询
 

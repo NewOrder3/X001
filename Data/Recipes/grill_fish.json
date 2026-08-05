@@ -1,6 +1,6 @@
 {
   "id": "recipe_grill_fish",
-  "display_name": "Grill Fish",
+  "display_name_key": "data.recipe.grill_fish.name",
   "cycle_seconds": 20,
   "input_items": {
     "item_raw_fish": 1

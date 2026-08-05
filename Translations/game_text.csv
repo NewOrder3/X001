@@ -1,0 +1,165 @@
+keys,zh_CN
+ui.main_menu.title,沧海余生
+ui.main_menu.subtitle,在风浪之间，搭建最后的归宿
+ui.main_menu.start,开始游戏
+ui.main_menu.quit,退出
+ui.main_menu.start_unavailable,启动流程不可用。
+ui.debug_panel.title,调试面板（F3）
+ui.offline_settlement.title,离线结算
+ui.offline_settlement.continue,继续
+ui.survival.title,生存状态（S2）
+ui.survival.supply_empty,补给：--
+ui.survival.durability_empty,耐久：--
+ui.survival.stamina_empty,体力：--
+ui.survival.supply,补给：%.1f / %.0f
+ui.survival.durability,耐久：%.1f / %.0f
+ui.survival.stamina,体力：%d / %d
+ui.survival.supply_depleted,补给耗尽：手动操作效率降低
+ui.survival.supply_warning,补给不足
+ui.survival.durability_depleted,耐久耗尽：无法进入战斗
+ui.survival.durability_warning,耐久偏低
+ui.survival.stamina_depleted,体力耗尽：无法探索或战斗
+ui.survival.stamina_warning,体力偏低
+ui.build.title,竹筏建造（S1）
+ui.build.wood,木材：%d
+ui.build.select_building,选择建筑
+ui.build.unavailable,设施不可用
+ui.build.select_with_cost,选择：%s（%s）
+ui.build.status_initial,选择建筑，点击竹筏格位开始。
+ui.build.status_select_tile,选择竹筏格位放置设施。
+ui.build.status_tile_selected,已选择格位（%d，%d），确认后建造。
+ui.build.status_cancelled,已取消建造。
+ui.build.cost_entry,%s×%d
+ui.build.confirm,确认建造
+ui.build.cancel,取消
+ui.production.title,采集与生产（S3）
+ui.production.inventory_empty,库存：--
+ui.production.facility_empty,设施：--
+ui.production.inventory,%s %d｜%s %d｜%s %d\n%s %d/%d｜%s %d/%d
+ui.production.facility_list,设施：\n%s
+ui.production.facility_none,设施：建造集雨器、篝火或维修站后可运行。
+ui.production.repair,维修
+ui.production.facility_line,%s：%s，%.0f 秒，%s
+ui.production.running,运行
+ui.production.stopped,已停
+ui.production.stall_manually_stopped,已停
+ui.production.stall_supply_depleted,补给耗尽
+ui.production.stall_missing_input,缺原料
+ui.production.stall_output_full,产物满仓
+ui.production.stall_normal,正常
+ui.production.need_facility,先建造对应设施。
+ui.production.gather_wood,采集木材
+ui.production.gather_fish,采集生鱼
+ui.production.gather_water,采集海水
+ui.production.use_fresh_water,使用淡水 +10
+ui.production.use_grilled_fish,使用烤鱼 +15
+ui.production.toggle_collector,启停集雨器
+ui.production.toggle_campfire,启停篝火
+ui.production.toggle_repair,启停维修站
+ui.world_map.title,世界地图（S4）
+ui.world_map.confirm,确认航行
+ui.world_map.cancel,取消并返回竹筏
+ui.world_map.status_initial,选择相邻海域开始探索。
+ui.world_map.returned,已返回竹筏规划。
+ui.world_map.current_empty,当前海域：--
+ui.world_map.start_hint,开始游戏后可勘察附近海域。
+ui.world_map.current,当前海域：%s（%d，%d）
+ui.world_map.region_button,%s（%d，%d）%s
+ui.world_map.charted,已勘察
+ui.world_map.uncharted,未勘察
+ui.world_map.preview_hint,选择相邻海域以预览航行。
+ui.world_map.preview,前往 %s 消耗 %d 点体力。当前体力：%d。%s
+ui.world_map.ready,可以起航。
+ui.world_map.build_rudder,请先建造船舵。
+ui.offline_settlement.time_hours,%d 小时
+ui.offline_settlement.time_hours_minutes,%s %d 分钟
+ui.offline_settlement.summary,离线 %s\n补给：%.1f（%+.1f）\n耐久：%.1f\n体力：%d（%+d）
+message.session.created,已创建新游戏。
+message.session.invalid,无法在缺少游戏会话时执行命令。
+message.session.empty_command,无法执行空命令。
+message.session.unsupported_command,尚未注册命令“%s”的处理器。
+message.session.start_before_building,请先开始游戏再建造。
+message.session.start_before_gathering,请先开始游戏再采集。
+message.session.start_before_use_supplies,请先开始游戏再使用补给。
+message.session.start_before_operating,请先开始游戏再操作设施。
+message.session.start_before_sailing,请先开始游戏再航行。
+message.session.item_unavailable,该物品不可用。
+message.session.item_not_food,该物品无法恢复补给。
+message.session.supplies_full,补给已满。
+message.session.no_food,没有可用食物。
+message.session.supplies_restored,补给恢复了 %.0f 点。
+message.building.no_active_state,没有活动游戏状态，无法建造。
+message.building.invalid_rotation,建筑旋转值必须在 0 到 3 之间。
+message.building.unavailable,该建筑不可用。
+message.building.invalid_placement,请选择未被占用的竹筏格位。
+message.building.insufficient_resources,建造材料不足。
+message.building.built,已建造%s。
+message.gather.invalid_request,请选择有效的资源数量。
+message.gather.unavailable,该资源不可用。
+message.gather.inventory_full,该资源的库存已满。
+message.gather.collected,已采集 %d 个%s。
+message.production.invalid_target,请选择有效设施。
+message.production.not_facility,该建筑无法操作。
+message.production.enabled,设施已启动。
+message.production.disabled,设施已停止。
+message.survival.state_unavailable,生存状态不可用。
+message.survival.action_unavailable,该生存行动不可用。
+message.survival.repair_before_battle,请先修复耐久再进入战斗。
+message.survival.insufficient_stamina,体力不足，无法执行该行动。
+message.survival.invalid_durability_loss,耐久损失需要有效来源和正数数值。
+message.exploration.no_world_state,航行前需要世界状态。
+message.exploration.region_unavailable,该海域不可用。
+message.exploration.rudder_required,航行前请先建造船舵。
+message.exploration.current_region_unavailable,当前海域不可用。
+message.exploration.not_adjacent,只能航行到相邻海域。
+message.exploration.reward_inventory_full,航行奖励的库存空间不足。
+message.exploration.arrived_calm,已抵达%s，海面平静。
+message.exploration.arrived_rewards,已抵达%s：%s
+message.exploration.arrived_storm,已抵达%s：风暴造成 %.0f 点耐久损失。
+message.exploration.arrived_encounter,已抵达%s：%s
+message.exploration.reward_entry,%s +%d
+message.exploration.found_rewards,发现%s。
+data.item.wood.name,木材
+data.item.wood.description,基础建造材料。
+data.item.fresh_water.name,淡水
+data.item.fresh_water.description,由集雨器收集的洁净饮水。
+data.item.grilled_fish.name,烤鱼
+data.item.grilled_fish.description,在火上烹制的温热食物。
+data.item.raw_fish.name,生鱼
+data.item.raw_fish.description,刚捕到、可以烹饪的鱼。
+data.item.seawater.name,海水
+data.item.seawater.description,从海中采集的咸水。
+data.building.campfire.name,篝火
+data.building.campfire.description,将生鱼烹制成饱腹的食物。
+data.building.rain_collector.name,集雨器
+data.building.rain_collector.description,为竹筏收集雨水。
+data.building.repair_station.name,维修站
+data.building.repair_station.description,维持竹筏船体的良好状态。
+data.building.rudder.name,船舵
+data.building.rudder.description,让竹筏能够驶入相邻海域。
+data.building.water_tank.name,储水罐
+data.building.water_tank.description,储存更多淡水。
+data.recipe.collect_fresh_water.name,收集淡水
+data.recipe.grill_fish.name,烹饪烤鱼
+data.region.east_current.name,东侧洋流
+data.region.east_current.description,明亮的洋流延伸至地平线外。
+data.region.north_mist.name,北方迷雾
+data.region.north_mist.description,寒冷的迷雾遮蔽北方海面。
+data.region.starting_sea.name,启航海域
+data.region.starting_sea.description,竹筏最初停泊点周围的海域。
+data.region.west_shoals.name,西侧浅滩
+data.region.west_shoals.description,漂流物容易聚集的浅水区。
+data.encounter.calm_sea.name,平静海面
+data.encounter.calm_sea.description,航行后只有平静的地平线回应。
+data.encounter.resource_cache.name,漂流补给箱
+data.encounter.resource_cache.description,被海浪困住的木箱。
+data.encounter.sudden_storm.name,突发风暴
+data.encounter.sudden_storm.description,强烈阵风撕扯着竹筏。
+data.fixture.wood.name,测试木材
+data.fixture.wood.description,测试物品。
+data.fixture.collector.name,测试收集器
+data.fixture.collector.description,测试建筑。
+data.fixture.duplicate_item.name,重复测试物品
+data.fixture.duplicate_item.description,与其他测试定义共用 ID。
+data.fixture.duplicate_building.name,重复测试建筑
+data.fixture.duplicate_building.description,与其他测试定义共用 ID。

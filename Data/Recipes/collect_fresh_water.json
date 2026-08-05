@@ -1,6 +1,6 @@
 {
   "id": "recipe_collect_fresh_water",
-  "display_name": "Collect Fresh Water",
+  "display_name_key": "data.recipe.collect_fresh_water.name",
   "cycle_seconds": 30,
   "input_items": {},
   "output_items": {

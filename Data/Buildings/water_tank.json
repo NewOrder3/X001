@@ -1,7 +1,7 @@
 {
   "id": "building_water_tank",
-  "display_name": "Water Tank",
-  "description": "Stores additional fresh water.",
+  "display_name_key": "data.building.water_tank.name",
+  "description_key": "data.building.water_tank.description",
   "footprint_width": 1,
   "footprint_height": 1,
   "build_cost": {

@@ -1,6 +1,6 @@
 {
   "id": "item_seawater",
-  "display_name": "Seawater",
-  "description": "Salt water collected from the sea.",
+  "display_name_key": "data.item.seawater.name",
+  "description_key": "data.item.seawater.description",
   "base_capacity": 10
 }

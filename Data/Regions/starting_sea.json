@@ -1,7 +1,7 @@
 {
   "id": "region_starting_sea",
-  "display_name": "Starting Sea",
-  "description": "The waters around the raft's first anchorage.",
+  "display_name_key": "data.region.starting_sea.name",
+  "description_key": "data.region.starting_sea.description",
   "q": 0,
   "r": 0,
   "is_starting_region": true,

@@ -46,12 +46,12 @@ func create_new_game(world_seed: int) -> bool:
 		&"survival_default",
 		int(Time.get_unix_time_from_system()),
 	):
-		_last_error = "Could not initialize the survival state."
+		_last_error = GameText.get_text(&"message.survival.state_unavailable")
 		_state = null
 		_is_disposed = true
 		return false
 	if not _exploration_system.initialize_new_state(_state.world_state):
-		_last_error = "Could not initialize the world state."
+		_last_error = GameText.get_text(&"message.exploration.no_world_state")
 		_state = null
 		_is_disposed = true
 		return false
@@ -60,7 +60,7 @@ func create_new_game(world_seed: int) -> bool:
 	_last_offline_settlement_report = null
 	_last_exploration_result = null
 	if not _inventory_system.add(_state.inventory_state, &"item_wood", 10):
-		_last_error = "Could not grant starting resources."
+		_last_error = GameText.get_text(&"message.gather.unavailable")
 		_state = null
 		_is_disposed = true
 		return false
@@ -86,14 +86,14 @@ func load_state_at(state: GameState, current_unix_seconds: int) -> bool:
 		current_unix_seconds,
 	)
 	if _last_offline_settlement_report == null or not _last_offline_settlement_report.succeeded:
-		_last_error = _last_offline_settlement_report.message if _last_offline_settlement_report != null else "Could not activate the survival state."
+		_last_error = _last_offline_settlement_report.message if _last_offline_settlement_report != null else GameText.get_text(&"message.survival.state_unavailable")
 		_state = null
 		_last_offline_settlement_report = null
 		return false
 	_world_seed = state.world_seed
 	_random_service.set_world_seed(_world_seed)
 	if not _exploration_system.activate_loaded_state(_state.world_state):
-		_last_error = "Could not activate the world state."
+		_last_error = GameText.get_text(&"message.exploration.no_world_state")
 		_state = null
 		return false
 	_is_disposed = false
@@ -169,6 +169,12 @@ func get_building_definition(building_id: StringName) -> BuildingDefinition:
 	return _data_registry.get_building(building_id)
 
 
+func get_item_definition(item_id: StringName) -> ItemDefinition:
+	if _data_registry == null or not _data_registry.has_item(item_id):
+		return null
+	return _data_registry.get_item(item_id)
+
+
 func get_recipe_definition(recipe_id: StringName) -> RecipeDefinition:
 	if _data_registry == null or not _data_registry.has_recipe(recipe_id):
 		return null
@@ -198,7 +204,7 @@ func can_perform_survival_action(action_type: StringName) -> SurvivalActionResul
 		return SurvivalActionResult.failure(
 			action_type,
 			SurvivalSystem.ERROR_INVALID_SURVIVAL_STATE,
-			"Start a game before performing survival actions.",
+			GameText.get_text(&"message.session.start_before_operating"),
 		)
 	return _survival_system.can_perform_action(_state.survival_state, action_type)
 
@@ -208,7 +214,7 @@ func consume_survival_action_stamina(action_type: StringName) -> SurvivalActionR
 		return SurvivalActionResult.failure(
 			action_type,
 			SurvivalSystem.ERROR_INVALID_SURVIVAL_STATE,
-			"Start a game before performing survival actions.",
+			GameText.get_text(&"message.session.start_before_operating"),
 		)
 	return _survival_system.consume_action_stamina(_state.survival_state, action_type)
 
@@ -218,7 +224,7 @@ func apply_survival_durability_loss(source_id: StringName, amount: float) -> Sur
 		return SurvivalActionResult.failure(
 			source_id,
 			SurvivalSystem.ERROR_INVALID_SURVIVAL_STATE,
-			"Start a game before applying durability loss.",
+			GameText.get_text(&"message.session.start_before_operating"),
 		)
 	return _survival_system.apply_durability_loss(_state.survival_state, source_id, amount)
 
@@ -239,38 +245,38 @@ func advance_simulation(delta_seconds: float) -> int:
 
 func execute_place_building(command: PlaceBuildingCommand) -> CommandResult:
 	if not has_active_state():
-		return CommandResult.failure(&"inactive_session", "Start a game before building.")
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_building"))
 	return _building_system.execute(_state, command)
 
 
 func execute_gather_resources(command: GatherResourcesCommand) -> CommandResult:
 	if not has_active_state():
-		return CommandResult.failure(&"inactive_session", "Start a game before gathering.")
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_gathering"))
 	return _gathering_system.execute(_state, command)
 
 
 func execute_use_food(command: UseFoodCommand) -> CommandResult:
 	if not has_active_state() or command == null:
-		return CommandResult.failure(&"inactive_session", "Start a game before using supplies.")
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_use_supplies"))
 	if not _data_registry.has_item(command.item_id):
-		return CommandResult.failure(&"unknown_item", "This item is unavailable.")
+		return CommandResult.failure(&"unknown_item", GameText.get_text(&"message.session.item_unavailable"))
 	var definition: ItemDefinition = _data_registry.get_item(command.item_id)
 	if definition.supply_restore_amount <= 0.0:
-		return CommandResult.failure(&"not_food", "This item cannot restore supplies.")
+		return CommandResult.failure(&"not_food", GameText.get_text(&"message.session.item_not_food"))
 	var config: SurvivalConfigDefinition = _survival_system.get_config(_state.survival_state)
 	if config == null or _state.survival_state.supply >= config.max_supply:
-		return CommandResult.failure(&"supply_full", "Supplies are already full.")
+		return CommandResult.failure(&"supply_full", GameText.get_text(&"message.session.supplies_full"))
 	var cost: Dictionary[StringName, int] = {command.item_id: 1}
 	if not _inventory_system.spend_cost(_state.inventory_state, cost):
-		return CommandResult.failure(&"insufficient_resources", "No food is available.")
+		return CommandResult.failure(&"insufficient_resources", GameText.get_text(&"message.session.no_food"))
 	if not _survival_system.restore_supply(_state.survival_state, definition.supply_restore_amount):
-		return CommandResult.failure(&"supply_full", "Supplies are already full.")
-	return CommandResult.success("Supplies restored by %.0f." % definition.supply_restore_amount)
+		return CommandResult.failure(&"supply_full", GameText.get_text(&"message.session.supplies_full"))
+	return CommandResult.success(GameText.format(&"message.session.supplies_restored", [definition.supply_restore_amount]))
 
 
 func execute_set_production_enabled(command: SetProductionEnabledCommand) -> CommandResult:
 	if not has_active_state():
-		return CommandResult.failure(&"inactive_session", "Start a game before operating facilities.")
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_operating"))
 	return _production_system.set_enabled(_state, command.building_instance_id, command.is_enabled)
 
 
@@ -300,7 +306,7 @@ func is_exploration_unlocked() -> bool:
 
 func execute_explore_region(command: ExploreRegionCommand) -> CommandResult:
 	if not has_active_state():
-		return CommandResult.failure(&"inactive_session", "Start a game before sailing.")
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_sailing"))
 	var result: ExplorationResult = _exploration_system.execute(_state, command)
 	_last_exploration_result = result if result.succeeded else null
 	if not result.succeeded:

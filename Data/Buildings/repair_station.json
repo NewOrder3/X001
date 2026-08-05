@@ -1,7 +1,7 @@
 {
   "id": "building_repair_station",
-  "display_name": "Repair Station",
-  "description": "Keeps the raft's hull in working order.",
+  "display_name_key": "data.building.repair_station.name",
+  "description_key": "data.building.repair_station.description",
   "footprint_width": 1,
   "footprint_height": 1,
   "build_cost": {

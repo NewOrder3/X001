@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="X001"
+config/name="沧海余生"
 run/main_scene="res://Scenes/Bootstrap/Bootstrap.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
@@ -54,6 +54,10 @@ place_building={
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":32,"physical_keycode":0,"key_label":0,"unicode":32,"location":0,"echo":false,"script":null)
 ]
 }
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://Translations/game_text.zh_CN.translation")
 
 [physics]
 

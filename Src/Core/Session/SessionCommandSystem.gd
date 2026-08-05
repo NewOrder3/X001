@@ -16,16 +16,16 @@ func _init(new_events: SessionEvents = null) -> void:
 
 func execute(session: GameSession, command: GameCommand) -> CommandResult:
 	if session == null:
-		return _reject(command, &"invalid_session", "Cannot execute a command without a GameSession.")
+		return _reject(command, &"invalid_session", GameText.get_text(&"message.session.invalid"))
 	if command == null:
-		return _reject(command, &"invalid_command", "Cannot execute an empty command.")
+		return _reject(command, &"invalid_command", GameText.get_text(&"message.session.empty_command"))
 
 	if command is CreateNewGameCommand:
 		var create_command: CreateNewGameCommand = command as CreateNewGameCommand
 		if not session.create_new_game(create_command.world_seed):
 			return _reject(command, &"content_load_failed", session.get_last_error())
 		events.new_game_created.emit(create_command.world_seed)
-		return CommandResult.success("Created a new game session.")
+		return CommandResult.success(GameText.get_text(&"message.session.created"))
 	if command is PlaceBuildingCommand:
 		var place_command: PlaceBuildingCommand = command as PlaceBuildingCommand
 		return _complete(command, session.execute_place_building(place_command))
@@ -45,7 +45,7 @@ func execute(session: GameSession, command: GameCommand) -> CommandResult:
 	return _reject(
 		command,
 		&"unsupported_command",
-		"No session handler is registered for command '%s'." % String(command.get_command_type()),
+		GameText.format(&"message.session.unsupported_command", [String(command.get_command_type())]),
 	)
 
 

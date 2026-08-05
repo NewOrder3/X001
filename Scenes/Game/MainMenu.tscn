@@ -54,14 +54,14 @@ theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 3
 theme_override_font_sizes/font_size = 58
-text = "沧海余生"
+text = "ui.main_menu.title"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Content/Menu"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.76, 0.86, 0.87, 1)
 theme_override_font_sizes/font_size = 18
-text = "在风浪之间，搭建最后的归宿"
+text = "ui.main_menu.subtitle"
 horizontal_alignment = 1
 
 [node name="Gap" type="Control" parent="Content/Menu"]
@@ -73,13 +73,13 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(420, 56)
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "开始游戏"
+text = "ui.main_menu.start"
 
 [node name="QuitButton" type="Button" parent="Content/Menu"]
 custom_minimum_size = Vector2(420, 48)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "退出"
+text = "ui.main_menu.quit"
 
 [node name="StatusLabel" type="Label" parent="Content/Menu"]
 unique_name_in_owner = true

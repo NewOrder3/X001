@@ -141,11 +141,11 @@ func _create_item_definition(data: Dictionary, source_path: String) -> ItemDefin
 	if not _last_error.is_empty():
 		return null
 
-	var display_name: String = _read_required_string(data, "display_name", source_path)
+	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
 	if not _last_error.is_empty():
 		return null
 
-	var description: String = _read_required_string(data, "description", source_path)
+	var description_key: StringName = _read_required_text_key(data, "description_key", source_path)
 	if not _last_error.is_empty():
 		return null
 
@@ -153,7 +153,7 @@ func _create_item_definition(data: Dictionary, source_path: String) -> ItemDefin
 	var supply_restore_amount: float = _read_optional_nonnegative_float(data, "supply_restore_amount", source_path, 0.0)
 	if not _last_error.is_empty():
 		return null
-	return ItemDefinition.new(id, display_name, description, base_capacity, supply_restore_amount)
+	return ItemDefinition.new(id, display_name_key, description_key, base_capacity, supply_restore_amount)
 
 
 func _create_building_definition(data: Dictionary, source_path: String) -> BuildingDefinition:
@@ -161,11 +161,11 @@ func _create_building_definition(data: Dictionary, source_path: String) -> Build
 	if not _last_error.is_empty():
 		return null
 
-	var display_name: String = _read_required_string(data, "display_name", source_path)
+	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
 	if not _last_error.is_empty():
 		return null
 
-	var description: String = _read_required_string(data, "description", source_path)
+	var description_key: StringName = _read_required_text_key(data, "description_key", source_path)
 	if not _last_error.is_empty():
 		return null
 
@@ -190,8 +190,8 @@ func _create_building_definition(data: Dictionary, source_path: String) -> Build
 
 	return BuildingDefinition.new(
 		id,
-		display_name,
-		description,
+		display_name_key,
+		description_key,
 		Vector2i(footprint_width, footprint_height),
 		build_cost,
 		capability_tags,
@@ -206,14 +206,14 @@ func _create_recipe_definition(data: Dictionary, source_path: String) -> RecipeD
 	var id: StringName = _read_id(data, source_path)
 	if _last_error.is_empty() and not String(id).begins_with("recipe_"):
 		_set_error("Definition '%s' requires an ID beginning with 'recipe_'." % source_path)
-	var display_name: String = _read_required_string(data, "display_name", source_path)
+	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
 	var cycle_seconds: float = _read_positive_float(data, "cycle_seconds", source_path)
 	var input_items: Dictionary[StringName, int] = _read_optional_item_amounts(data, "input_items", source_path)
 	var output_items: Dictionary[StringName, int] = _read_item_amounts(data, "output_items", source_path)
 	var required_tag: String = _read_required_string(data, "required_capability_tag", source_path)
 	if not _last_error.is_empty() or required_tag.is_empty():
 		return null
-	return RecipeDefinition.new(id, display_name, cycle_seconds, input_items, output_items, StringName(required_tag))
+	return RecipeDefinition.new(id, display_name_key, cycle_seconds, input_items, output_items, StringName(required_tag))
 
 
 func _create_survival_config_definition(
@@ -288,23 +288,23 @@ func _create_region_definition(data: Dictionary, source_path: String) -> RegionD
 	var id: StringName = _read_id(data, source_path)
 	if _last_error.is_empty() and not String(id).begins_with("region_"):
 		_set_error("Definition '%s' requires an ID beginning with 'region_'." % source_path)
-	var display_name: String = _read_required_string(data, "display_name", source_path)
-	var description: String = _read_required_string(data, "description", source_path)
+	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
+	var description_key: StringName = _read_required_text_key(data, "description_key", source_path)
 	var q: int = _read_required_int(data, "q", source_path)
 	var r: int = _read_required_int(data, "r", source_path)
 	var is_starting_region: bool = _read_required_bool(data, "is_starting_region", source_path)
 	var encounter_ids: Array[StringName] = _read_prefixed_id_array(data, "encounter_ids", "event_", source_path)
 	if not _last_error.is_empty():
 		return null
-	return RegionDefinition.new(id, display_name, description, Vector2i(q, r), is_starting_region, encounter_ids)
+	return RegionDefinition.new(id, display_name_key, description_key, Vector2i(q, r), is_starting_region, encounter_ids)
 
 
 func _create_encounter_definition(data: Dictionary, source_path: String) -> EncounterDefinition:
 	var id: StringName = _read_id(data, source_path)
 	if _last_error.is_empty() and not String(id).begins_with("event_"):
 		_set_error("Definition '%s' requires an ID beginning with 'event_'." % source_path)
-	var display_name: String = _read_required_string(data, "display_name", source_path)
-	var description: String = _read_required_string(data, "description", source_path)
+	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
+	var description_key: StringName = _read_required_text_key(data, "description_key", source_path)
 	var outcome_name: String = _read_required_string(data, "outcome_type", source_path)
 	if not _last_error.is_empty():
 		return null
@@ -335,7 +335,7 @@ func _create_encounter_definition(data: Dictionary, source_path: String) -> Enco
 	if outcome_type != EncounterDefinition.OutcomeType.STORM and durability_loss > 0.0:
 		_set_error("Only storm encounters may define durability_loss in '%s'." % source_path)
 		return null
-	return EncounterDefinition.new(id, display_name, description, outcome_type, reward_items, durability_loss)
+	return EncounterDefinition.new(id, display_name_key, description_key, outcome_type, reward_items, durability_loss)
 
 
 func _read_id(data: Dictionary, source_path: String) -> StringName:
@@ -360,6 +360,16 @@ func _read_required_string(data: Dictionary, field_name: String, source_path: St
 		return ""
 
 	return String(raw_value)
+
+
+func _read_required_text_key(data: Dictionary, field_name: String, source_path: String) -> StringName:
+	var text_key: String = _read_required_string(data, field_name, source_path)
+	if not _last_error.is_empty():
+		return &""
+	if not text_key.begins_with("data."):
+		_set_error("Definition '%s' requires '%s' to begin with 'data.'." % [source_path, field_name])
+		return &""
+	return StringName(text_key)
 
 
 func _read_positive_int(data: Dictionary, field_name: String, source_path: String) -> int:

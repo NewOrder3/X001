@@ -52,7 +52,7 @@ func bind_session(session: GameSession) -> void:
 func _select_building(building_id: StringName) -> void:
 	_selected_building_id = building_id
 	_has_selected_cell = false
-	_status_label.text = "选择竹筏格位放置设施。"
+	_status_label.text = GameText.get_text(&"ui.build.status_select_tile")
 	if _build_view != null:
 		_build_view.select_building(_selected_building_id)
 	_refresh()
@@ -61,7 +61,7 @@ func _select_building(building_id: StringName) -> void:
 func _on_tile_selected(cell: Vector2i) -> void:
 	_selected_cell = cell
 	_has_selected_cell = true
-	_status_label.text = "已选择格位 (%d, %d)，确认后建造。" % [cell.x, cell.y]
+	_status_label.text = GameText.format(&"ui.build.status_tile_selected", [cell.x, cell.y])
 	_refresh()
 
 
@@ -82,7 +82,7 @@ func _on_confirm_pressed() -> void:
 func _on_cancel_pressed() -> void:
 	_selected_building_id = &""
 	_has_selected_cell = false
-	_status_label.text = "已取消建造。"
+	_status_label.text = GameText.get_text(&"ui.build.status_cancelled")
 	if _build_view != null:
 		_build_view.select_building(&"")
 	_refresh()
@@ -104,7 +104,7 @@ func _refresh() -> void:
 	var wood_amount: int = 0
 	if _session != null:
 		wood_amount = _session.get_item_amount(&"item_wood")
-	_wood_label.text = "木材：%d" % wood_amount
+	_wood_label.text = GameText.format(&"ui.build.wood", [wood_amount])
 	_refresh_select_button(_select_collector_button, &"building_rain_collector")
 	_refresh_select_button(_select_campfire_button, &"building_campfire")
 	_refresh_select_button(_select_repair_button, &"building_repair_station")
@@ -120,13 +120,15 @@ func _refresh() -> void:
 
 func _refresh_select_button(button: Button, building_id: StringName) -> void:
 	if _session == null:
-		button.text = "选择建筑"
+		button.text = GameText.get_text(&"ui.build.select_building")
 		return
 	var definition: BuildingDefinition = _session.get_building_definition(building_id)
 	if definition == null:
-		button.text = "设施不可用"
+		button.text = GameText.get_text(&"ui.build.unavailable")
 		return
 	var cost_entries: PackedStringArray = []
 	for item_id: StringName in definition.build_cost:
-		cost_entries.append("%s×%d" % [String(item_id).trim_prefix("item_"), definition.build_cost[item_id]])
-	button.text = "选择：%s（%s）" % [definition.display_name, "、".join(cost_entries)]
+		var item: ItemDefinition = _session.get_item_definition(item_id)
+		var item_name: String = item.get_display_name() if item != null else String(item_id)
+		cost_entries.append(GameText.format(&"ui.build.cost_entry", [item_name, definition.build_cost[item_id]]))
+	button.text = GameText.format(&"ui.build.select_with_cost", [definition.get_display_name(), "、".join(cost_entries)])

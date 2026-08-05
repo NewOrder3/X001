@@ -63,7 +63,7 @@ theme_override_constants/separation = 14
 [node name="Title" type="Label" parent="UIRoot/WindowLayer/OfflineSettlementPanel/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
-text = "离线结算"
+text = "ui.offline_settlement.title"
 
 [node name="OfflineSettlementSummaryLabel" type="Label" parent="UIRoot/WindowLayer/OfflineSettlementPanel/Margin/Content"]
 unique_name_in_owner = true
@@ -74,7 +74,7 @@ theme_override_font_sizes/font_size = 18
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
-text = "继续"
+text = "ui.offline_settlement.continue"
 
 [node name="LeftPanelScroll" type="ScrollContainer" parent="UIRoot/HUDLayer/GameHudLayout"]
 layout_mode = 0
@@ -107,22 +107,22 @@ theme_override_constants/separation = 8
 
 [node name="Title" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/SurvivalHUD/Margin/Content"]
 theme_override_font_sizes/font_size = 22
-text = "生存状态（S2）"
+text = "ui.survival.title"
 
 [node name="SupplyLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/SurvivalHUD/Margin/Content"]
 unique_name_in_owner = true
 theme_override_font_sizes/font_size = 18
-text = "补给：--"
+text = "ui.survival.supply_empty"
 
 [node name="DurabilityLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/SurvivalHUD/Margin/Content"]
 unique_name_in_owner = true
 theme_override_font_sizes/font_size = 18
-text = "耐久：--"
+text = "ui.survival.durability_empty"
 
 [node name="StaminaLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/SurvivalHUD/Margin/Content"]
 unique_name_in_owner = true
 theme_override_font_sizes/font_size = 18
-text = "体力：--"
+text = "ui.survival.stamina_empty"
 
 [node name="SurvivalStatusLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/SurvivalHUD/Margin/Content"]
 unique_name_in_owner = true
@@ -140,32 +140,32 @@ theme_override_constants/separation = 10
 
 [node name="Title" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 theme_override_font_sizes/font_size = 26
-text = "竹筏建造（S1）"
+text = "ui.build.title"
 
 [node name="WoodLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 unique_name_in_owner = true
 theme_override_font_sizes/font_size = 20
-text = "木材：0"
+text = "ui.build.wood"
 
 [node name="SelectRainCollectorButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 unique_name_in_owner = true
-text = "选择：雨水收集器（3 木材）"
+text = "ui.build.select_building"
 
 [node name="SelectCampfireButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 unique_name_in_owner = true
-text = "选择：篝火"
+text = "ui.build.select_building"
 
 [node name="SelectRepairStationButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 unique_name_in_owner = true
-text = "选择：维修站"
+text = "ui.build.select_building"
 
 [node name="SelectWaterTankButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 unique_name_in_owner = true
-text = "选择：储水罐"
+text = "ui.build.select_building"
 
 [node name="SelectRudderButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 unique_name_in_owner = true
-text = "建造：船舵（解锁航行）"
+text = "ui.build.select_building"
 
 [node name="BuildActions" type="HBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 theme_override_constants/separation = 12
@@ -173,18 +173,18 @@ theme_override_constants/separation = 12
 [node name="ConfirmBuildButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content/BuildActions"]
 unique_name_in_owner = true
 size_flags_horizontal = 3
-text = "确认建造"
+text = "ui.build.confirm"
 
 [node name="CancelBuildButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content/BuildActions"]
 unique_name_in_owner = true
 size_flags_horizontal = 3
-text = "取消"
+text = "ui.build.cancel"
 
 [node name="BuildStatusLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 48)
 autowrap_mode = 2
-text = "选择建筑，点击竹筏格位开始。"
+text = "ui.build.status_initial"
 
 [node name="ProductionPanel" type="PanelContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn"]
 custom_minimum_size = Vector2(0, 370)
@@ -212,7 +212,7 @@ theme_override_constants/separation = 8
 [node name="Title" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel/Margin/Content"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "World Map (S4)"
+text = "ui.world_map.title"
 
 [node name="CurrentRegionLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel/Margin/Content"]
 unique_name_in_owner = true
@@ -237,19 +237,19 @@ theme_override_constants/separation = 8
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Confirm voyage"
+text = "ui.world_map.confirm"
 
 [node name="CancelExploreButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel/Margin/Content/MapActions"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Cancel / return to raft"
+text = "ui.world_map.cancel"
 
 [node name="ExplorationStatusLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
 autowrap_mode = 2
-text = "Choose a neighbouring sea region to begin exploration."
+text = "ui.world_map.status_initial"
 
 [node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel"]
 theme_override_constants/margin_left = 18
@@ -262,59 +262,59 @@ theme_override_constants/separation = 8
 
 [node name="Title" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 theme_override_font_sizes/font_size = 22
-text = "采集与生产（S3）"
+text = "ui.production.title"
 
 [node name="InventoryLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 unique_name_in_owner = true
-text = "库存：--"
+text = "ui.production.inventory_empty"
 
 [node name="GatherActions" type="HBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 theme_override_constants/separation = 6
 
 [node name="GatherWoodButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/GatherActions"]
 unique_name_in_owner = true
-text = "采木材"
+text = "ui.production.gather_wood"
 
 [node name="GatherFishButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/GatherActions"]
 unique_name_in_owner = true
-text = "采生鱼"
+text = "ui.production.gather_fish"
 
 [node name="GatherWaterButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/GatherActions"]
 unique_name_in_owner = true
-text = "采海水"
+text = "ui.production.gather_water"
 
 [node name="UseActions" type="HBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 theme_override_constants/separation = 6
 
 [node name="UseWaterButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/UseActions"]
 unique_name_in_owner = true
-text = "使用淡水 +10"
+text = "ui.production.use_fresh_water"
 
 [node name="UseFishButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/UseActions"]
 unique_name_in_owner = true
-text = "使用烤鱼 +15"
+text = "ui.production.use_grilled_fish"
 
 [node name="ToggleActions" type="HBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 theme_override_constants/separation = 6
 
 [node name="ToggleCollectorButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/ToggleActions"]
 unique_name_in_owner = true
-text = "启停集雨器"
+text = "ui.production.toggle_collector"
 
 [node name="ToggleCampfireButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/ToggleActions"]
 unique_name_in_owner = true
-text = "启停篝火"
+text = "ui.production.toggle_campfire"
 
 [node name="ToggleRepairButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/ToggleActions"]
 unique_name_in_owner = true
-text = "启停维修站"
+text = "ui.production.toggle_repair"
 
 [node name="FacilityLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 unique_name_in_owner = true
 autowrap_mode = 2
-text = "设施：--"
+text = "ui.production.facility_empty"
 
 [node name="ProductionStatusLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 unique_name_in_owner = true
 autowrap_mode = 2
-text = "采集原料，建造设施后开始生产。"
+text = "ui.production.need_facility"

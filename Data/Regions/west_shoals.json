@@ -1,7 +1,7 @@
 {
   "id": "region_west_shoals",
-  "display_name": "West Shoals",
-  "description": "Shallow water where debris gathers.",
+  "display_name_key": "data.region.west_shoals.name",
+  "description_key": "data.region.west_shoals.description",
   "q": -1,
   "r": 0,
   "is_starting_region": false,

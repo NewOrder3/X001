@@ -28,9 +28,9 @@ func _refresh() -> void:
 	if not is_instance_valid(_supply_label):
 		return
 	if _session == null or not _session.has_active_state() or _survival_system == null:
-		_supply_label.text = "补给：--"
-		_durability_label.text = "耐久：--"
-		_stamina_label.text = "体力：--"
+		_supply_label.text = GameText.get_text(&"ui.survival.supply_empty")
+		_durability_label.text = GameText.get_text(&"ui.survival.durability_empty")
+		_stamina_label.text = GameText.get_text(&"ui.survival.stamina_empty")
 		_status_label.text = ""
 		return
 
@@ -38,9 +38,9 @@ func _refresh() -> void:
 	var config: SurvivalConfigDefinition = _survival_system.get_config(state)
 	if state == null or config == null:
 		return
-	_supply_label.text = "补给：%.1f / %.0f" % [state.supply, config.max_supply]
-	_durability_label.text = "耐久：%.1f / %.0f" % [state.durability, config.max_durability]
-	_stamina_label.text = "体力：%d / %d" % [state.stamina, config.max_stamina]
+	_supply_label.text = GameText.format(&"ui.survival.supply", [state.supply, config.max_supply])
+	_durability_label.text = GameText.format(&"ui.survival.durability", [state.durability, config.max_durability])
+	_stamina_label.text = GameText.format(&"ui.survival.stamina", [state.stamina, config.max_stamina])
 	_supply_label.modulate = _get_status_color(state.supply_status)
 	_durability_label.modulate = _get_status_color(state.durability_status)
 	_stamina_label.modulate = _get_status_color(state.stamina_status)
@@ -58,15 +58,15 @@ func _get_status_color(status: SurvivalState.IndicatorStatus) -> Color:
 func _get_status_message(state: SurvivalState) -> String:
 	var messages: PackedStringArray = []
 	if state.supply_status == SurvivalState.IndicatorStatus.DEPLETED:
-		messages.append("补给耗尽：手动操作效率降低")
+		messages.append(GameText.get_text(&"ui.survival.supply_depleted"))
 	elif state.supply_status == SurvivalState.IndicatorStatus.WARNING:
-		messages.append("补给不足")
+		messages.append(GameText.get_text(&"ui.survival.supply_warning"))
 	if state.durability_status == SurvivalState.IndicatorStatus.DEPLETED:
-		messages.append("耐久耗尽：无法进入战斗")
+		messages.append(GameText.get_text(&"ui.survival.durability_depleted"))
 	elif state.durability_status == SurvivalState.IndicatorStatus.WARNING:
-		messages.append("耐久偏低")
+		messages.append(GameText.get_text(&"ui.survival.durability_warning"))
 	if state.stamina_status == SurvivalState.IndicatorStatus.DEPLETED:
-		messages.append("体力耗尽：无法探索或战斗")
+		messages.append(GameText.get_text(&"ui.survival.stamina_depleted"))
 	elif state.stamina_status == SurvivalState.IndicatorStatus.WARNING:
-		messages.append("体力偏低")
+		messages.append(GameText.get_text(&"ui.survival.stamina_warning"))
 	return "\n".join(messages)

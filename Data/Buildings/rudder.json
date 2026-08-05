@@ -1,7 +1,7 @@
 {
   "id": "building_rudder",
-  "display_name": "Ship Rudder",
-  "description": "Lets the raft steer into neighbouring sea regions.",
+  "display_name_key": "data.building.rudder.name",
+  "description_key": "data.building.rudder.description",
   "footprint_width": 1,
   "footprint_height": 1,
   "build_cost": {

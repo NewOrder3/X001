@@ -34,15 +34,15 @@ func advance(state: GameState) -> int:
 
 func set_enabled(state: GameState, building_instance_id: StringName, is_enabled: bool) -> CommandResult:
 	if state == null or building_instance_id == &"":
-		return CommandResult.failure(&"invalid_production_target", "Choose a valid facility.")
+		return CommandResult.failure(&"invalid_production_target", GameText.get_text(&"message.production.invalid_target"))
 	_sync_instances(state)
 	if not state.production_state.instances.has(building_instance_id):
-		return CommandResult.failure(&"not_a_production_facility", "This building cannot be operated.")
+		return CommandResult.failure(&"not_a_production_facility", GameText.get_text(&"message.production.not_facility"))
 	var production: ProductionInstance = state.production_state.instances[building_instance_id]
 	production.is_enabled = is_enabled
 	production.stall_reason = ProductionInstance.StallReason.NONE if is_enabled else ProductionInstance.StallReason.MANUALLY_STOPPED
 	production_changed.emit(building_instance_id)
-	return CommandResult.success("Facility %s." % ("started" if is_enabled else "stopped"))
+	return CommandResult.success(GameText.get_text(&"message.production.enabled" if is_enabled else &"message.production.disabled"))
 
 
 func get_instance(state: GameState, building_instance_id: StringName) -> ProductionInstance:
