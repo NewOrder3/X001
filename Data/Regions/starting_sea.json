@@ -1,0 +1,9 @@
+{
+  "id": "region_starting_sea",
+  "display_name": "Starting Sea",
+  "description": "The waters around the raft's first anchorage.",
+  "q": 0,
+  "r": 0,
+  "is_starting_region": true,
+  "encounter_ids": ["event_resource_cache", "event_calm_sea", "event_sudden_storm"]
+}

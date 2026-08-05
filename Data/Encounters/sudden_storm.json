@@ -1,0 +1,7 @@
+{
+  "id": "event_sudden_storm",
+  "display_name": "Sudden Storm",
+  "description": "A squall tears across the raft.",
+  "outcome_type": "storm",
+  "durability_loss": 15.0
+}

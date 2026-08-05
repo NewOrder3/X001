@@ -70,6 +70,32 @@ func load_survival_configs(directory_path: String) -> Array[SurvivalConfigDefini
 	return definitions
 
 
+func load_regions(directory_path: String) -> Array[RegionDefinition]:
+	var definitions: Array[RegionDefinition] = []
+	var entries: Array[Dictionary] = _load_json_entries(directory_path)
+	if not _last_error.is_empty():
+		return definitions
+	for entry: Dictionary in entries:
+		var definition: RegionDefinition = _create_region_definition(entry["data"], entry["source_path"])
+		if definition == null:
+			return []
+		definitions.append(definition)
+	return definitions
+
+
+func load_encounters(directory_path: String) -> Array[EncounterDefinition]:
+	var definitions: Array[EncounterDefinition] = []
+	var entries: Array[Dictionary] = _load_json_entries(directory_path)
+	if not _last_error.is_empty():
+		return definitions
+	for entry: Dictionary in entries:
+		var definition: EncounterDefinition = _create_encounter_definition(entry["data"], entry["source_path"])
+		if definition == null:
+			return []
+		definitions.append(definition)
+	return definitions
+
+
 func get_last_error() -> String:
 	return _last_error
 
@@ -258,6 +284,60 @@ func _create_survival_config_definition(
 	)
 
 
+func _create_region_definition(data: Dictionary, source_path: String) -> RegionDefinition:
+	var id: StringName = _read_id(data, source_path)
+	if _last_error.is_empty() and not String(id).begins_with("region_"):
+		_set_error("Definition '%s' requires an ID beginning with 'region_'." % source_path)
+	var display_name: String = _read_required_string(data, "display_name", source_path)
+	var description: String = _read_required_string(data, "description", source_path)
+	var q: int = _read_required_int(data, "q", source_path)
+	var r: int = _read_required_int(data, "r", source_path)
+	var is_starting_region: bool = _read_required_bool(data, "is_starting_region", source_path)
+	var encounter_ids: Array[StringName] = _read_prefixed_id_array(data, "encounter_ids", "event_", source_path)
+	if not _last_error.is_empty():
+		return null
+	return RegionDefinition.new(id, display_name, description, Vector2i(q, r), is_starting_region, encounter_ids)
+
+
+func _create_encounter_definition(data: Dictionary, source_path: String) -> EncounterDefinition:
+	var id: StringName = _read_id(data, source_path)
+	if _last_error.is_empty() and not String(id).begins_with("event_"):
+		_set_error("Definition '%s' requires an ID beginning with 'event_'." % source_path)
+	var display_name: String = _read_required_string(data, "display_name", source_path)
+	var description: String = _read_required_string(data, "description", source_path)
+	var outcome_name: String = _read_required_string(data, "outcome_type", source_path)
+	if not _last_error.is_empty():
+		return null
+	var outcome_type: EncounterDefinition.OutcomeType = EncounterDefinition.OutcomeType.EMPTY
+	match outcome_name:
+		"resource":
+			outcome_type = EncounterDefinition.OutcomeType.RESOURCE
+		"empty":
+			outcome_type = EncounterDefinition.OutcomeType.EMPTY
+		"storm":
+			outcome_type = EncounterDefinition.OutcomeType.STORM
+		_:
+			_set_error("Definition '%s' has an unknown outcome_type '%s'." % [source_path, outcome_name])
+			return null
+	var reward_items: Dictionary[StringName, int] = _read_optional_item_amounts(data, "reward_items", source_path)
+	var durability_loss: float = _read_optional_nonnegative_float(data, "durability_loss", source_path, 0.0)
+	if not _last_error.is_empty():
+		return null
+	if outcome_type == EncounterDefinition.OutcomeType.RESOURCE and reward_items.is_empty():
+		_set_error("Resource encounter '%s' requires reward_items." % source_path)
+		return null
+	if outcome_type != EncounterDefinition.OutcomeType.RESOURCE and not reward_items.is_empty():
+		_set_error("Only resource encounters may define reward_items in '%s'." % source_path)
+		return null
+	if outcome_type == EncounterDefinition.OutcomeType.STORM and durability_loss <= 0.0:
+		_set_error("Storm encounter '%s' requires durability_loss." % source_path)
+		return null
+	if outcome_type != EncounterDefinition.OutcomeType.STORM and durability_loss > 0.0:
+		_set_error("Only storm encounters may define durability_loss in '%s'." % source_path)
+		return null
+	return EncounterDefinition.new(id, display_name, description, outcome_type, reward_items, durability_loss)
+
+
 func _read_id(data: Dictionary, source_path: String) -> StringName:
 	var raw_id: Variant = data.get("id")
 	if typeof(raw_id) != TYPE_STRING:
@@ -293,6 +373,18 @@ func _read_positive_int(data: Dictionary, field_name: String, source_path: Strin
 		_set_error("Definition '%s' requires a positive integer field named '%s'." % [source_path, field_name])
 		return 0
 
+	return int(value)
+
+
+func _read_required_int(data: Dictionary, field_name: String, source_path: String) -> int:
+	var raw_value: Variant = data.get(field_name)
+	if typeof(raw_value) != TYPE_INT and typeof(raw_value) != TYPE_FLOAT:
+		_set_error("Definition '%s' requires an integer field named '%s'." % [source_path, field_name])
+		return 0
+	var value: float = float(raw_value)
+	if value != floor(value):
+		_set_error("Definition '%s' requires an integer field named '%s'." % [source_path, field_name])
+		return 0
 	return int(value)
 
 
@@ -372,6 +464,24 @@ func _read_optional_tags(data: Dictionary, field_name: String, source_path: Stri
 			return []
 		tags.append(StringName(raw_tag))
 	return tags
+
+
+func _read_prefixed_id_array(data: Dictionary, field_name: String, prefix: String, source_path: String) -> Array[StringName]:
+	var raw_ids: Variant = data.get(field_name)
+	if not raw_ids is Array or raw_ids.is_empty():
+		_set_error("Definition '%s' requires a non-empty array field named '%s'." % [source_path, field_name])
+		return []
+	var ids: Array[StringName] = []
+	for raw_id: Variant in raw_ids:
+		if typeof(raw_id) != TYPE_STRING or not String(raw_id).begins_with(prefix):
+			_set_error("Definition '%s' has an invalid ID in '%s'." % [source_path, field_name])
+			return []
+		var id: StringName = StringName(raw_id)
+		if not IdValidator.is_valid_id(id) or ids.has(id):
+			_set_error("Definition '%s' has an invalid or duplicate ID in '%s'." % [source_path, field_name])
+			return []
+		ids.append(id)
+	return ids
 
 
 func _read_number(data: Dictionary, field_name: String, source_path: String) -> float:

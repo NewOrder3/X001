@@ -5,6 +5,7 @@ extends Node
 @onready var _build_panel: RaftBuildPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel
 @onready var _survival_hud: SurvivalHUD = $UIRoot/HUDLayer/GameHudLayout/SurvivalHUD
 @onready var _production_panel: ProductionPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel
+@onready var _world_map_panel: WorldMapPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel
 @onready var _offline_settlement_panel: OfflineSettlementPanel = $UIRoot/WindowLayer/OfflineSettlementPanel
 
 var _session: GameSession = null
@@ -35,4 +36,5 @@ func _bind_views() -> void:
 	_build_panel.bind_session(_session)
 	_survival_hud.bind_session(_session)
 	_production_panel.bind_session(_session)
+	_world_map_panel.bind_session(_session)
 	_offline_settlement_panel.show_report(_session.get_last_offline_settlement_report())

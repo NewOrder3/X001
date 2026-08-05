@@ -13,9 +13,12 @@ var _gathering_system: GatheringSystem
 var _simulation_clock: SimulationClock
 var _survival_system: SurvivalSystem
 var _production_system: ProductionSystem
+var _random_service: RandomService
+var _exploration_system: ExplorationSystem
 var _session_command_system: SessionCommandSystem
 var _last_error: String = ""
 var _last_offline_settlement_report: OfflineSettlementReport = null
+var _last_exploration_result: ExplorationResult = null
 
 
 func _init() -> void:
@@ -26,6 +29,8 @@ func _init() -> void:
 	_simulation_clock = SimulationClock.new()
 	_survival_system = SurvivalSystem.new(_data_registry, _simulation_clock)
 	_production_system = ProductionSystem.new(_data_registry, _inventory_system, _simulation_clock)
+	_random_service = RandomService.new()
+	_exploration_system = ExplorationSystem.new(_data_registry, _inventory_system, _survival_system, _random_service)
 	_session_command_system = SessionCommandSystem.new()
 
 
@@ -34,6 +39,7 @@ func create_new_game(world_seed: int) -> bool:
 		_last_error = _data_registry.get_last_error()
 		return false
 	_world_seed = world_seed
+	_random_service.set_world_seed(world_seed)
 	_state = GameState.new(world_seed)
 	if not _survival_system.initialize_new_state(
 		_state.survival_state,
@@ -44,9 +50,15 @@ func create_new_game(world_seed: int) -> bool:
 		_state = null
 		_is_disposed = true
 		return false
+	if not _exploration_system.initialize_new_state(_state.world_state):
+		_last_error = "Could not initialize the world state."
+		_state = null
+		_is_disposed = true
+		return false
 	_is_disposed = false
 	_last_error = ""
 	_last_offline_settlement_report = null
+	_last_exploration_result = null
 	if not _inventory_system.add(_state.inventory_state, &"item_wood", 10):
 		_last_error = "Could not grant starting resources."
 		_state = null
@@ -79,6 +91,11 @@ func load_state_at(state: GameState, current_unix_seconds: int) -> bool:
 		_last_offline_settlement_report = null
 		return false
 	_world_seed = state.world_seed
+	_random_service.set_world_seed(_world_seed)
+	if not _exploration_system.activate_loaded_state(_state.world_state):
+		_last_error = "Could not activate the world state."
+		_state = null
+		return false
 	_is_disposed = false
 	_last_error = ""
 	_simulation_clock.start()
@@ -88,9 +105,11 @@ func load_state_at(state: GameState, current_unix_seconds: int) -> bool:
 func dispose() -> void:
 	_state = null
 	_world_seed = 0
+	_random_service.set_world_seed(0)
 	_is_disposed = true
 	_simulation_clock.pause()
 	_last_offline_settlement_report = null
+	_last_exploration_result = null
 
 
 func has_active_state() -> bool:
@@ -114,6 +133,10 @@ func get_last_offline_settlement_report() -> OfflineSettlementReport:
 	return _last_offline_settlement_report
 
 
+func get_last_exploration_result() -> ExplorationResult:
+	return _last_exploration_result
+
+
 func execute_command(command: GameCommand) -> CommandResult:
 	return _session_command_system.execute(self, command)
 
@@ -126,6 +149,12 @@ func get_raft_state() -> RaftState:
 	if not has_active_state():
 		return null
 	return _state.raft_state
+
+
+func get_world_state() -> WorldState:
+	if not has_active_state():
+		return null
+	return _state.world_state
 
 
 func get_item_amount(item_id: StringName) -> int:
@@ -247,3 +276,33 @@ func execute_set_production_enabled(command: SetProductionEnabledCommand) -> Com
 
 func get_production_system() -> ProductionSystem:
 	return _production_system
+
+
+func get_exploration_system() -> ExplorationSystem:
+	return _exploration_system
+
+
+func get_region_definition(region_id: StringName) -> RegionDefinition:
+	if _data_registry == null or not _data_registry.has_region(region_id):
+		return null
+	return _data_registry.get_region(region_id)
+
+
+func get_reachable_regions() -> Array[RegionDefinition]:
+	if not has_active_state():
+		return []
+	return _exploration_system.get_reachable_regions(_state.world_state)
+
+
+func is_exploration_unlocked() -> bool:
+	return has_active_state() and _exploration_system.is_unlocked(_state)
+
+
+func execute_explore_region(command: ExploreRegionCommand) -> CommandResult:
+	if not has_active_state():
+		return CommandResult.failure(&"inactive_session", "Start a game before sailing.")
+	var result: ExplorationResult = _exploration_system.execute(_state, command)
+	_last_exploration_result = result if result.succeeded else null
+	if not result.succeeded:
+		return CommandResult.failure(result.error_code, result.message)
+	return CommandResult.success(result.message)

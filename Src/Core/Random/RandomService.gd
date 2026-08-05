@@ -29,8 +29,12 @@ func roll_chance(chance: float) -> bool:
 
 
 func range_i(minimum: int, maximum: int) -> int:
+	return range_i_from_stream(DEFAULT_STREAM_ID, minimum, maximum)
+
+
+func range_i_from_stream(stream_id: StringName, minimum: int, maximum: int) -> int:
 	assert(minimum <= maximum, "RandomService range minimum must not exceed maximum.")
-	return get_stream(DEFAULT_STREAM_ID).randi_range(minimum, maximum)
+	return get_stream(stream_id).randi_range(minimum, maximum)
 
 
 func get_world_seed() -> int:

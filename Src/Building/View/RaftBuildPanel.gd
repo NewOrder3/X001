@@ -11,6 +11,7 @@ extends Control
 @onready var _select_campfire_button: Button = %SelectCampfireButton
 @onready var _select_repair_button: Button = %SelectRepairStationButton
 @onready var _select_tank_button: Button = %SelectWaterTankButton
+@onready var _select_rudder_button: Button = %SelectRudderButton
 @onready var _confirm_button: Button = %ConfirmBuildButton
 @onready var _cancel_button: Button = %CancelBuildButton
 
@@ -30,6 +31,7 @@ func _ready() -> void:
 		_select_campfire_button.pressed.connect(_select_building.bind(&"building_campfire"))
 		_select_repair_button.pressed.connect(_select_building.bind(&"building_repair_station"))
 		_select_tank_button.pressed.connect(_select_building.bind(&"building_water_tank"))
+		_select_rudder_button.pressed.connect(_select_building.bind(&"building_rudder"))
 	_confirm_button.pressed.connect(_on_confirm_pressed)
 	_cancel_button.pressed.connect(_on_cancel_pressed)
 	_refresh()
@@ -107,11 +109,13 @@ func _refresh() -> void:
 	_refresh_select_button(_select_campfire_button, &"building_campfire")
 	_refresh_select_button(_select_repair_button, &"building_repair_station")
 	_refresh_select_button(_select_tank_button, &"building_water_tank")
+	_refresh_select_button(_select_rudder_button, &"building_rudder")
 	_confirm_button.disabled = _selected_building_id == &"" or not _has_selected_cell
 	_select_collector_button.disabled = _session == null
 	_select_campfire_button.disabled = _session == null
 	_select_repair_button.disabled = _session == null
 	_select_tank_button.disabled = _session == null
+	_select_rudder_button.disabled = _session == null
 
 
 func _refresh_select_button(button: Button, building_id: StringName) -> void:

@@ -7,15 +7,21 @@ const ITEM_DIRECTORY: String = "res://Data/Items"
 const BUILDING_DIRECTORY: String = "res://Data/Buildings"
 const SURVIVAL_DIRECTORY: String = "res://Data/Survival"
 const RECIPE_DIRECTORY: String = "res://Data/Recipes"
+const REGION_DIRECTORY: String = "res://Data/Regions"
+const ENCOUNTER_DIRECTORY: String = "res://Data/Encounters"
 
 var _item_directory: String
 var _building_directory: String
 var _survival_directory: String
 var _recipe_directory: String
+var _region_directory: String
+var _encounter_directory: String
 var _items: Dictionary[StringName, ItemDefinition] = {}
 var _buildings: Dictionary[StringName, BuildingDefinition] = {}
 var _survival_configs: Dictionary[StringName, SurvivalConfigDefinition] = {}
 var _recipes: Dictionary[StringName, RecipeDefinition] = {}
+var _regions: Dictionary[StringName, RegionDefinition] = {}
+var _encounters: Dictionary[StringName, EncounterDefinition] = {}
 var _registered_ids: Dictionary[StringName, bool] = {}
 var _last_error: String = ""
 
@@ -25,11 +31,16 @@ func _init(
 	new_building_directory: String = BUILDING_DIRECTORY,
 	new_survival_directory: String = SURVIVAL_DIRECTORY,
 	new_recipe_directory: String = "",
+	new_region_directory: String = "",
+	new_encounter_directory: String = "",
 ) -> void:
 	_item_directory = new_item_directory
 	_building_directory = new_building_directory
 	_survival_directory = new_survival_directory
 	_recipe_directory = RECIPE_DIRECTORY if new_recipe_directory.is_empty() and new_item_directory == ITEM_DIRECTORY and new_building_directory == BUILDING_DIRECTORY else new_recipe_directory
+	var use_default_world_directories: bool = new_item_directory == ITEM_DIRECTORY and new_building_directory == BUILDING_DIRECTORY and new_survival_directory == SURVIVAL_DIRECTORY
+	_region_directory = REGION_DIRECTORY if new_region_directory.is_empty() and use_default_world_directories else new_region_directory
+	_encounter_directory = ENCOUNTER_DIRECTORY if new_encounter_directory.is_empty() and use_default_world_directories else new_encounter_directory
 
 
 func load_all() -> bool:
@@ -63,7 +74,23 @@ func load_all() -> bool:
 		for definition: RecipeDefinition in recipe_definitions:
 			if not _register_recipe(definition):
 				return _fail_load(_last_error)
+	if not _region_directory.is_empty():
+		var region_definitions: Array[RegionDefinition] = loader.load_regions(_region_directory)
+		if not loader.get_last_error().is_empty():
+			return _fail_load(loader.get_last_error())
+		for definition: RegionDefinition in region_definitions:
+			if not _register_region(definition):
+				return _fail_load(_last_error)
+	if not _encounter_directory.is_empty():
+		var encounter_definitions: Array[EncounterDefinition] = loader.load_encounters(_encounter_directory)
+		if not loader.get_last_error().is_empty():
+			return _fail_load(loader.get_last_error())
+		for definition: EncounterDefinition in encounter_definitions:
+			if not _register_encounter(definition):
+				return _fail_load(_last_error)
 	if not _validate_building_item_references():
+		return _fail_load(_last_error)
+	if not _validate_world_references():
 		return _fail_load(_last_error)
 
 	return true
@@ -97,6 +124,38 @@ func get_recipe(id: StringName) -> RecipeDefinition:
 	return _recipes[id]
 
 
+func get_region(id: StringName) -> RegionDefinition:
+	if not _regions.has(id):
+		push_error("DATA: Unknown region Definition ID '%s'." % String(id))
+		return null
+	return _regions[id]
+
+
+func get_encounter(id: StringName) -> EncounterDefinition:
+	if not _encounters.has(id):
+		push_error("DATA: Unknown encounter Definition ID '%s'." % String(id))
+		return null
+	return _encounters[id]
+
+
+func get_regions() -> Array[RegionDefinition]:
+	var ids: Array[StringName] = []
+	for region_id: StringName in _regions:
+		ids.append(region_id)
+	ids.sort()
+	var definitions: Array[RegionDefinition] = []
+	for region_id: StringName in ids:
+		definitions.append(_regions[region_id])
+	return definitions
+
+
+func get_starting_region() -> RegionDefinition:
+	for region: RegionDefinition in _regions.values():
+		if region.is_starting_region:
+			return region
+	return null
+
+
 func has_definition(id: StringName) -> bool:
 	return _registered_ids.has(id)
 
@@ -117,6 +176,14 @@ func has_recipe(id: StringName) -> bool:
 	return _recipes.has(id)
 
 
+func has_region(id: StringName) -> bool:
+	return _regions.has(id)
+
+
+func has_encounter(id: StringName) -> bool:
+	return _encounters.has(id)
+
+
 func get_last_error() -> String:
 	return _last_error
 
@@ -135,6 +202,14 @@ func get_survival_config_count() -> int:
 
 func get_recipe_count() -> int:
 	return _recipes.size()
+
+
+func get_region_count() -> int:
+	return _regions.size()
+
+
+func get_encounter_count() -> int:
+	return _encounters.size()
 
 
 func _register_item(definition: ItemDefinition) -> bool:
@@ -162,6 +237,20 @@ func _register_recipe(definition: RecipeDefinition) -> bool:
 	if not _register_id(definition.id):
 		return false
 	_recipes[definition.id] = definition
+	return true
+
+
+func _register_region(definition: RegionDefinition) -> bool:
+	if not _register_id(definition.id):
+		return false
+	_regions[definition.id] = definition
+	return true
+
+
+func _register_encounter(definition: EncounterDefinition) -> bool:
+	if not _register_id(definition.id):
+		return false
+	_encounters[definition.id] = definition
 	return true
 
 
@@ -203,11 +292,46 @@ func _validate_building_item_references() -> bool:
 	return true
 
 
+func _validate_world_references() -> bool:
+	if _regions.is_empty() and _encounters.is_empty():
+		return true
+	if _regions.is_empty() or _encounters.is_empty():
+		_set_error("World Definitions require both regions and encounters.")
+		return false
+	var starting_region_count: int = 0
+	var occupied_coordinates: Dictionary[Vector2i, bool] = {}
+	for region: RegionDefinition in _regions.values():
+		if region.is_starting_region:
+			starting_region_count += 1
+		if occupied_coordinates.has(region.coordinate):
+			_set_error("Region '%s' duplicates a map coordinate." % String(region.id))
+			return false
+		occupied_coordinates[region.coordinate] = true
+		if region.encounter_ids.is_empty():
+			_set_error("Region '%s' requires at least one encounter." % String(region.id))
+			return false
+		for encounter_id: StringName in region.encounter_ids:
+			if not _encounters.has(encounter_id):
+				_set_error("Region '%s' references unknown encounter '%s'." % [String(region.id), String(encounter_id)])
+				return false
+	if starting_region_count != 1:
+		_set_error("World Definitions require exactly one starting region.")
+		return false
+	for encounter: EncounterDefinition in _encounters.values():
+		for item_id: StringName in encounter.reward_items:
+			if not _items.has(item_id):
+				_set_error("Encounter '%s' references unknown reward item '%s'." % [String(encounter.id), String(item_id)])
+				return false
+	return true
+
+
 func _clear() -> void:
 	_items.clear()
 	_buildings.clear()
 	_survival_configs.clear()
 	_recipes.clear()
+	_regions.clear()
+	_encounters.clear()
 	_registered_ids.clear()
 	_last_error = ""
 
@@ -217,6 +341,8 @@ func _fail_load(message: String) -> bool:
 	_buildings.clear()
 	_survival_configs.clear()
 	_recipes.clear()
+	_regions.clear()
+	_encounters.clear()
 	_registered_ids.clear()
 	_last_error = message
 	return false

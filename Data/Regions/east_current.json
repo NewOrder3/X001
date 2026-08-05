@@ -1,0 +1,9 @@
+{
+  "id": "region_east_current",
+  "display_name": "East Current",
+  "description": "A bright current moving beyond the horizon.",
+  "q": 1,
+  "r": 0,
+  "is_starting_region": false,
+  "encounter_ids": ["event_resource_cache", "event_calm_sea", "event_sudden_storm"]
+}

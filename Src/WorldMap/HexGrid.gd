@@ -11,8 +11,12 @@ static func get_neighbors(coord: HexCoord) -> Array[HexCoord]:
 	return neighbors
 
 static func distance_to(a: HexCoord, b: HexCoord) -> int:
-	var dq: int = a.q - b.q
-	var dr: int = a.r - b.r
+	return distance_to_coord(Vector2i(a.q, a.r), Vector2i(b.q, b.r))
+
+
+static func distance_to_coord(a: Vector2i, b: Vector2i) -> int:
+	var dq: int = a.x - b.x
+	var dr: int = a.y - b.y
 	return int((abs(dq) + abs(dr) + abs(dq + dr)) / 2)
 
 static func hex_to_world(coord: HexCoord) -> Vector2:
