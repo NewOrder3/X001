@@ -7,6 +7,7 @@ func test_clicking_the_center_of_the_raft_selects_its_center_cell() -> void:
 	var build_view: RaftBuildView = RaftBuildView.new()
 	build_view.position = Vector2(960.0, 520.0)
 	build_view.bind_session(session)
+	build_view.set_interaction_enabled(true)
 	build_view.select_building(&"building_rain_collector")
 	var selected_cells: Array[Vector2i] = []
 	build_view.tile_selected.connect(func(cell: Vector2i) -> void:
@@ -33,3 +34,27 @@ func test_full_screen_ui_layers_do_not_block_raft_input() -> void:
 	assert_eq((ui_root.get_node("HUDLayer") as Control).mouse_filter, Control.MOUSE_FILTER_IGNORE)
 	assert_eq((ui_root.get_node("WindowLayer") as Control).mouse_filter, Control.MOUSE_FILTER_IGNORE)
 	ui_root.free()
+
+
+func test_clicking_a_salvage_spot_dispatches_its_resource_after_the_skiff_arrives() -> void:
+	var session: GameSession = GameSession.new()
+	assert_true(session.create_new_game(29), session.get_last_error())
+	var build_view: RaftBuildView = RaftBuildView.new()
+	build_view.position = Vector2(960.0, 520.0)
+	Engine.get_main_loop().root.add_child(build_view)
+	build_view.bind_session(session)
+	build_view.set_salvage_spots_visible(true)
+	var salvaged_items: Array[StringName] = []
+	build_view.salvage_requested.connect(func(item_id: StringName) -> void:
+		salvaged_items.append(item_id)
+	)
+
+	var click_event: InputEventMouseButton = InputEventMouseButton.new()
+	click_event.button_index = MOUSE_BUTTON_LEFT
+	click_event.pressed = true
+	click_event.position = build_view.position + Vector2(-250.0, -118.0)
+	build_view._unhandled_input(click_event)
+	build_view._process(0.5)
+
+	assert_eq(salvaged_items, [&"item_wood"])
+	build_view.free()

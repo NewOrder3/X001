@@ -3,13 +3,21 @@ extends PanelContainer
 
 ## Read-only S2 HUD. It observes SurvivalSystem and never mutates game state.
 
-@onready var _supply_label: Label = %SupplyLabel
-@onready var _durability_label: Label = %DurabilityLabel
-@onready var _stamina_label: Label = %StaminaLabel
+signal navigate_requested(panel_id: StringName)
+signal display_mode_changed(is_expanded: bool)
+
+@onready var _summary_label: Label = %SurvivalSummaryLabel
 @onready var _status_label: Label = %SurvivalStatusLabel
+@onready var _warning_action_button: Button = %SurvivalWarningActionButton
 
 var _session: GameSession = null
 var _survival_system: SurvivalSystem = null
+var _is_expanded: bool = false
+var _recommended_panel_id: StringName = &""
+
+
+func _ready() -> void:
+	_warning_action_button.pressed.connect(_open_recommended_panel)
 
 
 func bind_session(session: GameSession) -> void:
@@ -25,32 +33,59 @@ func _on_survival_changed(_supply: float, _durability: float, _stamina: int) -> 
 
 
 func _refresh() -> void:
-	if not is_instance_valid(_supply_label):
+	if not is_instance_valid(_summary_label):
 		return
 	if _session == null or not _session.has_active_state() or _survival_system == null:
-		_supply_label.text = GameText.get_text(&"ui.survival.supply_empty")
-		_durability_label.text = GameText.get_text(&"ui.survival.durability_empty")
-		_stamina_label.text = GameText.get_text(&"ui.survival.stamina_empty")
+		_summary_label.text = GameText.get_text(&"ui.survival.summary_empty")
 		_status_label.text = ""
+		_status_label.hide()
+		_warning_action_button.hide()
+		_set_expanded(false)
 		return
 
 	var state: SurvivalState = _session.get_survival_state()
 	var config: SurvivalConfigDefinition = _survival_system.get_config(state)
 	if state == null or config == null:
 		return
-	_supply_label.text = GameText.format(&"ui.survival.supply", [state.supply, config.max_supply])
-	_durability_label.text = GameText.format(&"ui.survival.durability", [state.durability, config.max_durability])
-	_stamina_label.text = GameText.format(&"ui.survival.stamina", [state.stamina, config.max_stamina])
-	_supply_label.modulate = _get_status_color(state.supply_status)
-	_durability_label.modulate = _get_status_color(state.durability_status)
-	_stamina_label.modulate = _get_status_color(state.stamina_status)
+	_summary_label.text = GameText.format(&"ui.survival.summary", [state.supply, config.max_supply, state.durability, config.max_durability, state.stamina, config.max_stamina])
+	_summary_label.modulate = _get_summary_color(state)
 	_status_label.text = _get_status_message(state)
+	_status_label.visible = not _status_label.text.is_empty()
+	_configure_warning_action(state)
+	_set_expanded(not _status_label.text.is_empty())
 
 
-func _get_status_color(status: SurvivalState.IndicatorStatus) -> Color:
-	if status == SurvivalState.IndicatorStatus.DEPLETED:
+func is_expanded() -> bool:
+	return _is_expanded
+
+
+func _set_expanded(is_expanded: bool) -> void:
+	if _is_expanded == is_expanded:
+		return
+	_is_expanded = is_expanded
+	display_mode_changed.emit(_is_expanded)
+
+
+func _configure_warning_action(state: SurvivalState) -> void:
+	_recommended_panel_id = &""
+	if state.supply_status != SurvivalState.IndicatorStatus.NORMAL:
+		_recommended_panel_id = &"supply"
+		_warning_action_button.text = GameText.get_text(&"ui.survival.action_supply")
+	elif state.durability_status != SurvivalState.IndicatorStatus.NORMAL:
+		_recommended_panel_id = &"build"
+		_warning_action_button.text = GameText.get_text(&"ui.survival.action_repair")
+	_warning_action_button.visible = _recommended_panel_id != &""
+
+
+func _open_recommended_panel() -> void:
+	if _recommended_panel_id != &"":
+		navigate_requested.emit(_recommended_panel_id)
+
+
+func _get_summary_color(state: SurvivalState) -> Color:
+	if state.supply_status == SurvivalState.IndicatorStatus.DEPLETED or state.durability_status == SurvivalState.IndicatorStatus.DEPLETED or state.stamina_status == SurvivalState.IndicatorStatus.DEPLETED:
 		return Color("b9b9b9")
-	if status == SurvivalState.IndicatorStatus.WARNING:
+	if state.supply_status == SurvivalState.IndicatorStatus.WARNING or state.durability_status == SurvivalState.IndicatorStatus.WARNING or state.stamina_status == SurvivalState.IndicatorStatus.WARNING:
 		return Color("ffb55c")
 	return Color.WHITE
 

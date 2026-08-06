@@ -9,6 +9,10 @@ func test_build_confirm_and_cancel_shortcuts() -> void:
 	game_root.bind_session(session)
 	var hud: GameHudLayout = game_root.get_node("UIRoot/HUDLayer/GameHudLayout") as GameHudLayout
 	hud.open_panel(&"build")
+	var build_confirm_bar: Control = game_root.get_node("UIRoot/HUDLayer/GameHudLayout/BuildConfirmBar") as Control
+	var confirm_button: Button = game_root.get_node("UIRoot/HUDLayer/GameHudLayout/BuildConfirmBar/BuildActions/ConfirmBuildButton") as Button
+	assert_true(build_confirm_bar.visible)
+	assert_not_null(confirm_button)
 	var build_panel: RaftBuildPanel = game_root.get_node(
 		"UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel"
 	) as RaftBuildPanel

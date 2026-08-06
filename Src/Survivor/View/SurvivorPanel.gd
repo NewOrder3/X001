@@ -177,7 +177,7 @@ func _add_empty_label(container: VBoxContainer, text_key: StringName) -> void:
 func _apply_portrait(button: Button, survivor_id: StringName) -> void:
 	button.icon = PORTRAIT_BY_SURVIVOR_ID.get(survivor_id) as Texture2D
 	button.expand_icon = true
-	button.icon_max_width = 42
+	button.add_theme_constant_override(&"icon_max_width", 42)
 
 
 func _clear_children(container: VBoxContainer) -> void:

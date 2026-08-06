@@ -9,6 +9,7 @@ extends Control
 @onready var _raft_level_label: Label = %RaftLevelLabel
 @onready var _raft_upgrade_button: Button = %RaftUpgradeButton
 @onready var _status_label: Label = %BuildStatusLabel
+@onready var _selected_preview_label: Label = %SelectedBuildingPreviewLabel
 @onready var _select_collector_button: Button = %SelectRainCollectorButton
 @onready var _select_campfire_button: Button = %SelectCampfireButton
 @onready var _select_repair_button: Button = %SelectRepairStationButton
@@ -177,7 +178,34 @@ func _refresh() -> void:
 	_select_desalinator_button.disabled = _session == null
 	_select_fishing_net_button.disabled = _session == null
 	_select_storage_rack_button.disabled = _session == null
+	_refresh_selected_preview()
 	_refresh_facility_list()
+
+
+func _refresh_selected_preview() -> void:
+	if _session == null or not _session.has_active_state():
+		_selected_preview_label.text = GameText.get_text(&"ui.build.preview_initial")
+		return
+	if _selected_building_id == &"":
+		_selected_preview_label.text = GameText.get_text(&"ui.build.preview_select")
+		return
+	var definition: BuildingDefinition = _session.get_building_definition(_selected_building_id)
+	if definition == null:
+		_selected_preview_label.text = GameText.get_text(&"ui.build.unavailable")
+		return
+	var benefits: PackedStringArray = []
+	if definition.recipe_id != &"":
+		var recipe: RecipeDefinition = _session.get_recipe_definition(definition.recipe_id)
+		if recipe != null:
+			benefits.append(GameText.format(&"ui.build.preview_recipe", [recipe.cycle_seconds, _format_cost(recipe.input_items), _format_cost(recipe.output_items)]))
+	if not definition.storage_capacity_bonus.is_empty():
+		benefits.append(GameText.format(&"ui.build.preview_storage", [_format_cost(definition.storage_capacity_bonus)]))
+	if definition.durability_recovery_per_minute > 0.0:
+		benefits.append(GameText.format(&"ui.build.preview_repair", [definition.durability_recovery_per_minute]))
+	if benefits.is_empty():
+		benefits.append(GameText.get_text(&"ui.build.preview_unlock"))
+	var placement: String = GameText.format(&"ui.build.preview_cell", [_selected_cell.x, _selected_cell.y]) if _has_selected_cell else GameText.get_text(&"ui.build.preview_choose_cell")
+	_selected_preview_label.text = GameText.format(&"ui.build.preview", [definition.get_display_name(), definition.get_description(), _format_cost(definition.build_cost), "\n".join(benefits), placement])
 
 
 func _refresh_raft_upgrade() -> void:

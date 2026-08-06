@@ -8,7 +8,7 @@ ui.main_menu.start_unavailable,启动流程不可用。
 ui.debug_panel.title,调试面板（F3）
 ui.offline_settlement.title,离线结算
 ui.offline_settlement.continue,继续
-ui.survival.title,生存状态（S2）
+ui.survival.title,生存状态
 ui.survival.supply_empty,补给：--
 ui.survival.durability_empty,耐久：--
 ui.survival.stamina_empty,体力：--
@@ -21,7 +21,11 @@ ui.survival.durability_depleted,耐久耗尽：无法进入战斗
 ui.survival.durability_warning,耐久偏低
 ui.survival.stamina_depleted,体力耗尽：无法探索或战斗
 ui.survival.stamina_warning,体力偏低
-ui.build.title,竹筏建造（S1）
+ui.survival.summary_empty,生存状态：--
+ui.survival.summary,补给 %.0f/%.0f ｜ 耐久 %.0f/%.0f ｜ 体力 %d/%d
+ui.survival.action_supply,前往补给
+ui.survival.action_repair,前往维修
+ui.build.title,竹筏建造
 ui.build.wood,木材：%d
 ui.build.select_building,选择建筑
 ui.build.unavailable,设施不可用
@@ -37,11 +41,12 @@ ui.ocean_map.sail_hint,点击相邻漂流点启航  ·  拖动浏览  ·  滚轮
 ui.ocean_map.build_rudder_hint,先进入「设施」建造船舵，才能驶出当前海域
 ui.ocean_map.default_status,探索海面、打捞材料，再升级你的船上设施
 ui.nav.tip_map,航海图（1）
-ui.nav.tip_goal,目标（2）
-ui.nav.tip_build,设施（3）
-ui.nav.tip_supply,补给（4）
-ui.nav.tip_crew,伙伴（5）
-ui.nav.tip_merchant,商人（6）
+ui.nav.tip_goal,目标册（6）
+ui.nav.tip_build,设施建造（2）
+ui.nav.tip_supply,生产设施（3）
+ui.nav.tip_crew,伙伴（4）
+ui.nav.tip_merchant,商人（更多）
+ui.nav.tip_more,更多功能（5）
 ui.nav.tip_menu,菜单
 ui.menu.button,菜单
 ui.menu.title,游戏菜单
@@ -56,12 +61,21 @@ ui.build.status_cancelled,已取消建造。
 ui.build.cost_entry,%s×%d
 ui.build.confirm,确认建造
 ui.build.cancel,取消
-ui.production.title,采集与生产（S3）
+ui.production.title,生产设施
 ui.production.inventory_empty,库存：--
 ui.production.facility_empty,设施：--
 ui.production.inventory,%s %d｜%s %d｜%s %d\n%s %d/%d｜%s %d/%d
 ui.production.facility_list,设施：\n%s
 ui.production.facility_none,设施：建造集雨器、篝火或维修站后可运行。
+ui.production.facility_section,设施运行状态
+ui.production.card_detail,%s｜%s\n%s\n%s
+ui.production.card_progress,进度：%.0f / %.0f 秒
+ui.production.card_repair_progress,进度：持续维修
+ui.production.card_recipe,投入：%s → 产出：%s
+ui.production.card_repair,自动恢复竹筏耐久
+ui.production.item_amount,%s × %d
+ui.production.no_input,无需原料
+ui.production.pause,暂停生产
 ui.production.repair,维修
 ui.production.facility_line,%s：%s，%.0f 秒，%s
 ui.production.running,运行
@@ -80,7 +94,7 @@ ui.production.use_grilled_fish,使用烤鱼 +15
 ui.production.toggle_collector,启停集雨器
 ui.production.toggle_campfire,启停篝火
 ui.production.toggle_repair,启停维修站
-ui.world_map.title,世界地图（S4）
+ui.world_map.title,航海图
 ui.world_map.confirm,确认航行
 ui.world_map.cancel,取消并返回竹筏
 ui.world_map.status_initial,选择相邻海域开始探索。
@@ -187,7 +201,7 @@ data.fixture.duplicate_item.name,重复测试物品
 data.fixture.duplicate_item.description,与其他测试定义共用 ID。
 data.fixture.duplicate_building.name,重复测试建筑
 data.fixture.duplicate_building.description,与其他测试定义共用 ID。
-ui.survivor.title,伙伴与编队（S5）
+ui.survivor.title,伙伴与编队
 ui.survivor.pending,待招募：%s
 ui.survivor.pending_empty,尚未发现等待救援的伙伴。
 ui.survivor.roster_empty,尚未招募伙伴。航行时留意救援信号。
@@ -243,6 +257,29 @@ ui.battle.use_skill,使用 %s
 ui.battle.return,返回竹筏
 ui.battle.status,%s\nBoss：%d / %d\n回合：%d
 ui.battle.party_member,%s：%d / %d
+ui.battle.turn,第 %d 回合
+ui.battle.boss_health,%s｜生命：%d / %d
+ui.battle.boss_intent,Boss 意图：下次反击将随机攻击一名伙伴，造成 %d 点伤害。
+ui.battle.boss_intent_finished,战斗已结束。
+ui.battle.normal_attack_preview,普通攻击（预计 %d 伤害）
+ui.battle.skill_damage_preview,%s（预计 %d 伤害，冷却 %d 回合）
+ui.battle.skill_heal_preview,%s（回复 %d 生命，冷却 %d 回合）
+ui.battle.skill_cooldown,%s（冷却中：%d 回合）
+ui.battle.skill_unavailable,技能不可用
+ui.battle.victory,战斗胜利
+ui.battle.defeat,战斗失败
+ui.battle.result,%s\n%s
+ui.battle.preparation_unavailable,战斗准备不可用
+ui.battle.preparation_title,准备挑战：%s
+ui.battle.preparation_summary,Boss 反击：%d 伤害\n胜利后竹筏耐久 -%.0f；失败 -%.0f
+ui.battle.preparation_checklist,%s 编队：%d 名伙伴\n%s 竹筏耐久：%.0f\n%s 体力：%d / 需要 %d
+ui.battle.check_ready,✓
+ui.battle.check_missing,✕
+ui.battle.preparation_start,开始战斗
+ui.battle.preparation_crew,前往设置编队
+ui.battle.preparation_repair,前往维修竹筏
+ui.battle.preparation_recover,前往恢复体力
+ui.battle.preparation_later,稍后挑战
 data.boss.tutorial_sea_beast.name,礁海巨兽
 data.boss.tutorial_sea_beast.description,盘踞在起航海域边缘的巨兽，适合检验基础战斗技巧。
 message.session.start_before_battle,请先开始游戏再进入战斗。
@@ -278,6 +315,15 @@ ui.build.raft_level_max,竹筏等级：Lv%d（甲板 %d×%d，已满级）
 ui.build.upgrade_raft,扩建竹筏
 ui.build.upgrade_raft_cost,扩建竹筏（%s）
 ui.build.upgrade_raft_max,已满级
+ui.build.preview_initial,开始游戏后可查看设施预览。
+ui.build.preview_select,选择一项设施，查看它能解决什么问题。
+ui.build.preview,%s\n%s\n成本：%s\n%s\n%s
+ui.build.preview_recipe,每 %.0f 秒：%s → %s
+ui.build.preview_storage,扩充容量：%s
+ui.build.preview_repair,每分钟恢复 %.1f 点耐久
+ui.build.preview_unlock,解锁新的航行能力
+ui.build.preview_choose_cell,下一步：选择竹筏格位
+ui.build.preview_cell,已选格位（%d，%d），可确认建造
 message.progression.raft_unavailable,竹筏成长数据不可用。
 message.progression.max_level,竹筏已升至最高等级。
 message.progression.insufficient_resources,木材不足，无法扩建竹筏。
@@ -295,6 +341,14 @@ data.boss.reef_leviathan.name,暗礁巨鳗
 data.boss.reef_leviathan.description,潜伏在暗礁带的大型掠食者，需要更强的编队才能挑战。
 ui.production.toggle_desalinator,启停淡化器
 ui.production.toggle_fishing_net,启停渔网
+ui.production.resolve_restart,恢复设施运行
+ui.production.resolve_gather,去采集%s
+ui.production.resolve_salvage,去海面打捞%s
+ui.production.salvage_needed,点击竹筏旁的%s漂浮物，派主角出海打捞。
+ui.production.resolve_supply,使用补给恢复运转
+ui.production.resolve_no_supply,缺少可用补给
+ui.production.resolve_storage,前往建造储物架
+ui.gathering.salvage_hint,点击海面漂浮物，派主角出海打捞。
 ui.survivor.challenge_reef,挑战区域 Boss
 ui.survivor.challenge_reef_locked,区域 Boss（竹筏 Lv2 解锁）
 message.battle.boss_locked,尚未解锁该 Boss。
@@ -332,7 +386,18 @@ ui.current_goal.initial,开始游戏后显示当前主目标。
 ui.current_goal.complete,新手航程已完成
 ui.current_goal.title,主目标：%s（%d/%d）
 ui.current_goal.challenge,挑战 Boss
+ui.current_goal.prepare_lineup,前往编队准备
 ui.quest_feedback.completed,%s 已完成！\n下一步：%s
 ui.world_map.view_rescued_survivor,查看获救伙伴
 ui.world_map.boss_threat,海图威胁：挑战%s
+ui.exploration_result.arrival,抵达：%s
+ui.exploration_result.rewards,获得：%s
+ui.exploration_result.reward_entry,%s × %d
+ui.exploration_result.durability_loss,竹筏耐久 -%.0f
+ui.exploration_result.rescue,发现落难伙伴：%s
+ui.exploration_result.stamina_cost,本次航行消耗体力：%d
+ui.exploration_result.view_survivor,查看并招募伙伴
+ui.exploration_result.repair_raft,前往维修竹筏
+ui.exploration_result.continue_sailing,继续查看海图
+ui.exploration_result.later,稍后处理
 message.quest.unavailable,新手目标数据不可用。

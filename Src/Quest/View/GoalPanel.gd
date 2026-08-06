@@ -73,8 +73,9 @@ func _refresh() -> void:
 		var action: Button = Button.new()
 		action.custom_minimum_size = Vector2(0.0, 44.0)
 		var is_battle_goal: bool = quest.objective_type == QuestDefinition.ObjectiveType.WIN_BATTLE
-		action.text = GameText.get_text(&"ui.current_goal.challenge" if is_battle_goal else &"ui.goal.navigate")
-		if is_battle_goal:
+		var is_battle_ready: bool = _is_battle_ready()
+		action.text = GameText.get_text(&"ui.current_goal.challenge" if is_battle_goal and is_battle_ready else (&"ui.current_goal.prepare_lineup" if is_battle_goal else &"ui.goal.navigate"))
+		if is_battle_goal and is_battle_ready:
 			action.pressed.connect(battle_requested.emit.bind(quest.target_id))
 		else:
 			action.pressed.connect(navigate_requested.emit.bind(_get_panel_id(quest)))
@@ -91,5 +92,9 @@ func _get_panel_id(quest: QuestDefinition) -> StringName:
 		QuestDefinition.ObjectiveType.RECRUIT_SURVIVOR, QuestDefinition.ObjectiveType.WIN_BATTLE:
 			return &"crew"
 		QuestDefinition.ObjectiveType.EXPLORE_REGION:
-			return &"map"
+			return &"map" if _session.is_exploration_unlocked() else &"build"
 	return &""
+
+
+func _is_battle_ready() -> bool:
+	return _session != null and _session.has_active_state() and not _session.get_survivor_state().lineup_ids.is_empty()

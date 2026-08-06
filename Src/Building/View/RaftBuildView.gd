@@ -4,6 +4,7 @@ extends Node2D
 ## Temporary S1 presentation of the raft grid. It only forwards tile selection to UI.
 
 signal tile_selected(cell: Vector2i)
+signal salvage_requested(item_id: StringName)
 
 const DECK_TEXTURE: Texture2D = preload("res://Assets/Temp/ship/ship_tile_deck_wooden.png")
 const CAMPFIRE_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/facility_build_campfire.png")
@@ -11,11 +12,28 @@ const RAIN_COLLECTOR_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/fa
 const REPAIR_STATION_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/facility_build_repair_station.png")
 const WATER_TANK_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/facility_build_water_tank.png")
 const RUDDER_TEXTURE: Texture2D = preload("res://Assets/Temp/ship/ship_rudder.png")
+const DESALINATOR_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/facility_build_desalinator.png")
+const FISHING_NET_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/facility_build_fishing_net.png")
+const STORAGE_RACK_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/facility_build_storage_rack.png")
+const SALVAGE_MARKER_TEXTURE: Texture2D = preload("res://Assets/Art/Map/salvage_marker_isometric.png")
+const SALVAGE_SKIFF_TEXTURE: Texture2D = preload("res://Assets/Art/Ship/player_ship_isometric.png")
+
+const SALVAGE_SPOTS: Dictionary[StringName, Vector2] = {
+	&"item_wood": Vector2(-250.0, -118.0),
+	&"item_raw_fish": Vector2(265.0, -36.0),
+	&"item_seawater": Vector2(-190.0, 178.0),
+}
+const SALVAGE_DURATION: float = 0.9
 
 var _session: GameSession = null
 var _selected_building_id: StringName = &""
 var _preview_cell: Vector2i = Vector2i.ZERO
 var _has_preview: bool = false
+var _is_interaction_enabled: bool = false
+var _show_salvage_spots: bool = false
+var _salvage_item_id: StringName = &""
+var _salvage_elapsed: float = 0.0
+var _salvage_dispatched: bool = false
 
 
 func bind_session(session: GameSession) -> void:
@@ -42,8 +60,28 @@ func clear_preview() -> void:
 	queue_redraw()
 
 
+func set_interaction_enabled(is_enabled: bool) -> void:
+	_is_interaction_enabled = is_enabled
+	if not _is_interaction_enabled:
+		clear_preview()
+	queue_redraw()
+
+
+func set_salvage_spots_visible(is_visible: bool) -> void:
+	_show_salvage_spots = is_visible
+	if not _show_salvage_spots:
+		_salvage_item_id = &""
+		_salvage_elapsed = 0.0
+		_salvage_dispatched = false
+	queue_redraw()
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if _session == null or _selected_building_id == &"":
+	if _session == null or not _session.has_active_state():
+		return
+	if _show_salvage_spots and _try_begin_salvage(event):
+		return
+	if not _is_interaction_enabled or _selected_building_id == &"":
 		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_select_tile_at_global_position(event.position)
@@ -54,6 +92,39 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventScreenTouch and event.pressed:
 		_select_tile_at_global_position(event.position)
+
+
+func _process(delta: float) -> void:
+	if _salvage_item_id == &"":
+		return
+	_salvage_elapsed += delta
+	if not _salvage_dispatched and _salvage_elapsed >= SALVAGE_DURATION * 0.5:
+		_salvage_dispatched = true
+		salvage_requested.emit(_salvage_item_id)
+	if _salvage_elapsed >= SALVAGE_DURATION:
+		_salvage_item_id = &""
+		_salvage_elapsed = 0.0
+		_salvage_dispatched = false
+	queue_redraw()
+
+
+func _try_begin_salvage(event: InputEvent) -> bool:
+	if _salvage_item_id != &"" or not event is InputEventMouseButton:
+		return false
+	var mouse_event: InputEventMouseButton = event as InputEventMouseButton
+	if mouse_event.button_index != MOUSE_BUTTON_LEFT or not mouse_event.pressed:
+		return false
+	var local_position: Vector2 = to_local(mouse_event.position)
+	for item_id: StringName in SALVAGE_SPOTS:
+		if local_position.distance_to(SALVAGE_SPOTS[item_id]) > 54.0:
+			continue
+		_salvage_item_id = item_id
+		_salvage_elapsed = 0.0
+		_salvage_dispatched = false
+		get_viewport().set_input_as_handled()
+		queue_redraw()
+		return true
+	return false
 
 
 func _select_tile_at_global_position(global_position: Vector2) -> void:
@@ -76,6 +147,9 @@ func _draw() -> void:
 
 	for instance: BuildingInstance in raft_state.building_instances.values():
 		_draw_building(instance)
+
+	if _show_salvage_spots:
+		_draw_salvage_spots()
 
 	if _has_preview:
 		_draw_preview(raft_state)
@@ -127,7 +201,30 @@ func _get_building_texture(building_id: StringName) -> Texture2D:
 			return WATER_TANK_TEXTURE
 		&"building_rudder":
 			return RUDDER_TEXTURE
+		&"building_desalinator":
+			return DESALINATOR_TEXTURE
+		&"building_fishing_net":
+			return FISHING_NET_TEXTURE
+		&"building_storage_rack":
+			return STORAGE_RACK_TEXTURE
 	return null
+
+
+func _draw_salvage_spots() -> void:
+	for item_id: StringName in SALVAGE_SPOTS:
+		var position: Vector2 = SALVAGE_SPOTS[item_id]
+		draw_texture_rect(SALVAGE_MARKER_TEXTURE, Rect2(position - Vector2(28.0, 28.0), Vector2(56.0, 56.0)), false)
+		var item: ItemDefinition = _session.get_item_definition(item_id)
+		draw_string(ThemeDB.fallback_font, position + Vector2(-42.0, 48.0), item.get_display_name() if item != null else String(item_id), HORIZONTAL_ALIGNMENT_CENTER, 84.0, 15, Color(1.0, 0.95, 0.78, 1.0))
+	if _salvage_item_id == &"":
+		draw_string(ThemeDB.fallback_font, Vector2(-140.0, -248.0), GameText.get_text(&"ui.gathering.salvage_hint"), HORIZONTAL_ALIGNMENT_CENTER, 280.0, 18, Color(0.85, 0.96, 0.95, 1.0))
+		return
+	var target: Vector2 = SALVAGE_SPOTS[_salvage_item_id]
+	var travel: float = minf(_salvage_elapsed / (SALVAGE_DURATION * 0.5), 1.0)
+	if _salvage_elapsed > SALVAGE_DURATION * 0.5:
+		travel = 1.0 - minf((_salvage_elapsed - SALVAGE_DURATION * 0.5) / (SALVAGE_DURATION * 0.5), 1.0)
+	var skiff_position: Vector2 = Vector2.ZERO.lerp(target, travel)
+	draw_texture_rect(SALVAGE_SKIFF_TEXTURE, Rect2(skiff_position - Vector2(32.0, 24.0), Vector2(64.0, 48.0)), false)
 
 
 func _draw_preview(raft_state: RaftState) -> void:

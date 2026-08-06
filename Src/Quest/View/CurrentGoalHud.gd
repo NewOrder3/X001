@@ -36,7 +36,10 @@ func _perform_action() -> void:
 	if quest == null:
 		return
 	if quest.objective_type == QuestDefinition.ObjectiveType.WIN_BATTLE:
-		battle_requested.emit(quest.target_id)
+		if _is_battle_ready():
+			battle_requested.emit(quest.target_id)
+		else:
+			navigate_requested.emit(&"crew")
 		return
 	navigate_requested.emit(_get_panel_id(quest))
 
@@ -67,7 +70,10 @@ func _refresh() -> void:
 	_title_label.text = GameText.format(&"ui.current_goal.title", [quest.get_display_name(), progress, quest.target_amount])
 	_description_label.text = quest.get_description()
 	_action_button.disabled = false
-	_action_button.text = GameText.get_text(&"ui.current_goal.challenge" if quest.objective_type == QuestDefinition.ObjectiveType.WIN_BATTLE else &"ui.goal.navigate")
+	if quest.objective_type == QuestDefinition.ObjectiveType.WIN_BATTLE:
+		_action_button.text = GameText.get_text(&"ui.current_goal.challenge" if _is_battle_ready() else &"ui.current_goal.prepare_lineup")
+	else:
+		_action_button.text = GameText.get_text(&"ui.goal.navigate")
 
 
 func _get_panel_id(quest: QuestDefinition) -> StringName:
@@ -79,5 +85,9 @@ func _get_panel_id(quest: QuestDefinition) -> StringName:
 		QuestDefinition.ObjectiveType.RECRUIT_SURVIVOR:
 			return &"crew"
 		QuestDefinition.ObjectiveType.EXPLORE_REGION:
-			return &"map"
+			return &"map" if _session.is_exploration_unlocked() else &"build"
 	return &""
+
+
+func _is_battle_ready() -> bool:
+	return _session != null and _session.has_active_state() and not _session.get_survivor_state().lineup_ids.is_empty()

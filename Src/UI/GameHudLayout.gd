@@ -9,14 +9,17 @@ const DRAWER_MARGIN: float = 32.0
 
 signal map_navigation_changed(is_enabled: bool)
 signal build_mode_changed(is_enabled: bool)
+signal raft_view_changed(is_visible: bool, is_interactive: bool, is_salvage_available: bool)
 signal menu_requested
 
 @onready var _left_panel_scroll: ScrollContainer = $LeftPanelScroll
-@onready var _survival_hud: Control = $SurvivalHUD
+@onready var _survival_hud: SurvivalHUD = $SurvivalHUD
 @onready var _resource_ribbon: Control = $ResourceRibbon
 @onready var _current_goal_hud: Control = $CurrentGoalHud
 @onready var _quest_feedback_banner: Control = $QuestFeedbackBanner
 @onready var _bottom_navigation: PanelContainer = $BottomNavigation
+@onready var _more_menu: PanelContainer = $MoreMenu
+@onready var _build_confirm_bar: PanelContainer = $BuildConfirmBar
 @onready var _build_panel: Control = $LeftPanelScroll/LeftPanelColumn/RaftBuildPanel
 @onready var _production_panel: Control = $LeftPanelScroll/LeftPanelColumn/ProductionPanel
 @onready var _world_map_panel: Control = $LeftPanelScroll/LeftPanelColumn/WorldMapPanel
@@ -36,8 +39,9 @@ func _ready() -> void:
 	$BottomNavigation/Buttons/BuildButton.pressed.connect(_toggle_panel.bind(_build_panel))
 	$BottomNavigation/Buttons/SupplyButton.pressed.connect(_toggle_panel.bind(_production_panel))
 	$BottomNavigation/Buttons/CrewButton.pressed.connect(_toggle_panel.bind(_survivor_panel))
-	$BottomNavigation/Buttons/GoalButton.pressed.connect(_toggle_panel.bind(_goal_panel))
-	$BottomNavigation/Buttons/MerchantButton.pressed.connect(_toggle_panel.bind(_merchant_panel))
+	$BottomNavigation/Buttons/MoreButton.pressed.connect(_toggle_more_menu)
+	$MoreMenu/Actions/GoalButton.pressed.connect(_open_more_panel.bind(_goal_panel))
+	$MoreMenu/Actions/MerchantButton.pressed.connect(_open_more_panel.bind(_merchant_panel))
 	_menu_button.pressed.connect(menu_requested.emit)
 	_apply_styles()
 	_apply_nav_tooltips()
@@ -58,19 +62,23 @@ func _toggle_panel(panel: Control) -> void:
 
 
 func _show_ocean_map() -> void:
+	_more_menu.hide()
 	_set_active_panel(null)
 
 
 func _set_active_panel(panel: Control) -> void:
 	_active_panel = panel
+	_more_menu.hide()
 	for candidate: Control in [_goal_panel, _build_panel, _production_panel, _world_map_panel, _survivor_panel, _merchant_panel]:
 		candidate.visible = candidate == _active_panel
 	if _active_panel != null and _active_panel.has_method("refresh"):
 		_active_panel.call("refresh")
 	_left_panel_scroll.visible = _active_panel != null
 	var is_build_mode: bool = _active_panel == _build_panel
+	_build_confirm_bar.visible = is_build_mode
 	map_navigation_changed.emit(_active_panel == null or _active_panel == _world_map_panel)
 	build_mode_changed.emit(is_build_mode)
+	raft_view_changed.emit(_active_panel != null and _active_panel != _world_map_panel, is_build_mode, _active_panel == _production_panel)
 	_voyage_header.visible = not is_build_mode
 	_voyage_status.visible = not is_build_mode
 	_apply_layout()
@@ -86,6 +94,10 @@ func _apply_layout() -> void:
 	_apply_wide_layout(viewport_size)
 
 
+func refresh_layout() -> void:
+	_apply_layout()
+
+
 func _apply_wide_layout(viewport_size: Vector2) -> void:
 	_voyage_header.visible = _active_panel != _build_panel
 	_resource_ribbon.position = Vector2(DRAWER_MARGIN, DRAWER_MARGIN)
@@ -94,12 +106,17 @@ func _apply_wide_layout(viewport_size: Vector2) -> void:
 	_current_goal_hud.size = Vector2(480.0, 132.0)
 	_quest_feedback_banner.position = Vector2((viewport_size.x - 480.0) * 0.5, 174.0)
 	_quest_feedback_banner.size = Vector2(480.0, 76.0)
+	var survival_height: float = 148.0 if _survival_hud.is_expanded() else 76.0
 	_survival_hud.position = Vector2(viewport_size.x - 300.0 - DRAWER_MARGIN, DRAWER_MARGIN + 52.0)
-	_survival_hud.size = Vector2(300.0, 154.0)
+	_survival_hud.size = Vector2(300.0, survival_height)
 	_menu_button.position = Vector2(viewport_size.x - 132.0 - DRAWER_MARGIN, DRAWER_MARGIN)
 	_menu_button.size = Vector2(132.0, 44.0)
 	_bottom_navigation.size = Vector2(minf(900.0, viewport_size.x - 280.0), 112.0)
 	_bottom_navigation.position = Vector2((viewport_size.x - _bottom_navigation.size.x) * 0.5, viewport_size.y - 136.0)
+	_build_confirm_bar.size = Vector2(420.0, 62.0)
+	_build_confirm_bar.position = Vector2((viewport_size.x - _build_confirm_bar.size.x) * 0.5, viewport_size.y - 210.0)
+	_more_menu.size = Vector2(320.0, 64.0)
+	_more_menu.position = Vector2((viewport_size.x - _more_menu.size.x) * 0.5, viewport_size.y - 208.0)
 	_voyage_header.size = Vector2(520.0, 88.0)
 	_voyage_header.position = Vector2((viewport_size.x - _voyage_header.size.x) * 0.5, 258.0)
 	_voyage_status.size = Vector2(minf(680.0, viewport_size.x - 420.0), 58.0)
@@ -113,30 +130,38 @@ func _apply_wide_layout(viewport_size: Vector2) -> void:
 
 func _apply_compact_layout(viewport_size: Vector2) -> void:
 	_voyage_header.hide()
+	var compact_content_right: float = viewport_size.x - 128.0
+	var resource_width: float = minf(300.0, (compact_content_right - 16.0) * 0.46)
+	var survival_x: float = 16.0 + resource_width + 8.0
 	_resource_ribbon.position = Vector2(16.0, 16.0)
-	_resource_ribbon.size = Vector2(viewport_size.x * 0.48 - 20.0, 76.0)
-	_survival_hud.position = Vector2(viewport_size.x * 0.48 + 4.0, 16.0)
-	_survival_hud.size = Vector2(viewport_size.x * 0.52 - 20.0, 116.0)
-	_current_goal_hud.position = Vector2(16.0, 142.0)
+	_resource_ribbon.size = Vector2(resource_width, 76.0)
+	var survival_height: float = 146.0 if _survival_hud.is_expanded() else 76.0
+	var goal_y: float = survival_height + 34.0
+	_survival_hud.position = Vector2(survival_x, 16.0)
+	_survival_hud.size = Vector2(maxf(120.0, compact_content_right - survival_x), survival_height)
+	_current_goal_hud.position = Vector2(16.0, goal_y)
 	_current_goal_hud.size = Vector2(viewport_size.x - 32.0, 112.0)
-	_quest_feedback_banner.position = Vector2(16.0, 262.0)
+	_quest_feedback_banner.position = Vector2(16.0, goal_y + 120.0)
 	_quest_feedback_banner.size = Vector2(viewport_size.x - 32.0, 68.0)
-	_menu_button.position = Vector2(16.0, 16.0)
+	_menu_button.position = Vector2(viewport_size.x - 112.0, 16.0)
 	_menu_button.size = Vector2(96.0, 44.0)
 	_bottom_navigation.position = Vector2(16.0, viewport_size.y - 102.0)
 	_bottom_navigation.size = Vector2(viewport_size.x - 32.0, 86.0)
+	_build_confirm_bar.position = Vector2(16.0, viewport_size.y - 246.0)
+	_build_confirm_bar.size = Vector2(viewport_size.x - 32.0, 58.0)
+	_more_menu.position = Vector2(16.0, viewport_size.y - 174.0)
+	_more_menu.size = Vector2(minf(320.0, viewport_size.x - 32.0), 62.0)
 	_voyage_header.position = Vector2(viewport_size.x * 0.18, 340.0)
 	_voyage_header.size = Vector2(viewport_size.x * 0.64, 76.0)
 	_voyage_status.position = Vector2(20.0, viewport_size.y - 154.0)
 	_voyage_status.size = Vector2(viewport_size.x - 40.0, 44.0)
 	if _active_panel != null:
-		_left_panel_scroll.position = Vector2(16.0, 344.0)
-		_left_panel_scroll.size = Vector2(viewport_size.x - 32.0, maxf(160.0, viewport_size.y - 262.0))
-		_left_panel_scroll.size.y = maxf(140.0, viewport_size.y - 462.0)
+		_left_panel_scroll.position = Vector2(16.0, goal_y + 202.0)
+		_left_panel_scroll.size = Vector2(viewport_size.x - 32.0, maxf(140.0, viewport_size.y - _left_panel_scroll.position.y - 118.0))
 
 
 func _apply_styles() -> void:
-	for panel: Control in [_goal_panel, _build_panel, _production_panel, _world_map_panel, _survivor_panel, _merchant_panel, _survival_hud, _current_goal_hud, _quest_feedback_banner]:
+	for panel: Control in [_goal_panel, _build_panel, _production_panel, _world_map_panel, _survivor_panel, _merchant_panel, _more_menu, _build_confirm_bar, _survival_hud, _current_goal_hud, _quest_feedback_banner]:
 		var style: StyleBoxFlat = StyleBoxFlat.new()
 		style.bg_color = Color(0.045, 0.12, 0.15, 0.90)
 		style.corner_radius_top_left = 18
@@ -161,7 +186,7 @@ func _apply_styles() -> void:
 	nav_style.border_width_right = 2
 	nav_style.border_color = Color(0.73, 0.45, 0.22, 0.85)
 	_bottom_navigation.add_theme_stylebox_override(&"panel", nav_style)
-	for button: Button in [$BottomNavigation/Buttons/MapButton, $BottomNavigation/Buttons/GoalButton, $BottomNavigation/Buttons/BuildButton, $BottomNavigation/Buttons/SupplyButton, $BottomNavigation/Buttons/CrewButton, $BottomNavigation/Buttons/MerchantButton]:
+	for button: Button in [$BottomNavigation/Buttons/MapButton, $BottomNavigation/Buttons/BuildButton, $BottomNavigation/Buttons/SupplyButton, $BottomNavigation/Buttons/CrewButton, $BottomNavigation/Buttons/MoreButton, $MoreMenu/Actions/GoalButton, $MoreMenu/Actions/MerchantButton]:
 		var normal: StyleBoxFlat = StyleBoxFlat.new()
 		normal.bg_color = Color("b9783c")
 		normal.corner_radius_top_left = 14
@@ -194,6 +219,16 @@ func open_panel(panel_id: StringName) -> void:
 			_set_active_panel(null)
 
 
+func _toggle_more_menu() -> void:
+	if _active_panel != null:
+		_set_active_panel(null)
+	_more_menu.visible = not _more_menu.visible
+
+
+func _open_more_panel(panel: Control) -> void:
+	_set_active_panel(panel)
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey:
 		return
@@ -205,19 +240,19 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_set_active_panel(null)
 			get_viewport().set_input_as_handled()
 		KEY_2:
-			_set_active_panel(_goal_panel)
-			get_viewport().set_input_as_handled()
-		KEY_3:
 			_set_active_panel(_build_panel)
 			get_viewport().set_input_as_handled()
-		KEY_4:
+		KEY_3:
 			_set_active_panel(_production_panel)
 			get_viewport().set_input_as_handled()
-		KEY_5:
+		KEY_4:
 			_set_active_panel(_survivor_panel)
 			get_viewport().set_input_as_handled()
+		KEY_5:
+			_toggle_more_menu()
+			get_viewport().set_input_as_handled()
 		KEY_6:
-			_set_active_panel(_merchant_panel)
+			_set_active_panel(_goal_panel)
 			get_viewport().set_input_as_handled()
 		KEY_ESCAPE:
 			if _active_panel != null:
@@ -227,9 +262,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func _apply_nav_tooltips() -> void:
 	$BottomNavigation/Buttons/MapButton.tooltip_text = GameText.get_text(&"ui.nav.tip_map")
-	$BottomNavigation/Buttons/GoalButton.tooltip_text = GameText.get_text(&"ui.nav.tip_goal")
 	$BottomNavigation/Buttons/BuildButton.tooltip_text = GameText.get_text(&"ui.nav.tip_build")
 	$BottomNavigation/Buttons/SupplyButton.tooltip_text = GameText.get_text(&"ui.nav.tip_supply")
 	$BottomNavigation/Buttons/CrewButton.tooltip_text = GameText.get_text(&"ui.nav.tip_crew")
-	$BottomNavigation/Buttons/MerchantButton.tooltip_text = GameText.get_text(&"ui.nav.tip_merchant")
+	$BottomNavigation/Buttons/MoreButton.tooltip_text = GameText.get_text(&"ui.nav.tip_more")
+	$MoreMenu/Actions/GoalButton.tooltip_text = GameText.get_text(&"ui.nav.tip_goal")
+	$MoreMenu/Actions/MerchantButton.tooltip_text = GameText.get_text(&"ui.nav.tip_merchant")
 	_menu_button.tooltip_text = GameText.get_text(&"ui.nav.tip_menu")
