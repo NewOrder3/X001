@@ -10,6 +10,9 @@ F07 选择 JSON 作为第一批 Definition 格式。它便于版本审查、fixt
 | Building | `Data/Buildings/` | `id`、`display_name_key`、`description_key`、`footprint_width`、`footprint_height` |
 | SurvivalConfig | `Data/Survival/` | `id`、补给/耐久消耗与阈值、被动恢复、体力配置 |
 | Recipe | `Data/Recipes/` | `id`、生产周期、输入、输出、所需设施能力标签 |
+| Skill | `Data/Skills/` | `id`、显示/描述文本键、`effect_type`、`power`、`cooldown_turns` |
+| Boss | `Data/Bosses/` | `id`、显示/描述文本键、生命、攻击、奖励 ID、胜负耐久影响 |
+| Reward | `Data/Rewards/` | `id`、物品奖励、伙伴经验 |
 
 每个文件是一个 JSON 对象，文件名使用 `snake_case`。ID 规则见 [DataDesign.md](DataDesign.md)。例如：
 

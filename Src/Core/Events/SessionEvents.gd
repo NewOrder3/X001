@@ -5,3 +5,5 @@ extends RefCounted
 
 signal new_game_created(world_seed: int)
 signal command_rejected(command_type: StringName, error_code: StringName)
+signal battle_started(boss_id: StringName)
+signal battle_exited()

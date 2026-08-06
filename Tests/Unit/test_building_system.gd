@@ -81,3 +81,39 @@ func test_built_instance_and_inventory_survive_save_load() -> void:
 	assert_eq(loaded_state.inventory_state.item_amounts.get(&"item_wood", 0), 7)
 	assert_eq(loaded_state.raft_state.building_instances.size(), 1)
 	assert_false(loaded_state.raft_state.grid.is_walkable(Vector2i(1, -1)))
+
+
+func test_upgrade_building_spends_scaled_cost_and_changes_level() -> void:
+	var session: GameSession = GameSession.new()
+	assert_true(session.create_new_game(42), session.get_last_error())
+	var place_result: CommandResult = session.execute_place_building(
+		PlaceBuildingCommand.new(&"building_rain_collector", Vector2i.ZERO, 0)
+	)
+	assert_true(place_result.succeeded, place_result.message)
+	var instance: BuildingInstance = session.get_raft_state().building_instances.values()[0]
+	var upgrade_result: CommandResult = session.execute_command(UpgradeBuildingCommand.new(instance.instance_id))
+	assert_true(upgrade_result.succeeded, upgrade_result.message)
+	assert_eq(instance.level, 2)
+	assert_eq(session.get_item_amount(&"item_wood"), 1)
+	var insufficient_result: CommandResult = session.execute_command(UpgradeBuildingCommand.new(instance.instance_id))
+	assert_false(insufficient_result.succeeded)
+	assert_eq(insufficient_result.error_code, &"insufficient_resources")
+	assert_eq(instance.level, 2)
+
+
+func test_upgraded_water_tank_multiplies_storage_capacity() -> void:
+	var session: GameSession = GameSession.new()
+	assert_true(session.create_new_game(42), session.get_last_error())
+	var place_result: CommandResult = session.execute_place_building(
+		PlaceBuildingCommand.new(&"building_water_tank", Vector2i.ZERO, 0)
+	)
+	assert_true(place_result.succeeded, place_result.message)
+	var instance: BuildingInstance = session.get_raft_state().building_instances.values()[0]
+	var base_capacity: int = session.get_inventory_system().get_capacity(session.get_state(), &"item_fresh_water")
+	assert_true(session.get_inventory_system().add(session.get_state().inventory_state, &"item_wood", 20))
+	var upgrade_result: CommandResult = session.execute_command(UpgradeBuildingCommand.new(instance.instance_id))
+	assert_true(upgrade_result.succeeded, upgrade_result.message)
+	assert_eq(
+		session.get_inventory_system().get_capacity(session.get_state(), &"item_fresh_water"),
+		base_capacity + 30,
+	)

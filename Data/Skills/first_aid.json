@@ -1,5 +1,8 @@
 {
   "id": "skill_first_aid",
   "display_name_key": "data.skill.first_aid.name",
-  "description_key": "data.skill.first_aid.description"
+  "description_key": "data.skill.first_aid.description",
+  "effect_type": "heal",
+  "power": 12,
+  "cooldown_turns": 2
 }

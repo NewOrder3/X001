@@ -7,6 +7,7 @@ signal recruitment_offered(survivor_id: StringName)
 signal survivor_recruited(survivor_id: StringName)
 signal survivor_upgraded(survivor_id: StringName, level: int)
 signal lineup_changed(lineup_ids: Array[StringName])
+signal survivor_experience_gained(survivor_id: StringName, total_experience: int)
 
 const MIN_LEVEL: int = 1
 const MAX_LEVEL: int = 10
@@ -132,3 +133,16 @@ func get_lineup_passive_value(state: SurvivorState, passive_id: StringName) -> f
 			var instance: SurvivorInstance = state.survivors[survivor_id]
 			total += definition.passive_value_per_level * float(instance.level)
 	return total
+
+
+func grant_lineup_experience(state: SurvivorState, amount: int) -> bool:
+	if state == null or amount <= 0 or state.lineup_ids.is_empty():
+		return false
+	for survivor_id: StringName in state.lineup_ids:
+		if not state.survivors.has(survivor_id):
+			return false
+	for survivor_id: StringName in state.lineup_ids:
+		var instance: SurvivorInstance = state.survivors[survivor_id]
+		instance.experience += amount
+		survivor_experience_gained.emit(survivor_id, instance.experience)
+	return true

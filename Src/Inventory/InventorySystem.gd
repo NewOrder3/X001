@@ -42,7 +42,7 @@ func get_capacity(state: GameState, item_id: StringName) -> int:
 		if not _data_registry.has_building(building.building_id):
 			continue
 		var building_definition: BuildingDefinition = _data_registry.get_building(building.building_id)
-		capacity += building_definition.storage_capacity_bonus.get(item_id, 0)
+		capacity += building_definition.storage_capacity_bonus.get(item_id, 0) * maxi(building.level, 1)
 	return capacity
 
 

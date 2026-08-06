@@ -5,5 +5,7 @@
   "skill_id": "skill_anchor_strike",
   "passive_id": "passive_attack",
   "passive_value_per_level": 2.0,
-  "upgrade_cost": {"item_wood": 2}
+  "upgrade_cost": {"item_wood": 2},
+  "battle_max_health": 30,
+  "battle_attack": 7
 }

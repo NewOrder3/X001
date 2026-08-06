@@ -5,6 +5,13 @@ extends Node2D
 
 signal tile_selected(cell: Vector2i)
 
+const DECK_TEXTURE: Texture2D = preload("res://Assets/Temp/ship/ship_tile_deck_wooden.png")
+const CAMPFIRE_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/facility_build_campfire.png")
+const RAIN_COLLECTOR_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/facility_build_rain_collector.png")
+const REPAIR_STATION_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/facility_build_repair_station.png")
+const WATER_TANK_TEXTURE: Texture2D = preload("res://Assets/Temp/facility/facility_build_water_tank.png")
+const RUDDER_TEXTURE: Texture2D = preload("res://Assets/Temp/ship/ship_rudder.png")
+
 var _session: GameSession = null
 var _selected_building_id: StringName = &""
 var _preview_cell: Vector2i = Vector2i.ZERO
@@ -61,7 +68,7 @@ func _draw() -> void:
 		return
 
 	for cell: Vector2i in raft_state.grid.get_deck_cells():
-		_draw_diamond(cell, Color("8f6036"), Color("e3b36f"), 3.0)
+		_draw_deck_tile(cell)
 
 	for instance: BuildingInstance in raft_state.building_instances.values():
 		_draw_building(instance)
@@ -79,15 +86,44 @@ func _draw_diamond(cell: Vector2i, fill_color: Color, outline_color: Color, outl
 
 func _draw_building(instance: BuildingInstance) -> void:
 	var center: Vector2 = GridMath.grid_to_world(instance.grid_position)
-	var body: PackedVector2Array = PackedVector2Array([
-		center + Vector2(0.0, -48.0),
-		center + Vector2(36.0, -8.0),
-		center + Vector2(0.0, 18.0),
-		center + Vector2(-36.0, -8.0),
-	])
-	draw_colored_polygon(body, Color("4e6d62"))
-	draw_polyline(body, Color("d4efe3"), 3.0, true)
-	draw_circle(center + Vector2(0.0, -19.0), 14.0, Color("7db8c2"))
+	var texture: Texture2D = _get_building_texture(instance.building_id)
+	if texture == null:
+		return
+	var size: Vector2 = Vector2(124.0, 124.0)
+	draw_texture_rect(texture, Rect2(center - size * 0.5, size), false)
+	var badge_center: Vector2 = center + Vector2(0.0, 42.0)
+	draw_circle(badge_center, 22.0, Color(0.04, 0.12, 0.14, 0.88))
+	draw_arc(badge_center, 22.0, 0.0, TAU, 20, Color(0.96, 0.73, 0.32, 0.90), 2.0, true)
+	draw_string(
+		ThemeDB.fallback_font,
+		badge_center + Vector2(-20.0, 7.0),
+		"Lv%d" % instance.level,
+		HORIZONTAL_ALIGNMENT_CENTER,
+		40.0,
+		16,
+		Color(1.0, 0.94, 0.78, 1.0),
+	)
+
+
+func _draw_deck_tile(cell: Vector2i) -> void:
+	var center: Vector2 = GridMath.grid_to_world(cell)
+	var size: Vector2 = Vector2(128.0, 96.0)
+	draw_texture_rect(DECK_TEXTURE, Rect2(center - size * 0.5, size), false)
+
+
+func _get_building_texture(building_id: StringName) -> Texture2D:
+	match building_id:
+		&"building_campfire":
+			return CAMPFIRE_TEXTURE
+		&"building_rain_collector":
+			return RAIN_COLLECTOR_TEXTURE
+		&"building_repair_station":
+			return REPAIR_STATION_TEXTURE
+		&"building_water_tank":
+			return WATER_TANK_TEXTURE
+		&"building_rudder":
+			return RUDDER_TEXTURE
+	return null
 
 
 func _draw_preview(raft_state: RaftState) -> void:

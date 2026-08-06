@@ -7,11 +7,20 @@ extends PanelContainer
 @onready var _lineup_label: Label = %LineupLabel
 @onready var _owned_cards: VBoxContainer = %OwnedCards
 @onready var _status_label: Label = %SurvivorStatusLabel
+@onready var _challenge_boss_button: Button = %ChallengeBossButton
+
+const PORTRAIT_BY_SURVIVOR_ID := {
+	&"survivor_bo": preload("res://Assets/Temp/partner/partner_portrait_01.png"),
+	&"survivor_marin": preload("res://Assets/Temp/partner/partner_portrait_02.png"),
+	&"survivor_su": preload("res://Assets/Temp/partner/partner_portrait_03.png"),
+	&"survivor_yue": preload("res://Assets/Temp/partner/partner_portrait_04.png"),
+}
 
 var _session: GameSession = null
 
 
 func _ready() -> void:
+	_challenge_boss_button.pressed.connect(_challenge_boss)
 	_refresh()
 
 
@@ -36,12 +45,14 @@ func _refresh() -> void:
 	_clear_children(_pending_cards)
 	_clear_children(_owned_cards)
 	if _session == null or not _session.has_active_state():
+		_challenge_boss_button.disabled = true
 		_lineup_label.text = GameText.format(&"ui.survivor.lineup", [0, SurvivorState.MAX_LINEUP_SIZE, GameText.get_text(&"ui.survivor.lineup_empty")])
 		_add_empty_label(_pending_cards, &"ui.survivor.pending_empty")
 		_add_empty_label(_owned_cards, &"ui.survivor.roster_empty")
 		return
 
 	var state: SurvivorState = _session.get_survivor_state()
+	_challenge_boss_button.disabled = state.lineup_ids.is_empty()
 	var lineup_names: PackedStringArray = []
 	for survivor_id: StringName in state.lineup_ids:
 		var definition: SurvivorDefinition = _session.get_survivor_definition(survivor_id)
@@ -61,6 +72,7 @@ func _refresh() -> void:
 				continue
 			var recruit_button: Button = Button.new()
 			recruit_button.text = GameText.format(&"ui.survivor.recruit", [definition.get_display_name()])
+			_apply_portrait(recruit_button, survivor_id)
 			recruit_button.pressed.connect(_recruit.bind(survivor_id))
 			_pending_cards.add_child(recruit_button)
 
@@ -77,8 +89,19 @@ func _add_survivor_card(state: SurvivorState, instance: SurvivorInstance) -> voi
 	if definition == null:
 		return
 	var skill: SkillDefinition = _session.get_skill_definition(definition.skill_id)
-	var card: VBoxContainer = VBoxContainer.new()
-	card.add_theme_constant_override("separation", 4)
+	var card: HBoxContainer = HBoxContainer.new()
+	card.add_theme_constant_override("separation", 10)
+	var portrait: TextureRect = TextureRect.new()
+	portrait.custom_minimum_size = Vector2(72.0, 72.0)
+	portrait.texture = PORTRAIT_BY_SURVIVOR_ID.get(instance.survivor_id) as Texture2D
+	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(portrait)
+	var details: VBoxContainer = VBoxContainer.new()
+	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	details.add_theme_constant_override("separation", 4)
+	card.add_child(details)
 	var card_label: Label = Label.new()
 	card_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	card_label.text = GameText.format(&"ui.survivor.card", [
@@ -89,7 +112,7 @@ func _add_survivor_card(state: SurvivorState, instance: SurvivorInstance) -> voi
 		String(definition.passive_id),
 		definition.passive_value_per_level,
 	])
-	card.add_child(card_label)
+	details.add_child(card_label)
 	var actions: HBoxContainer = HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 6)
 	var upgrade_button: Button = Button.new()
@@ -102,7 +125,7 @@ func _add_survivor_card(state: SurvivorState, instance: SurvivorInstance) -> voi
 	lineup_button.text = GameText.get_text(&"ui.survivor.remove_from_lineup" if is_in_lineup else &"ui.survivor.add_to_lineup")
 	lineup_button.pressed.connect(_toggle_lineup.bind(instance.survivor_id))
 	actions.add_child(lineup_button)
-	card.add_child(actions)
+	details.add_child(actions)
 	_owned_cards.add_child(card)
 
 
@@ -123,6 +146,10 @@ func _toggle_lineup(survivor_id: StringName) -> void:
 	else:
 		lineup_ids.append(survivor_id)
 	_submit(SetLineupCommand.new(lineup_ids))
+
+
+func _challenge_boss() -> void:
+	_submit(StartBattleCommand.new(&"boss_tutorial_sea_beast"))
 
 
 func _submit(command: GameCommand) -> void:
@@ -150,6 +177,12 @@ func _add_empty_label(container: VBoxContainer, text_key: StringName) -> void:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.text = GameText.get_text(text_key)
 	container.add_child(label)
+
+
+func _apply_portrait(button: Button, survivor_id: StringName) -> void:
+	button.icon = PORTRAIT_BY_SURVIVOR_ID.get(survivor_id) as Texture2D
+	button.expand_icon = true
+	button.icon_max_width = 42
 
 
 func _clear_children(container: VBoxContainer) -> void:

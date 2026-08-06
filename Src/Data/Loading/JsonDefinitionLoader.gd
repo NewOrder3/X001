@@ -122,6 +122,32 @@ func load_skills(directory_path: String) -> Array[SkillDefinition]:
 	return definitions
 
 
+func load_bosses(directory_path: String) -> Array[BossDefinition]:
+	var definitions: Array[BossDefinition] = []
+	var entries: Array[Dictionary] = _load_json_entries(directory_path)
+	if not _last_error.is_empty():
+		return definitions
+	for entry: Dictionary in entries:
+		var definition: BossDefinition = _create_boss_definition(entry["data"], entry["source_path"])
+		if definition == null:
+			return []
+		definitions.append(definition)
+	return definitions
+
+
+func load_rewards(directory_path: String) -> Array[RewardDefinition]:
+	var definitions: Array[RewardDefinition] = []
+	var entries: Array[Dictionary] = _load_json_entries(directory_path)
+	if not _last_error.is_empty():
+		return definitions
+	for entry: Dictionary in entries:
+		var definition: RewardDefinition = _create_reward_definition(entry["data"], entry["source_path"])
+		if definition == null:
+			return []
+		definitions.append(definition)
+	return definitions
+
+
 func get_last_error() -> String:
 	return _last_error
 
@@ -383,11 +409,13 @@ func _create_survivor_definition(data: Dictionary, source_path: String) -> Survi
 	var passive_id: String = _read_required_string(data, "passive_id", source_path)
 	var passive_value_per_level: float = _read_positive_float(data, "passive_value_per_level", source_path)
 	var upgrade_cost: Dictionary[StringName, int] = _read_item_amounts(data, "upgrade_cost", source_path)
+	var battle_max_health: int = _read_positive_int(data, "battle_max_health", source_path)
+	var battle_attack: int = _read_positive_int(data, "battle_attack", source_path)
 	if not _last_error.is_empty() or skill_id == &"" or passive_id.is_empty():
 		if _last_error.is_empty():
 			_set_error("Definition '%s' requires a skill_id and passive_id." % source_path)
 		return null
-	return SurvivorDefinition.new(id, display_name_key, description_key, skill_id, StringName(passive_id), passive_value_per_level, upgrade_cost)
+	return SurvivorDefinition.new(id, display_name_key, description_key, skill_id, StringName(passive_id), passive_value_per_level, upgrade_cost, battle_max_health, battle_attack)
 
 
 func _create_skill_definition(data: Dictionary, source_path: String) -> SkillDefinition:
@@ -396,9 +424,47 @@ func _create_skill_definition(data: Dictionary, source_path: String) -> SkillDef
 		_set_error("Definition '%s' requires an ID beginning with 'skill_'." % source_path)
 	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
 	var description_key: StringName = _read_required_text_key(data, "description_key", source_path)
+	var effect_name: String = _read_required_string(data, "effect_type", source_path)
+	var power: int = _read_positive_int(data, "power", source_path)
+	var cooldown_turns: int = _read_nonnegative_int(data, "cooldown_turns", source_path)
 	if not _last_error.is_empty():
 		return null
-	return SkillDefinition.new(id, display_name_key, description_key)
+	var effect_type: SkillDefinition.EffectType = SkillDefinition.EffectType.DAMAGE
+	if effect_name == "heal":
+		effect_type = SkillDefinition.EffectType.HEAL
+	elif effect_name != "damage":
+		_set_error("Definition '%s' has an unknown skill effect_type '%s'." % [source_path, effect_name])
+		return null
+	return SkillDefinition.new(id, display_name_key, description_key, effect_type, power, cooldown_turns)
+
+
+func _create_boss_definition(data: Dictionary, source_path: String) -> BossDefinition:
+	var id: StringName = _read_id(data, source_path)
+	if _last_error.is_empty() and not String(id).begins_with("boss_"):
+		_set_error("Definition '%s' requires an ID beginning with 'boss_'." % source_path)
+	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
+	var description_key: StringName = _read_required_text_key(data, "description_key", source_path)
+	var max_health: int = _read_positive_int(data, "max_health", source_path)
+	var attack_damage: int = _read_positive_int(data, "attack_damage", source_path)
+	var reward_id: StringName = _read_optional_prefixed_id(data, "reward_id", "reward_", source_path)
+	var victory_durability_loss: float = _read_nonnegative_float(data, "victory_durability_loss", source_path)
+	var defeat_durability_loss: float = _read_nonnegative_float(data, "defeat_durability_loss", source_path)
+	if not _last_error.is_empty() or reward_id == &"":
+		if _last_error.is_empty():
+			_set_error("Definition '%s' requires a reward_id." % source_path)
+		return null
+	return BossDefinition.new(id, display_name_key, description_key, max_health, attack_damage, reward_id, victory_durability_loss, defeat_durability_loss)
+
+
+func _create_reward_definition(data: Dictionary, source_path: String) -> RewardDefinition:
+	var id: StringName = _read_id(data, source_path)
+	if _last_error.is_empty() and not String(id).begins_with("reward_"):
+		_set_error("Definition '%s' requires an ID beginning with 'reward_'." % source_path)
+	var item_rewards: Dictionary[StringName, int] = _read_optional_item_amounts(data, "item_rewards", source_path)
+	var survivor_experience: int = _read_positive_int(data, "survivor_experience", source_path)
+	if not _last_error.is_empty():
+		return null
+	return RewardDefinition.new(id, item_rewards, survivor_experience)
 
 
 func _read_id(data: Dictionary, source_path: String) -> StringName:

@@ -14,6 +14,7 @@ extends Control
 @onready var _select_rudder_button: Button = %SelectRudderButton
 @onready var _confirm_button: Button = %ConfirmBuildButton
 @onready var _cancel_button: Button = %CancelBuildButton
+@onready var _facility_list: VBoxContainer = %FacilityList
 
 var _session: GameSession = null
 var _build_view: RaftBuildView = null
@@ -46,6 +47,8 @@ func bind_session(session: GameSession) -> void:
 		var building_system: BuildingSystem = _session.get_building_system()
 		if not building_system.building_placed.is_connected(_on_building_placed):
 			building_system.building_placed.connect(_on_building_placed)
+		if not building_system.building_upgraded.is_connected(_on_building_upgraded):
+			building_system.building_upgraded.connect(_on_building_upgraded)
 	_refresh()
 
 
@@ -94,6 +97,20 @@ func _on_building_placed(_instance_id: StringName, _building_id: StringName, _or
 		_build_view.queue_redraw()
 
 
+func _on_building_upgraded(_instance_id: StringName, _new_level: int) -> void:
+	_refresh()
+	if _build_view != null:
+		_build_view.queue_redraw()
+
+
+func _upgrade_building(instance_id: StringName) -> void:
+	if _session == null:
+		return
+	var result: CommandResult = _session.execute_command(UpgradeBuildingCommand.new(instance_id))
+	_status_label.text = result.message
+	_refresh()
+
+
 func _on_item_amount_changed(_item_id: StringName, _new_amount: int) -> void:
 	_refresh()
 
@@ -116,6 +133,43 @@ func _refresh() -> void:
 	_select_repair_button.disabled = _session == null
 	_select_tank_button.disabled = _session == null
 	_select_rudder_button.disabled = _session == null
+	_refresh_facility_list()
+
+
+func _refresh_facility_list() -> void:
+	for child: Node in _facility_list.get_children():
+		child.queue_free()
+	if _session == null or not _session.has_active_state():
+		return
+	for instance: BuildingInstance in _session.get_raft_state().building_instances.values():
+		var definition: BuildingDefinition = _session.get_building_definition(instance.building_id)
+		if definition == null:
+			continue
+		var row: HBoxContainer = HBoxContainer.new()
+		row.add_theme_constant_override(&"separation", 8)
+		var name_label: Label = Label.new()
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.text = GameText.format(&"ui.build.facility_entry", [definition.get_display_name(), instance.level])
+		row.add_child(name_label)
+		var upgrade_button: Button = Button.new()
+		if instance.level >= BuildingSystem.MAX_BUILDING_LEVEL:
+			upgrade_button.text = GameText.get_text(&"ui.build.max_level")
+			upgrade_button.disabled = true
+		else:
+			var cost: Dictionary[StringName, int] = _session.get_building_system().get_upgrade_cost(instance)
+			upgrade_button.text = GameText.format(&"ui.build.upgrade_cost", [instance.level + 1, _format_cost(cost)])
+			upgrade_button.disabled = not _session.get_inventory_system().can_afford(_session.get_state().inventory_state, cost)
+			upgrade_button.pressed.connect(_upgrade_building.bind(instance.instance_id))
+		row.add_child(upgrade_button)
+		_facility_list.add_child(row)
+
+
+func _format_cost(cost: Dictionary[StringName, int]) -> String:
+	var entries: PackedStringArray = []
+	for item_id: StringName in cost:
+		var item: ItemDefinition = _session.get_item_definition(item_id)
+		entries.append("%s×%d" % [item.get_display_name() if item != null else String(item_id), cost[item_id]])
+	return "、".join(entries)
 
 
 func _refresh_select_button(button: Button, building_id: StringName) -> void:

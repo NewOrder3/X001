@@ -5,5 +5,7 @@
   "skill_id": "skill_tide_guard",
   "passive_id": "passive_defense",
   "passive_value_per_level": 1.0,
-  "upgrade_cost": {"item_wood": 3}
+  "upgrade_cost": {"item_wood": 3},
+  "battle_max_health": 38,
+  "battle_attack": 5
 }

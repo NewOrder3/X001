@@ -16,10 +16,12 @@ var _production_system: ProductionSystem
 var _survivor_system: SurvivorSystem
 var _random_service: RandomService
 var _exploration_system: ExplorationSystem
+var _battle_system: BattleSystem
 var _session_command_system: SessionCommandSystem
 var _last_error: String = ""
 var _last_offline_settlement_report: OfflineSettlementReport = null
 var _last_exploration_result: ExplorationResult = null
+var _last_battle_action_result: BattleActionResult = null
 
 
 func _init() -> void:
@@ -33,6 +35,7 @@ func _init() -> void:
 	_survivor_system = SurvivorSystem.new(_data_registry, _inventory_system)
 	_random_service = RandomService.new()
 	_exploration_system = ExplorationSystem.new(_data_registry, _inventory_system, _survival_system, _survivor_system, _random_service)
+	_battle_system = BattleSystem.new(_data_registry, _random_service)
 	_session_command_system = SessionCommandSystem.new()
 
 
@@ -61,6 +64,7 @@ func create_new_game(world_seed: int) -> bool:
 	_last_error = ""
 	_last_offline_settlement_report = null
 	_last_exploration_result = null
+	_last_battle_action_result = null
 	if not _inventory_system.add(_state.inventory_state, &"item_wood", 10):
 		_last_error = GameText.get_text(&"message.gather.unavailable")
 		_state = null
@@ -102,6 +106,10 @@ func load_state_at(state: GameState, current_unix_seconds: int) -> bool:
 		_last_error = GameText.get_text(&"message.exploration.no_world_state")
 		_state = null
 		return false
+	if not _battle_system.validate_loaded_state(_state):
+		_last_error = GameText.get_text(&"message.battle.state_unavailable")
+		_state = null
+		return false
 	_is_disposed = false
 	_last_error = ""
 	_simulation_clock.start()
@@ -116,6 +124,7 @@ func dispose() -> void:
 	_simulation_clock.pause()
 	_last_offline_settlement_report = null
 	_last_exploration_result = null
+	_last_battle_action_result = null
 
 
 func has_active_state() -> bool:
@@ -141,6 +150,10 @@ func get_last_offline_settlement_report() -> OfflineSettlementReport:
 
 func get_last_exploration_result() -> ExplorationResult:
 	return _last_exploration_result
+
+
+func get_last_battle_action_result() -> BattleActionResult:
+	return _last_battle_action_result
 
 
 func execute_command(command: GameCommand) -> CommandResult:
@@ -227,6 +240,22 @@ func get_skill_definition(skill_id: StringName) -> SkillDefinition:
 	return _data_registry.get_skill(skill_id)
 
 
+func get_boss_definition(boss_id: StringName) -> BossDefinition:
+	if _data_registry == null or not _data_registry.has_boss(boss_id):
+		return null
+	return _data_registry.get_boss(boss_id)
+
+
+func get_battle_state() -> BattleState:
+	if not has_active_state():
+		return null
+	return _state.battle_state
+
+
+func get_battle_system() -> BattleSystem:
+	return _battle_system
+
+
 func can_perform_survival_action(action_type: StringName) -> SurvivalActionResult:
 	if not has_active_state():
 		return SurvivalActionResult.failure(
@@ -275,6 +304,12 @@ func execute_place_building(command: PlaceBuildingCommand) -> CommandResult:
 	if not has_active_state():
 		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_building"))
 	return _building_system.execute(_state, command)
+
+
+func execute_upgrade_building(command: UpgradeBuildingCommand) -> CommandResult:
+	if not has_active_state():
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_building"))
+	return _building_system.upgrade(_state, command)
 
 
 func execute_gather_resources(command: GatherResourcesCommand) -> CommandResult:
@@ -335,9 +370,7 @@ func get_exploration_system() -> ExplorationSystem:
 
 
 func get_region_definition(region_id: StringName) -> RegionDefinition:
-	if _data_registry == null or not _data_registry.has_region(region_id):
-		return null
-	return _data_registry.get_region(region_id)
+	return _exploration_system.get_region_definition(region_id) if _exploration_system != null else null
 
 
 func get_reachable_regions() -> Array[RegionDefinition]:
@@ -358,3 +391,84 @@ func execute_explore_region(command: ExploreRegionCommand) -> CommandResult:
 	if not result.succeeded:
 		return CommandResult.failure(result.error_code, result.message)
 	return CommandResult.success(result.message)
+
+
+func execute_start_battle(command: StartBattleCommand) -> CommandResult:
+	if not has_active_state() or command == null:
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_battle"))
+	var start_validation: BattleActionResult = _battle_system.can_start(_state, command.boss_id)
+	if not start_validation.succeeded:
+		return CommandResult.failure(start_validation.error_code, start_validation.message)
+	if not _can_settle_battle_victory(command.boss_id):
+		return CommandResult.failure(&"battle_settlement_failed", GameText.get_text(&"message.battle.settlement_failed"))
+	var precheck: SurvivalActionResult = consume_survival_action_stamina(SurvivalSystem.ACTION_BATTLE)
+	if not precheck.succeeded:
+		return CommandResult.failure(precheck.error_code, precheck.message)
+	var result: BattleActionResult = _battle_system.start(_state, command.boss_id)
+	_last_battle_action_result = result
+	if not result.succeeded:
+		return CommandResult.failure(result.error_code, result.message)
+	return CommandResult.success(result.message)
+
+
+func execute_battle_action(command: BattleActionCommand) -> CommandResult:
+	if not has_active_state() or command == null:
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_battle"))
+	var result: BattleActionResult = _battle_system.perform_action(_state, command.actor_id, command.use_skill)
+	_last_battle_action_result = result
+	if not result.succeeded:
+		return CommandResult.failure(result.error_code, result.message)
+	if result.battle_completed and not _settle_completed_battle():
+		return CommandResult.failure(&"battle_settlement_failed", GameText.get_text(&"message.battle.settlement_failed"))
+	return CommandResult.success(result.message)
+
+
+func execute_return_from_battle(_command: ReturnFromBattleCommand) -> CommandResult:
+	if not has_active_state():
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_battle"))
+	var result: BattleActionResult = _battle_system.dismiss_completed(_state)
+	_last_battle_action_result = result
+	if not result.succeeded:
+		return CommandResult.failure(result.error_code, result.message)
+	return CommandResult.success(result.message)
+
+
+func _settle_completed_battle() -> bool:
+	var battle: BattleState = _state.battle_state
+	if battle == null or battle.status != BattleState.Status.COMPLETED or battle.settlement_applied:
+		return battle != null and battle.settlement_applied
+	var boss: BossDefinition = get_boss_definition(battle.boss_id)
+	if boss == null:
+		return false
+	if battle.did_win:
+		var reward: RewardDefinition = _data_registry.get_reward(boss.reward_id)
+		if reward == null:
+			return false
+		for item_id: StringName in reward.item_rewards:
+			if not _inventory_system.can_add(_state.inventory_state, item_id, reward.item_rewards[item_id], _inventory_system.get_capacity(_state, item_id)):
+				return false
+		for item_id: StringName in reward.item_rewards:
+			if not _inventory_system.add(_state.inventory_state, item_id, reward.item_rewards[item_id], _inventory_system.get_capacity(_state, item_id)):
+				return false
+		if not _survivor_system.grant_lineup_experience(_state.survivor_state, reward.survivor_experience):
+			return false
+		if boss.victory_durability_loss > 0.0:
+			_survival_system.apply_durability_loss(_state.survival_state, boss.id, boss.victory_durability_loss)
+	else:
+		if boss.defeat_durability_loss > 0.0:
+			_survival_system.apply_durability_loss(_state.survival_state, boss.id, boss.defeat_durability_loss)
+	battle.settlement_applied = true
+	return true
+
+
+func _can_settle_battle_victory(boss_id: StringName) -> bool:
+	var boss: BossDefinition = get_boss_definition(boss_id)
+	if boss == null:
+		return false
+	var reward: RewardDefinition = _data_registry.get_reward(boss.reward_id)
+	if reward == null:
+		return false
+	for item_id: StringName in reward.item_rewards:
+		if not _inventory_system.can_add(_state.inventory_state, item_id, reward.item_rewards[item_id], _inventory_system.get_capacity(_state, item_id)):
+			return false
+	return true

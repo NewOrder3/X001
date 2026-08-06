@@ -29,6 +29,9 @@ func execute(session: GameSession, command: GameCommand) -> CommandResult:
 	if command is PlaceBuildingCommand:
 		var place_command: PlaceBuildingCommand = command as PlaceBuildingCommand
 		return _complete(command, session.execute_place_building(place_command))
+	if command is UpgradeBuildingCommand:
+		var upgrade_building_command: UpgradeBuildingCommand = command as UpgradeBuildingCommand
+		return _complete(command, session.execute_upgrade_building(upgrade_building_command))
 	if command is GatherResourcesCommand:
 		var gather_command: GatherResourcesCommand = command as GatherResourcesCommand
 		return _complete(command, session.execute_gather_resources(gather_command))
@@ -50,6 +53,20 @@ func execute(session: GameSession, command: GameCommand) -> CommandResult:
 	if command is SetLineupCommand:
 		var lineup_command: SetLineupCommand = command as SetLineupCommand
 		return _complete(command, session.execute_set_lineup(lineup_command))
+	if command is StartBattleCommand:
+		var start_battle_command: StartBattleCommand = command as StartBattleCommand
+		var start_battle_result: CommandResult = _complete(command, session.execute_start_battle(start_battle_command))
+		if start_battle_result.succeeded:
+			events.battle_started.emit(start_battle_command.boss_id)
+		return start_battle_result
+	if command is BattleActionCommand:
+		var battle_action_command: BattleActionCommand = command as BattleActionCommand
+		return _complete(command, session.execute_battle_action(battle_action_command))
+	if command is ReturnFromBattleCommand:
+		var return_battle_result: CommandResult = _complete(command, session.execute_return_from_battle(command as ReturnFromBattleCommand))
+		if return_battle_result.succeeded:
+			events.battle_exited.emit()
+		return return_battle_result
 
 	return _reject(
 		command,

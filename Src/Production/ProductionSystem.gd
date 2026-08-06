@@ -62,7 +62,7 @@ func get_durability_recovery(state: GameState) -> Dictionary[StringName, float]:
 		var definition: BuildingDefinition = _data_registry.get_building(building.building_id) if _data_registry != null and _data_registry.has_building(building.building_id) else null
 		var production: ProductionInstance = get_instance(state, building.instance_id)
 		if definition != null and production != null and production.is_enabled and definition.durability_recovery_per_minute > 0.0:
-			recovery_rate += definition.durability_recovery_per_minute
+			recovery_rate += definition.durability_recovery_per_minute * float(maxi(building.level, 1))
 			accelerated_multiplier = maxf(accelerated_multiplier, definition.durability_recovery_accelerated_multiplier)
 	return {&"rate": recovery_rate, &"accelerated_multiplier": accelerated_multiplier}
 
@@ -113,7 +113,11 @@ func _advance_instance(state: GameState, production: ProductionInstance, elapsed
 		_notify_if_changed(production, previous_reason)
 		return 0
 	production.stall_reason = ProductionInstance.StallReason.NONE
-	production.progress_seconds += elapsed_seconds
+	var building_level: int = 1
+	if state.raft_state.building_instances.has(production.building_instance_id):
+		var building: BuildingInstance = state.raft_state.building_instances[production.building_instance_id]
+		building_level = maxi(building.level, 1)
+	production.progress_seconds += elapsed_seconds * float(building_level)
 	var completed_cycles: int = int(floor(production.progress_seconds / recipe.cycle_seconds))
 	if completed_cycles <= 0:
 		production_changed.emit(production.building_instance_id)

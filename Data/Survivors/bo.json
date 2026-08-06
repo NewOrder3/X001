@@ -5,5 +5,7 @@
   "skill_id": "skill_first_aid",
   "passive_id": "passive_recovery",
   "passive_value_per_level": 0.5,
-  "upgrade_cost": {"item_raw_fish": 1}
+  "upgrade_cost": {"item_raw_fish": 1},
+  "battle_max_health": 32,
+  "battle_attack": 5
 }

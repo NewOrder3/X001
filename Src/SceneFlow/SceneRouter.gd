@@ -21,6 +21,7 @@ func enter_game(session: GameSession) -> void:
 		go_to_main_menu()
 		return
 	_session = session
+	_bind_session_events()
 	var game_root: GameRoot = _show_scene_path(GAME_SCENE_PATH) as GameRoot
 	if game_root != null:
 		game_root.bind_session(_session)
@@ -43,6 +44,24 @@ func return_to_game() -> void:
 
 func get_current_scene() -> Node:
 	return _current_scene
+
+
+func _bind_session_events() -> void:
+	if _session == null:
+		return
+	var events: SessionEvents = _session.get_session_events()
+	if not events.battle_started.is_connected(_on_battle_started):
+		events.battle_started.connect(_on_battle_started)
+	if not events.battle_exited.is_connected(_on_battle_exited):
+		events.battle_exited.connect(_on_battle_exited)
+
+
+func _on_battle_started(boss_id: StringName) -> void:
+	call_deferred("enter_battle", boss_id)
+
+
+func _on_battle_exited() -> void:
+	call_deferred("return_to_game")
 
 func _show_scene(packed_scene: PackedScene) -> Node:
 	if scene_host == null:

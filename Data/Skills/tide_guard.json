@@ -1,5 +1,8 @@
 {
   "id": "skill_tide_guard",
   "display_name_key": "data.skill.tide_guard.name",
-  "description_key": "data.skill.tide_guard.description"
+  "description_key": "data.skill.tide_guard.description",
+  "effect_type": "damage",
+  "power": 6,
+  "cooldown_turns": 1
 }

@@ -7,6 +7,7 @@ const TEST_SCRIPTS: Array[String] = [
 	"res://Tests/Unit/test_random_service.gd",
 	"res://Tests/Unit/test_exploration_system.gd",
 	"res://Tests/Unit/test_survivor_system.gd",
+	"res://Tests/Unit/test_battle_system.gd",
 	"res://Tests/Unit/test_save_service.gd",
 	"res://Tests/Unit/test_survival_state.gd",
 	"res://Tests/Unit/test_survival_calculator.gd",

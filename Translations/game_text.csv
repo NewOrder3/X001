@@ -212,3 +212,39 @@ data.skill.first_aid.name,紧急包扎
 data.skill.first_aid.description,快速处理伤口；战斗效果将在 S6 接入。
 data.skill.harpoon_throw.name,鱼叉投掷
 data.skill.harpoon_throw.description,瞄准破绽投出鱼叉；战斗效果将在 S6 接入。
+ui.survivor.challenge_boss,挑战教学 Boss
+ui.battle.title,教学 Boss 战
+ui.battle.normal_attack,普通攻击
+ui.battle.use_skill,使用 %s
+ui.battle.return,返回竹筏
+ui.battle.status,%s\nBoss：%d / %d\n回合：%d
+ui.battle.party_member,%s：%d / %d
+data.boss.tutorial_sea_beast.name,礁海巨兽
+data.boss.tutorial_sea_beast.description,盘踞在起航海域边缘的巨兽，适合检验基础战斗技巧。
+message.session.start_before_battle,请先开始游戏再进入战斗。
+message.battle.state_unavailable,战斗状态不可用。
+message.battle.already_active,已有一场战斗正在进行。
+message.battle.unavailable,该 Boss 不可用。
+message.battle.lineup_required,请先安排至少一名已招募伙伴出战。
+message.battle.started,已向 %s 发起挑战。
+message.battle.not_active,当前没有进行中的战斗。
+message.battle.invalid_actor,该伙伴无法执行本次行动。
+message.battle.actor_defeated,该伙伴已失去行动能力。
+message.battle.skill_cooldown,技能尚在冷却中。
+message.battle.not_completed,战斗尚未结束。
+message.battle.returned,已返回竹筏。
+message.battle.actor_attacked,%s 使用%s造成 %d 点伤害。
+message.battle.actor_healed,%s 使用%s恢复 %d 点生命。
+message.battle.boss_attacked,%s 攻击 %s，造成 %d 点伤害。
+message.battle.boss_defeated,%s 使用%s造成 %d 点伤害并击败 Boss！
+message.battle.victory,胜利！奖励、伙伴经验与耐久影响已结算。
+message.battle.defeat,战斗失败。耐久影响已结算。
+message.battle.settlement_failed,战斗奖励无法结算，请先腾出库存空间。
+ui.build.facilities,船上设施
+ui.build.facility_entry,%s  Lv%d
+ui.build.upgrade_cost,升级至 Lv%d（%s）
+ui.build.max_level,已满级
+message.building.upgrade_unavailable,找不到要升级的设施。
+message.building.max_level,该设施已达到最高等级。
+message.building.insufficient_upgrade_resources,升级材料不足，继续探索海面收集资源吧。
+message.building.upgraded,%s 已升级至 Lv%d。

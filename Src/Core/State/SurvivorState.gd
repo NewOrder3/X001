@@ -22,6 +22,7 @@ func to_save_data() -> Dictionary:
 			"instance_id": String(instance.instance_id),
 			"survivor_id": String(instance.survivor_id),
 			"level": instance.level,
+			"experience": instance.experience,
 		})
 	return {
 		"survivors": survivor_data,
@@ -46,15 +47,19 @@ func load_from_save_data(data: Dictionary) -> bool:
 		var raw_instance_id: Variant = raw_entry.get("instance_id")
 		var raw_survivor_id: Variant = raw_entry.get("survivor_id")
 		var raw_level: Variant = raw_entry.get("level")
+		var raw_experience: Variant = raw_entry.get("experience", 0)
 		if typeof(raw_instance_id) != TYPE_STRING or typeof(raw_survivor_id) != TYPE_STRING:
 			return false
 		if typeof(raw_level) != TYPE_INT and typeof(raw_level) != TYPE_FLOAT:
 			return false
+		if typeof(raw_experience) != TYPE_INT and typeof(raw_experience) != TYPE_FLOAT:
+			return false
 		var survivor_id: StringName = StringName(raw_survivor_id)
 		var level: int = int(raw_level)
-		if float(raw_level) != float(level) or not IdValidator.is_valid_id(survivor_id) or not String(survivor_id).begins_with("survivor_") or level < 1 or level > 10 or loaded_survivors.has(survivor_id):
+		var experience: int = int(raw_experience)
+		if float(raw_level) != float(level) or float(raw_experience) != float(experience) or experience < 0 or not IdValidator.is_valid_id(survivor_id) or not String(survivor_id).begins_with("survivor_") or level < 1 or level > 10 or loaded_survivors.has(survivor_id):
 			return false
-		loaded_survivors[survivor_id] = SurvivorInstance.new(StringName(raw_instance_id), survivor_id, level)
+		loaded_survivors[survivor_id] = SurvivorInstance.new(StringName(raw_instance_id), survivor_id, level, experience)
 
 	var loaded_pending_ids: Array[StringName] = _read_unique_survivor_ids(raw_pending_ids)
 	var loaded_lineup_ids: Array[StringName] = _read_unique_survivor_ids(raw_lineup_ids)

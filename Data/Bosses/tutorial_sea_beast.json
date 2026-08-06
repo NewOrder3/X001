@@ -1,0 +1,10 @@
+{
+  "id": "boss_tutorial_sea_beast",
+  "display_name_key": "data.boss.tutorial_sea_beast.name",
+  "description_key": "data.boss.tutorial_sea_beast.description",
+  "max_health": 45,
+  "attack_damage": 5,
+  "reward_id": "reward_tutorial_cache",
+  "victory_durability_loss": 4,
+  "defeat_durability_loss": 8
+}

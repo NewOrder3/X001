@@ -15,6 +15,7 @@ const ALLOWED_PREFIXES: Array[String] = [
 	"quest",
 	"progression",
 	"survival",
+	"reward",
 ]
 
 

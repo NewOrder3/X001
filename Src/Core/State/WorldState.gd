@@ -59,7 +59,7 @@ func load_from_save_data(data: Dictionary) -> bool:
 	var raw_revision: Variant = data.get("exploration_revision", 0)
 	if typeof(raw_current_region_id) != TYPE_STRING or not raw_discovered_ids is Array or not raw_consumed_keys is Array:
 		return false
-	if typeof(raw_revision) != TYPE_INT or int(raw_revision) < 0:
+	if (typeof(raw_revision) != TYPE_INT and typeof(raw_revision) != TYPE_FLOAT) or float(raw_revision) != floor(float(raw_revision)) or int(raw_revision) < 0:
 		return false
 	var loaded_discovered_ids: Array[StringName] = []
 	for raw_id: Variant in raw_discovered_ids:

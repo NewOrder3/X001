@@ -12,6 +12,7 @@ const ERROR_NOT_ADJACENT: StringName = &"not_adjacent"
 const ERROR_INVENTORY_FULL: StringName = &"inventory_full"
 const ERROR_EXPLORATION_LOCKED: StringName = &"exploration_locked"
 const REQUIRED_BUILDING_ID: StringName = &"building_rudder"
+const GENERATED_REGION_PREFIX: String = "region_open_sea_q"
 
 var _data_registry: DataRegistry
 var _inventory_system: InventorySystem
@@ -49,10 +50,10 @@ func activate_loaded_state(state: WorldState) -> bool:
 		return false
 	if state.current_region_id == &"":
 		return initialize_new_state(state)
-	if not _data_registry.has_region(state.current_region_id):
+	if not _has_region(state.current_region_id):
 		return false
 	for region_id: StringName in state.discovered_region_ids:
-		if not _data_registry.has_region(region_id):
+		if not _has_region(region_id):
 			return false
 	if not state.is_discovered(state.current_region_id):
 		state.mark_discovered(state.current_region_id)
@@ -61,13 +62,34 @@ func activate_loaded_state(state: WorldState) -> bool:
 
 func get_reachable_regions(state: WorldState) -> Array[RegionDefinition]:
 	var regions: Array[RegionDefinition] = []
-	if state == null or _data_registry == null or not _data_registry.has_region(state.current_region_id):
+	if state == null or _data_registry == null or not _has_region(state.current_region_id):
 		return regions
-	var current: RegionDefinition = _data_registry.get_region(state.current_region_id)
+	var current: RegionDefinition = get_region_definition(state.current_region_id)
+	var has_uncharted_authored_neighbor: bool = false
 	for region: RegionDefinition in _data_registry.get_regions():
 		if region.id != current.id and HexGrid.distance_to_coord(current.coordinate, region.coordinate) == 1:
 			regions.append(region)
+			if not state.is_discovered(region.id):
+				has_uncharted_authored_neighbor = true
+	# Authored regions take priority while there is still nearby hand-crafted content.
+	# Once that edge is charted, the open sea extends indefinitely from the current cell.
+	if has_uncharted_authored_neighbor:
+		return regions
+	for direction: Vector2i in HexGrid.DIRECTIONS:
+		var coordinate: Vector2i = current.coordinate + direction
+		if _get_authored_region_at(coordinate) != null:
+			continue
+		regions.append(_create_generated_region(coordinate))
 	return regions
+
+
+func get_region_definition(region_id: StringName) -> RegionDefinition:
+	if _data_registry != null and _data_registry.has_region(region_id):
+		return _data_registry.get_region(region_id)
+	var generated_coordinate: Variant = _get_generated_coordinate(region_id)
+	if generated_coordinate is Vector2i:
+		return _create_generated_region(generated_coordinate as Vector2i)
+	return null
 
 
 func is_unlocked(state: GameState) -> bool:
@@ -77,15 +99,15 @@ func is_unlocked(state: GameState) -> bool:
 func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResult:
 	if state == null or command == null or state.world_state == null:
 		return ExplorationResult.failure(ERROR_INVALID_WORLD_STATE, GameText.get_text(&"message.exploration.no_world_state"))
-	if _data_registry == null or not _data_registry.has_region(command.target_region_id):
+	if _data_registry == null or not _has_region(command.target_region_id):
 		return ExplorationResult.failure(ERROR_UNKNOWN_REGION, GameText.get_text(&"message.exploration.region_unavailable"))
 	if not _has_required_rudder(state):
 		return ExplorationResult.failure(ERROR_EXPLORATION_LOCKED, GameText.get_text(&"message.exploration.rudder_required"))
-	if not _data_registry.has_region(state.world_state.current_region_id):
+	if not _has_region(state.world_state.current_region_id):
 		return ExplorationResult.failure(ERROR_INVALID_WORLD_STATE, GameText.get_text(&"message.exploration.current_region_unavailable"))
 
-	var origin: RegionDefinition = _data_registry.get_region(state.world_state.current_region_id)
-	var target: RegionDefinition = _data_registry.get_region(command.target_region_id)
+	var origin: RegionDefinition = get_region_definition(state.world_state.current_region_id)
+	var target: RegionDefinition = get_region_definition(command.target_region_id)
 	if HexGrid.distance_to_coord(origin.coordinate, target.coordinate) != 1:
 		return ExplorationResult.failure(ERROR_NOT_ADJACENT, GameText.get_text(&"message.exploration.not_adjacent"))
 
@@ -151,6 +173,62 @@ func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResu
 	)
 	exploration_completed.emit(result)
 	return result
+
+
+func _has_region(region_id: StringName) -> bool:
+	return (_data_registry != null and _data_registry.has_region(region_id)) or _get_generated_coordinate(region_id) is Vector2i
+
+
+func _get_authored_region_at(coordinate: Vector2i) -> RegionDefinition:
+	if _data_registry == null:
+		return null
+	for region: RegionDefinition in _data_registry.get_regions():
+		if region.coordinate == coordinate:
+			return region
+	return null
+
+
+func _create_generated_region(coordinate: Vector2i) -> RegionDefinition:
+	return RegionDefinition.new(
+		_get_generated_region_id(coordinate),
+		&"",
+		&"",
+		coordinate,
+		false,
+		[&"event_resource_cache", &"event_calm_sea", &"event_sudden_storm"],
+		"远洋海域（%d，%d）" % [coordinate.x, coordinate.y],
+	)
+
+
+func _get_generated_region_id(coordinate: Vector2i) -> StringName:
+	return StringName("%s%s_r%s" % [GENERATED_REGION_PREFIX, _encode_coordinate(coordinate.x), _encode_coordinate(coordinate.y)])
+
+
+func _get_generated_coordinate(region_id: StringName) -> Variant:
+	var raw_id: String = String(region_id)
+	if not raw_id.begins_with(GENERATED_REGION_PREFIX):
+		return null
+	var encoded_coordinates: String = raw_id.trim_prefix(GENERATED_REGION_PREFIX)
+	var parts: PackedStringArray = encoded_coordinates.split("_r", false, 1)
+	if parts.size() != 2:
+		return null
+	var q: Variant = _decode_coordinate(parts[0])
+	var r: Variant = _decode_coordinate(parts[1])
+	if q is int and r is int:
+		return Vector2i(q as int, r as int)
+	return null
+
+
+func _encode_coordinate(value: int) -> String:
+	return "neg_%d" % abs(value) if value < 0 else str(value)
+
+
+func _decode_coordinate(encoded_value: String) -> Variant:
+	if encoded_value.is_valid_int():
+		return int(encoded_value)
+	if encoded_value.begins_with("neg_") and encoded_value.trim_prefix("neg_").is_valid_int():
+		return -int(encoded_value.trim_prefix("neg_"))
+	return null
 
 
 func _resolve_encounter(state: WorldState, region: RegionDefinition) -> EncounterDefinition:

@@ -83,6 +83,38 @@ func test_consumed_encounter_is_not_resolved_twice_and_world_state_round_trips()
 		assert_eq(loaded_state.world_state.consumed_encounter_keys, session.get_world_state().consumed_encounter_keys)
 
 
+func test_open_sea_extends_after_the_authored_edge_and_round_trips() -> void:
+	var session: GameSession = _create_session(604)
+	assert_true(session.execute_command(ExploreRegionCommand.new(&"region_west_shoals")).succeeded)
+	assert_true(session.execute_command(ExploreRegionCommand.new(&"region_north_mist")).succeeded)
+	assert_true(session.execute_command(ExploreRegionCommand.new(&"region_west_shoals")).succeeded)
+
+	var generated_region: RegionDefinition = null
+	for region: RegionDefinition in session.get_reachable_regions():
+		if region.coordinate == Vector2i(-2, 0):
+			generated_region = region
+			break
+	assert_not_null(generated_region)
+	if generated_region == null:
+		return
+	assert_true(String(generated_region.id).begins_with("region_open_sea_q"))
+	assert_true(session.execute_command(ExploreRegionCommand.new(generated_region.id)).succeeded)
+	assert_eq(session.get_world_state().current_region_id, generated_region.id)
+	assert_true(session.get_world_state().is_discovered(generated_region.id))
+
+	var save_service: SaveService = SaveService.new()
+	save_service.set_active_state(session.get_state())
+	assert_true(save_service.save_game(&"dynamic_open_sea_round_trip", 1_710_000_000))
+	var loaded_state: GameState = save_service.load_game(&"dynamic_open_sea_round_trip")
+	assert_not_null(loaded_state)
+	if loaded_state == null:
+		return
+	var restored_session: GameSession = GameSession.new()
+	assert_true(restored_session.load_state_at(loaded_state, 1_710_000_000), restored_session.get_last_error())
+	assert_eq(restored_session.get_world_state().current_region_id, generated_region.id)
+	assert_true(restored_session.get_reachable_regions().size() >= 5)
+
+
 func test_storm_encounter_applies_durability_loss() -> void:
 	var found_storm: bool = false
 	for seed: int in range(1, 64):

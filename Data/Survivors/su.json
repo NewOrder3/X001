@@ -5,5 +5,7 @@
   "skill_id": "skill_harpoon_throw",
   "passive_id": "passive_critical",
   "passive_value_per_level": 0.05,
-  "upgrade_cost": {"item_wood": 2}
+  "upgrade_cost": {"item_wood": 2},
+  "battle_max_health": 28,
+  "battle_attack": 8
 }

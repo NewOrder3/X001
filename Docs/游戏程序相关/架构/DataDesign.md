@@ -23,6 +23,7 @@
 | `survivor` | 伙伴/幸存者 Definition | `survivor_lao_chen` |
 | `skill` | 技能 Definition | `skill_anchor_strike` |
 | `boss` | Boss Definition | `boss_giant_squid` |
+| `reward` | 战斗奖励 Definition | `reward_tutorial_cache` |
 | `region` | 海域/区域 Definition | `region_shallow_sea` |
 | `event` | 事件 Definition | `event_storm_warning` |
 | `quest` | 任务 Definition | `quest_first_sail` |

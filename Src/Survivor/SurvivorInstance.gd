@@ -6,13 +6,16 @@ extends RefCounted
 var instance_id: StringName
 var survivor_id: StringName
 var level: int
+var experience: int
 
 
 func _init(
 	new_instance_id: StringName,
 	new_survivor_id: StringName,
 	new_level: int = 1,
+	new_experience: int = 0,
 ) -> void:
 	instance_id = new_instance_id
 	survivor_id = new_survivor_id
 	level = new_level
+	experience = new_experience

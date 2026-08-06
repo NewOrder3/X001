@@ -11,6 +11,8 @@ const REGION_DIRECTORY: String = "res://Data/Regions"
 const ENCOUNTER_DIRECTORY: String = "res://Data/Encounters"
 const SURVIVOR_DIRECTORY: String = "res://Data/Survivors"
 const SKILL_DIRECTORY: String = "res://Data/Skills"
+const BOSS_DIRECTORY: String = "res://Data/Bosses"
+const REWARD_DIRECTORY: String = "res://Data/Rewards"
 
 var _item_directory: String
 var _building_directory: String
@@ -20,6 +22,8 @@ var _region_directory: String
 var _encounter_directory: String
 var _survivor_directory: String
 var _skill_directory: String
+var _boss_directory: String
+var _reward_directory: String
 var _items: Dictionary[StringName, ItemDefinition] = {}
 var _buildings: Dictionary[StringName, BuildingDefinition] = {}
 var _survival_configs: Dictionary[StringName, SurvivalConfigDefinition] = {}
@@ -28,6 +32,8 @@ var _regions: Dictionary[StringName, RegionDefinition] = {}
 var _encounters: Dictionary[StringName, EncounterDefinition] = {}
 var _survivors: Dictionary[StringName, SurvivorDefinition] = {}
 var _skills: Dictionary[StringName, SkillDefinition] = {}
+var _bosses: Dictionary[StringName, BossDefinition] = {}
+var _rewards: Dictionary[StringName, RewardDefinition] = {}
 var _registered_ids: Dictionary[StringName, bool] = {}
 var _last_error: String = ""
 
@@ -41,6 +47,8 @@ func _init(
 	new_encounter_directory: String = "",
 	new_survivor_directory: String = "",
 	new_skill_directory: String = "",
+	new_boss_directory: String = "",
+	new_reward_directory: String = "",
 ) -> void:
 	_item_directory = new_item_directory
 	_building_directory = new_building_directory
@@ -51,6 +59,8 @@ func _init(
 	_encounter_directory = ENCOUNTER_DIRECTORY if new_encounter_directory.is_empty() and use_default_content_directories else new_encounter_directory
 	_survivor_directory = SURVIVOR_DIRECTORY if new_survivor_directory.is_empty() and use_default_content_directories else new_survivor_directory
 	_skill_directory = SKILL_DIRECTORY if new_skill_directory.is_empty() and use_default_content_directories else new_skill_directory
+	_boss_directory = BOSS_DIRECTORY if new_boss_directory.is_empty() and use_default_content_directories else new_boss_directory
+	_reward_directory = REWARD_DIRECTORY if new_reward_directory.is_empty() and use_default_content_directories else new_reward_directory
 
 
 func load_all() -> bool:
@@ -105,6 +115,20 @@ func load_all() -> bool:
 		for definition: SkillDefinition in skill_definitions:
 			if not _register_skill(definition):
 				return _fail_load(_last_error)
+	if not _reward_directory.is_empty():
+		var reward_definitions: Array[RewardDefinition] = loader.load_rewards(_reward_directory)
+		if not loader.get_last_error().is_empty():
+			return _fail_load(loader.get_last_error())
+		for definition: RewardDefinition in reward_definitions:
+			if not _register_reward(definition):
+				return _fail_load(_last_error)
+	if not _boss_directory.is_empty():
+		var boss_definitions: Array[BossDefinition] = loader.load_bosses(_boss_directory)
+		if not loader.get_last_error().is_empty():
+			return _fail_load(loader.get_last_error())
+		for definition: BossDefinition in boss_definitions:
+			if not _register_boss(definition):
+				return _fail_load(_last_error)
 	if not _survivor_directory.is_empty():
 		var survivor_definitions: Array[SurvivorDefinition] = loader.load_survivors(_survivor_directory)
 		if not loader.get_last_error().is_empty():
@@ -117,6 +141,8 @@ func load_all() -> bool:
 	if not _validate_world_references():
 		return _fail_load(_last_error)
 	if not _validate_survivor_references():
+		return _fail_load(_last_error)
+	if not _validate_battle_references():
 		return _fail_load(_last_error)
 
 	return true
@@ -178,6 +204,20 @@ func get_skill(id: StringName) -> SkillDefinition:
 	return _skills[id]
 
 
+func get_boss(id: StringName) -> BossDefinition:
+	if not _bosses.has(id):
+		push_error("DATA: Unknown boss Definition ID '%s'." % String(id))
+		return null
+	return _bosses[id]
+
+
+func get_reward(id: StringName) -> RewardDefinition:
+	if not _rewards.has(id):
+		push_error("DATA: Unknown reward Definition ID '%s'." % String(id))
+		return null
+	return _rewards[id]
+
+
 func get_regions() -> Array[RegionDefinition]:
 	var ids: Array[StringName] = []
 	for region_id: StringName in _regions:
@@ -232,6 +272,14 @@ func has_skill(id: StringName) -> bool:
 	return _skills.has(id)
 
 
+func has_boss(id: StringName) -> bool:
+	return _bosses.has(id)
+
+
+func has_reward(id: StringName) -> bool:
+	return _rewards.has(id)
+
+
 func get_last_error() -> String:
 	return _last_error
 
@@ -266,6 +314,14 @@ func get_survivor_count() -> int:
 
 func get_skill_count() -> int:
 	return _skills.size()
+
+
+func get_boss_count() -> int:
+	return _bosses.size()
+
+
+func get_reward_count() -> int:
+	return _rewards.size()
 
 
 func _register_item(definition: ItemDefinition) -> bool:
@@ -321,6 +377,20 @@ func _register_skill(definition: SkillDefinition) -> bool:
 	if not _register_id(definition.id):
 		return false
 	_skills[definition.id] = definition
+	return true
+
+
+func _register_boss(definition: BossDefinition) -> bool:
+	if not _register_id(definition.id):
+		return false
+	_bosses[definition.id] = definition
+	return true
+
+
+func _register_reward(definition: RewardDefinition) -> bool:
+	if not _register_id(definition.id):
+		return false
+	_rewards[definition.id] = definition
 	return true
 
 
@@ -415,6 +485,24 @@ func _validate_survivor_references() -> bool:
 	return true
 
 
+func _validate_battle_references() -> bool:
+	if _bosses.is_empty() and _rewards.is_empty():
+		return true
+	if _bosses.is_empty() or _rewards.is_empty():
+		_set_error("Battle Definitions require both bosses and rewards.")
+		return false
+	for boss: BossDefinition in _bosses.values():
+		if not _rewards.has(boss.reward_id):
+			_set_error("Boss '%s' references unknown reward '%s'." % [String(boss.id), String(boss.reward_id)])
+			return false
+	for reward: RewardDefinition in _rewards.values():
+		for item_id: StringName in reward.item_rewards:
+			if not _items.has(item_id):
+				_set_error("Reward '%s' references unknown item '%s'." % [String(reward.id), String(item_id)])
+				return false
+	return true
+
+
 func _clear() -> void:
 	_items.clear()
 	_buildings.clear()
@@ -424,6 +512,8 @@ func _clear() -> void:
 	_encounters.clear()
 	_survivors.clear()
 	_skills.clear()
+	_bosses.clear()
+	_rewards.clear()
 	_registered_ids.clear()
 	_last_error = ""
 
@@ -437,6 +527,8 @@ func _fail_load(message: String) -> bool:
 	_encounters.clear()
 	_survivors.clear()
 	_skills.clear()
+	_bosses.clear()
+	_rewards.clear()
 	_registered_ids.clear()
 	_last_error = message
 	return false
