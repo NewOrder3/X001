@@ -1,5 +1,5 @@
 class_name UIRoot
-extends Control
+extends CanvasLayer
 
 signal window_opened(window_id: StringName)
 signal window_closed(window_id: StringName)

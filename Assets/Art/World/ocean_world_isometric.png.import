@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://13m33ly41owt"
-path="res://.godot/imported/ocean_world_surface.png-456534f89d77b1c55d5c0c35b8343a98.ctex"
+uid="uid://dcinuwkfx2xj6"
+path="res://.godot/imported/ocean_world_isometric.png-72db2fdd52830c1c9eabf820a0416518.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Art/World/ocean_world_surface.png"
-dest_files=["res://.godot/imported/ocean_world_surface.png-456534f89d77b1c55d5c0c35b8343a98.ctex"]
+source_file="res://Assets/Art/World/ocean_world_isometric.png"
+dest_files=["res://.godot/imported/ocean_world_isometric.png-72db2fdd52830c1c9eabf820a0416518.ctex"]
 
 [params]
 

@@ -25,11 +25,11 @@ func test_clicking_the_center_of_the_raft_selects_its_center_cell() -> void:
 
 
 func test_full_screen_ui_layers_do_not_block_raft_input() -> void:
-	var ui_root: Control = preload("res://Scenes/UI/UIRoot.tscn").instantiate() as Control
+	var ui_root: CanvasLayer = preload("res://Scenes/UI/UIRoot.tscn").instantiate() as CanvasLayer
 	assert_not_null(ui_root)
 	if ui_root == null:
 		return
-	assert_eq(ui_root.mouse_filter, Control.MOUSE_FILTER_IGNORE)
+	assert_eq(ui_root.layer, 100)
 	assert_eq((ui_root.get_node("HUDLayer") as Control).mouse_filter, Control.MOUSE_FILTER_IGNORE)
 	assert_eq((ui_root.get_node("WindowLayer") as Control).mouse_filter, Control.MOUSE_FILTER_IGNORE)
 	ui_root.free()

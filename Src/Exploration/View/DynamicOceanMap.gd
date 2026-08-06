@@ -8,11 +8,12 @@ signal voyage_status_changed(message: String)
 signal hovered_region_changed(region_name: String)
 
 const DISPLAY_RADIUS: int = 4
-const BASE_TILE_RADIUS: float = 118.0
+const BASE_TILE_RADIUS: float = 150.0
+const VERTICAL_PROJECTION: float = 0.56
 const TRAVEL_DURATION: float = 0.9
 const DRAG_THRESHOLD: float = 10.0
-const SHIP_TEXTURE: Texture2D = preload("res://Assets/Art/Ship/player_ship.png")
-const RESOURCE_MARKER_TEXTURE: Texture2D = preload("res://Assets/Art/Map/salvage_marker.png")
+const SHIP_TEXTURE: Texture2D = preload("res://Assets/Art/Ship/player_ship_isometric.png")
+const RESOURCE_MARKER_TEXTURE: Texture2D = preload("res://Assets/Art/Map/salvage_marker_isometric.png")
 
 var _session: GameSession = null
 var _wave_time: float = 0.0
@@ -169,20 +170,19 @@ func _draw_sea_cell(
 	var is_discovered: bool = region != null and world_state.is_discovered(region.id)
 	var is_reachable: bool = reachable.has(coordinate)
 	var is_hovered: bool = region != null and region.id == _hovered_region_id
-	var fill: Color = Color(0.025, 0.12, 0.18, 0.05)
-	var outline: Color = Color(0.72, 0.94, 0.94, 0.10)
+	var fill: Color = Color.TRANSPARENT
+	var outline: Color = Color.TRANSPARENT
 	if is_discovered:
-		fill = Color(0.05, 0.45, 0.55, 0.12)
-		outline = Color(0.72, 0.96, 0.93, 0.28)
+		fill = Color(0.04, 0.34, 0.40, 0.025)
 	if is_reachable:
-		fill = Color(0.08, 0.54, 0.62, 0.16)
-		outline = Color(0.88, 0.96, 0.73, 0.48)
+		fill = Color(0.08, 0.54, 0.62, 0.08)
+		outline = Color(0.88, 0.96, 0.73, 0.28)
 	if is_hovered:
 		fill = Color(0.95, 0.70, 0.25, 0.25)
 		outline = Color(1.0, 0.89, 0.55, 0.95)
 	if is_current:
-		fill = Color(0.06, 0.30, 0.38, 0.10)
-		outline = Color(0.90, 0.98, 0.94, 0.36)
+		fill = Color.TRANSPARENT
+		outline = Color.TRANSPARENT
 	draw_colored_polygon(polygon, fill)
 	for index: int in range(polygon.size()):
 		draw_line(polygon[index], polygon[(index + 1) % polygon.size()], outline, 2.0 if not is_hovered else 4.0, true)
@@ -191,10 +191,12 @@ func _draw_sea_cell(
 
 
 func _draw_region_marker(center: Vector2, region: RegionDefinition) -> void:
-	var marker_size: Vector2 = Vector2.ONE * 112.0 * _zoom
+	var marker_size: Vector2 = Vector2.ONE * 142.0 * _zoom
 	var bob: float = sin(_wave_time * 1.8 + float(region.coordinate.x * 3 + region.coordinate.y)) * 4.0
-	var rect: Rect2 = Rect2(center - marker_size * 0.5 + Vector2(0.0, bob), marker_size)
-	draw_circle(center + Vector2(0.0, 24.0 * _zoom), 26.0 * _zoom, Color(0.02, 0.12, 0.16, 0.22))
+	var rect: Rect2 = Rect2(center - marker_size * 0.5 + Vector2(0.0, bob - 12.0 * _zoom), marker_size)
+	draw_set_transform(center + Vector2(0.0, 22.0 * _zoom), 0.0, Vector2(1.0, 0.42))
+	draw_circle(Vector2.ZERO, 42.0 * _zoom, Color(0.01, 0.08, 0.12, 0.26))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	draw_texture_rect(RESOURCE_MARKER_TEXTURE, rect, false)
 
 
@@ -213,19 +215,20 @@ func _draw_route(center: Vector2, reachable: Dictionary[Vector2i, RegionDefiniti
 
 func _draw_ship(center: Vector2, current_coordinate: Vector2i) -> void:
 	var ship_position: Vector2 = center + _hex_offset(current_coordinate - _visual_origin_coordinate)
-	var rotation_angle: float = sin(_wave_time * 1.35) * 0.025
+	var horizontal_flip: float = 1.0
 	if _is_traveling:
 		var progress: float = smoothstep(0.0, 1.0, clampf(_travel_elapsed / TRAVEL_DURATION, 0.0, 1.0))
 		var from_position: Vector2 = center + _hex_offset(_travel_from_coordinate - _visual_origin_coordinate)
 		var to_position: Vector2 = center + _hex_offset(_travel_to_coordinate - _visual_origin_coordinate)
 		ship_position = from_position.lerp(to_position, progress)
 		var direction: Vector2 = to_position - from_position
-		rotation_angle = direction.angle() + PI * 0.5
+		horizontal_flip = -1.0 if direction.x < 0.0 else 1.0
 		_draw_wake(ship_position, -direction.normalized())
-	var ship_size: Vector2 = Vector2.ONE * 154.0 * _zoom
-	var bob: float = sin(_wave_time * 2.1) * 3.0
-	draw_set_transform(ship_position + Vector2(0.0, bob), rotation_angle, Vector2.ONE)
-	draw_circle(Vector2(0.0, 17.0 * _zoom), 47.0 * _zoom, Color(0.015, 0.09, 0.13, 0.30))
+	var ship_size: Vector2 = Vector2.ONE * 276.0 * _zoom
+	var bob: float = sin(_wave_time * 2.1) * 4.0
+	draw_set_transform(ship_position + Vector2(0.0, bob + 30.0 * _zoom), 0.0, Vector2(1.0, 0.38))
+	draw_circle(Vector2.ZERO, 76.0 * _zoom, Color(0.015, 0.07, 0.10, 0.30))
+	draw_set_transform(ship_position + Vector2(0.0, bob - 34.0 * _zoom), 0.0, Vector2(horizontal_flip, 1.0))
 	draw_texture_rect(SHIP_TEXTURE, Rect2(-ship_size * 0.5, ship_size), false)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
@@ -303,7 +306,10 @@ func _get_map_center() -> Vector2:
 func _hex_offset(coordinate: Vector2i) -> Vector2:
 	var radius: float = BASE_TILE_RADIUS * _zoom
 	var width: float = sqrt(3.0) * radius
-	return Vector2(width * (float(coordinate.x) + float(coordinate.y) * 0.5), radius * 1.5 * float(coordinate.y))
+	return Vector2(
+		width * (float(coordinate.x) + float(coordinate.y) * 0.5),
+		radius * 1.5 * float(coordinate.y) * VERTICAL_PROJECTION,
+	)
 
 
 func _get_hex_polygon(center: Vector2) -> PackedVector2Array:
@@ -311,7 +317,7 @@ func _get_hex_polygon(center: Vector2) -> PackedVector2Array:
 	var radius: float = BASE_TILE_RADIUS * _zoom
 	for index: int in range(6):
 		var angle: float = deg_to_rad(60.0 * float(index) - 30.0)
-		polygon.append(center + Vector2(cos(angle), sin(angle)) * radius)
+		polygon.append(center + Vector2(cos(angle) * radius, sin(angle) * radius * VERTICAL_PROJECTION))
 	return polygon
 
 

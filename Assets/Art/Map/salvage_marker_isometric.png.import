@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://o6qkx3rf0np2"
-path="res://.godot/imported/salvage_marker.png-b24562730c420db7d57ebad86a87a921.ctex"
+uid="uid://dxi8f870o4fh"
+path="res://.godot/imported/salvage_marker_isometric.png-7258c91ed55207d72dfd37c8b8591960.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Art/Map/salvage_marker.png"
-dest_files=["res://.godot/imported/salvage_marker.png-b24562730c420db7d57ebad86a87a921.ctex"]
+source_file="res://Assets/Art/Map/salvage_marker_isometric.png"
+dest_files=["res://.godot/imported/salvage_marker_isometric.png-7258c91ed55207d72dfd37c8b8591960.ctex"]
 
 [params]
 
