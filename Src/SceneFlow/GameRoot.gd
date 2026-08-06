@@ -10,6 +10,7 @@ extends Node
 @onready var _world_map_panel: WorldMapPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel
 @onready var _survivor_panel: SurvivorPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel
 @onready var _merchant_panel: MerchantPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/MerchantPanel
+@onready var _goal_panel: GoalPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/GoalPanel
 @onready var _offline_settlement_panel: OfflineSettlementPanel = $UIRoot/WindowLayer/OfflineSettlementPanel
 @onready var _resource_ribbon: ResourceRibbon = $UIRoot/HUDLayer/GameHudLayout/ResourceRibbon
 @onready var _ocean_map_hud: OceanMapHUD = $UIRoot/HUDLayer/GameHudLayout/OceanMapHUD
@@ -24,6 +25,7 @@ func _ready() -> void:
 	_dynamic_ocean_map.hovered_region_changed.connect(_ocean_map_hud.show_hovered_region)
 	_dynamic_ocean_map.set_navigation_mode(true)
 	_set_build_mode(false)
+	_goal_panel.navigate_requested.connect(_hud_layout.open_panel)
 	get_viewport().size_changed.connect(_layout_world_views)
 	_bind_views()
 	call_deferred("_layout_world_views")
@@ -54,6 +56,7 @@ func _bind_views() -> void:
 	_world_map_panel.bind_session(_session)
 	_survivor_panel.bind_session(_session)
 	_merchant_panel.bind_session(_session)
+	_goal_panel.bind_session(_session)
 	_offline_settlement_panel.show_report(_session.get_last_offline_settlement_report())
 	_resource_ribbon.bind_session(_session)
 	_ocean_map_hud.bind_session(_session)

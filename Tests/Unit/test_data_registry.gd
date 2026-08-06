@@ -83,6 +83,7 @@ func test_default_registry_loads_full_content_definitions() -> void:
 	assert_eq(registry.get_building_count(), 8)
 	assert_eq(registry.get_merchant_count(), 1)
 	assert_eq(registry.get_merchant_offer_count(), 3)
+	assert_eq(registry.get_quest_count(), 5)
 	assert_not_null(registry.get_recipe(&"recipe_grill_fish"))
 	assert_eq(registry.get_survivor_count(), 4)
 	assert_eq(registry.get_skill_count(), 4)
@@ -100,6 +101,8 @@ func test_default_registry_loads_full_content_definitions() -> void:
 	assert_not_null(registry.get_merchant(&"merchant_wandering"))
 	assert_not_null(registry.get_merchant_offer(&"offer_fresh_water"))
 	assert_not_null(registry.get_merchant_offer(&"offer_wood_bundle"))
+	assert_not_null(registry.get_quest(&"quest_first_boss"))
+	assert_not_null(registry.get_quest(&"quest_first_shelter"))
 	assert_eq(registry.get_skill(&"skill_anchor_strike").power, 10)
 
 

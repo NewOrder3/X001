@@ -1,7 +1,7 @@
 class_name SaveService
 extends RefCounted
 
-const CURRENT_SAVE_VERSION: int = 10
+const CURRENT_SAVE_VERSION: int = 11
 const SAVE_DIRECTORY: String = "user://saves"
 
 var _active_state: GameState = null
@@ -124,6 +124,9 @@ func migrate(data: Dictionary) -> Dictionary:
 		elif version == 9:
 			migrated_data = _v9_to_v10(migrated_data)
 			version = 10
+		elif version == 10:
+			migrated_data = _v10_to_v11(migrated_data)
+			version = 11
 		else:
 			_fail("No migration exists for save version %d." % version)
 			return {}
@@ -143,6 +146,7 @@ func _serialize_game_state(state: GameState) -> Dictionary:
 		"survival_state": state.survival_state.to_save_data(),
 		"production_state": state.production_state.to_save_data(),
 		"merchant_state": state.merchant_state.to_save_data(),
+		"quest_state": state.quest_state.to_save_data(),
 		"survivor_state": state.survivor_state.to_save_data(),
 		"world_state": state.world_state.to_save_data(),
 		"battle_state": state.battle_state.to_save_data(),
@@ -182,6 +186,10 @@ func _deserialize_game_state(data: Dictionary) -> GameState:
 	if not raw_merchant_state is Dictionary or not state.merchant_state.load_from_save_data(raw_merchant_state):
 		_fail("Save game_state contains an invalid merchant_state.")
 		return null
+	var raw_quest_state: Variant = data.get("quest_state", {})
+	if not raw_quest_state is Dictionary or not state.quest_state.load_from_save_data(raw_quest_state):
+		_fail("Save game_state contains an invalid quest_state.")
+		return null
 	var raw_world_state: Variant = data.get("world_state", {})
 	if not raw_world_state is Dictionary or not state.world_state.load_from_save_data(raw_world_state):
 		_fail("Save game_state contains an invalid world_state.")
@@ -208,6 +216,7 @@ func _v1_to_v2(data: Dictionary) -> Dictionary:
 	for state_key: String in [
 		"inventory_state",
 		"merchant_state",
+		"quest_state",
 		"survivor_state",
 		"world_state",
 		"battle_state",
@@ -333,6 +342,20 @@ func _v9_to_v10(data: Dictionary) -> Dictionary:
 	var raw_merchant_state: Variant = game_state_data.get("merchant_state")
 	if not raw_merchant_state is Dictionary or raw_merchant_state.is_empty():
 		game_state_data["merchant_state"] = {"stock_remaining": {}}
+	migrated_data["game_state"] = game_state_data
+	return migrated_data
+
+
+func _v10_to_v11(data: Dictionary) -> Dictionary:
+	var migrated_data: Dictionary = data.duplicate(true)
+	var raw_game_state: Variant = migrated_data.get("game_state")
+	if not raw_game_state is Dictionary:
+		_fail("Version 10 save is missing a valid game_state object.")
+		return {}
+	var game_state_data: Dictionary = raw_game_state.duplicate(true)
+	var raw_quest_state: Variant = game_state_data.get("quest_state")
+	if not raw_quest_state is Dictionary or raw_quest_state.is_empty():
+		game_state_data["quest_state"] = {"completed_quest_ids": [], "defeated_boss_ids": []}
 	migrated_data["game_state"] = game_state_data
 	return migrated_data
 

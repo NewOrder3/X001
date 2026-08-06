@@ -66,6 +66,19 @@ func load_merchants(directory_path: String) -> Array[MerchantDefinition]:
 	return definitions
 
 
+func load_quests(directory_path: String) -> Array[QuestDefinition]:
+	var definitions: Array[QuestDefinition] = []
+	var entries: Array[Dictionary] = _load_json_entries(directory_path)
+	if not _last_error.is_empty():
+		return definitions
+	for entry: Dictionary in entries:
+		var definition: QuestDefinition = _create_quest_definition(entry["data"], entry["source_path"])
+		if definition == null:
+			return []
+		definitions.append(definition)
+	return definitions
+
+
 func load_recipes(directory_path: String) -> Array[RecipeDefinition]:
 	var definitions: Array[RecipeDefinition] = []
 	var entries: Array[Dictionary] = _load_json_entries(directory_path)
@@ -350,6 +363,42 @@ func _create_merchant_definition(data: Dictionary, source_path: String) -> Merch
 	if not _last_error.is_empty():
 		return null
 	return MerchantDefinition.new(id, display_name_key, description_key, offers)
+
+
+func _create_quest_definition(data: Dictionary, source_path: String) -> QuestDefinition:
+	var id: StringName = _read_id(data, source_path)
+	if _last_error.is_empty() and not String(id).begins_with("quest_"):
+		_set_error("Definition '%s' requires an ID beginning with 'quest_'." % source_path)
+	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
+	var description_key: StringName = _read_required_text_key(data, "description_key", source_path)
+	var objective_name: String = _read_required_string(data, "objective_type", source_path)
+	var target_id: StringName = &""
+	var objective_type: QuestDefinition.ObjectiveType = QuestDefinition.ObjectiveType.BUILD_BUILDING
+	match objective_name:
+		"build_building":
+			target_id = _read_required_prefixed_id(data, "target_id", "building_", source_path)
+		"have_item":
+			objective_type = QuestDefinition.ObjectiveType.HAVE_ITEM
+			target_id = _read_required_prefixed_id(data, "target_id", "item_", source_path)
+		"upgrade_raft":
+			objective_type = QuestDefinition.ObjectiveType.UPGRADE_RAFT
+			if data.has("target_id"):
+				_set_error("Definition '%s' must not define target_id for upgrade_raft." % source_path)
+		"recruit_survivor":
+			objective_type = QuestDefinition.ObjectiveType.RECRUIT_SURVIVOR
+			target_id = _read_optional_prefixed_id(data, "target_id", "survivor_", source_path)
+		"win_battle":
+			objective_type = QuestDefinition.ObjectiveType.WIN_BATTLE
+			target_id = _read_required_prefixed_id(data, "target_id", "boss_", source_path)
+		"explore_region":
+			objective_type = QuestDefinition.ObjectiveType.EXPLORE_REGION
+			target_id = _read_required_prefixed_id(data, "target_id", "region_", source_path)
+		_:
+			_set_error("Definition '%s' has unsupported quest objective '%s'." % [source_path, objective_name])
+	var target_amount: int = _read_positive_int(data, "target_amount", source_path)
+	if not _last_error.is_empty():
+		return null
+	return QuestDefinition.new(id, display_name_key, description_key, objective_type, target_id, target_amount)
 
 
 func _read_merchant_offers(

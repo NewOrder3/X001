@@ -287,3 +287,19 @@ message.merchant.inventory_full,背包已满，无法收纳货物。
 message.merchant.out_of_stock,该货物已售罄。
 message.merchant.purchased,购入 %d 份%s。
 message.session.start_before_merchant,请先开始游戏再与商人交易。
+data.quest.first_shelter.name,建造集雨器
+data.quest.first_shelter.description,在竹筏上建造一座集雨器，开始收集淡水。
+data.quest.first_sail.name,驶向西部浅滩
+data.quest.first_sail.description,建造船舵后探索相邻的西部浅滩海域。
+data.quest.first_crew.name,救起一位伙伴
+data.quest.first_crew.description,在航行中救起一位落难者并招募入队。
+data.quest.first_expand.name,扩建竹筏
+data.quest.first_expand.description,把竹筏扩建到 Lv2，获得更大的甲板。
+data.quest.first_boss.name,击败教学 Boss
+data.quest.first_boss.description,编队后击败礁海巨兽，检验你的战斗准备。
+ui.goal.title,%s（%d/%d）
+ui.goal.navigate,去完成
+ui.goal.all_done,所有新手目标已完成，继续探索海面吧！
+ui.goal.status_hint,按顺序完成目标，可一键跳转到对应面板。
+ui.goal.status_initial,开始游戏后显示新手目标。
+message.quest.unavailable,新手目标数据不可用。

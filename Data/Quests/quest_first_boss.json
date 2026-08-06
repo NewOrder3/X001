@@ -1,0 +1,8 @@
+{
+  "id": "quest_first_boss",
+  "display_name_key": "data.quest.first_boss.name",
+  "description_key": "data.quest.first_boss.description",
+  "objective_type": "win_battle",
+  "target_id": "boss_tutorial_sea_beast",
+  "target_amount": 1
+}

@@ -9,6 +9,7 @@ var inventory_state: InventoryState
 var survival_state: SurvivalState
 var production_state: ProductionState
 var merchant_state: MerchantState
+var quest_state: QuestState
 var survivor_state: SurvivorState
 var world_state: WorldState
 var battle_state: BattleState
@@ -22,6 +23,7 @@ func _init(initial_world_seed: int = 0) -> void:
 	survival_state = SurvivalState.new()
 	production_state = ProductionState.new()
 	merchant_state = MerchantState.new()
+	quest_state = QuestState.new()
 	survivor_state = SurvivorState.new()
 	world_state = WorldState.new()
 	battle_state = BattleState.new()

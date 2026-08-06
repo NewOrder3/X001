@@ -1,0 +1,8 @@
+{
+  "id": "quest_first_sail",
+  "display_name_key": "data.quest.first_sail.name",
+  "description_key": "data.quest.first_sail.description",
+  "objective_type": "explore_region",
+  "target_id": "region_west_shoals",
+  "target_amount": 1
+}

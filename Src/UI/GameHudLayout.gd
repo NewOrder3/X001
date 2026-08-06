@@ -19,6 +19,7 @@ signal build_mode_changed(is_enabled: bool)
 @onready var _world_map_panel: Control = $LeftPanelScroll/LeftPanelColumn/WorldMapPanel
 @onready var _survivor_panel: Control = $LeftPanelScroll/LeftPanelColumn/SurvivorPanel
 @onready var _merchant_panel: Control = $LeftPanelScroll/LeftPanelColumn/MerchantPanel
+@onready var _goal_panel: Control = $LeftPanelScroll/LeftPanelColumn/GoalPanel
 @onready var _voyage_header: Control = $OceanMapHUD/VoyageHeader
 @onready var _voyage_status: Control = $OceanMapHUD/VoyageStatus
 
@@ -31,7 +32,7 @@ func _ready() -> void:
 	$BottomNavigation/Buttons/BuildButton.pressed.connect(_toggle_panel.bind(_build_panel))
 	$BottomNavigation/Buttons/SupplyButton.pressed.connect(_toggle_panel.bind(_production_panel))
 	$BottomNavigation/Buttons/CrewButton.pressed.connect(_toggle_panel.bind(_survivor_panel))
-	$BottomNavigation/Buttons/StorageButton.pressed.connect(_toggle_panel.bind(_production_panel))
+	$BottomNavigation/Buttons/GoalButton.pressed.connect(_toggle_panel.bind(_goal_panel))
 	$BottomNavigation/Buttons/MerchantButton.pressed.connect(_toggle_panel.bind(_merchant_panel))
 	_apply_styles()
 	_set_active_panel(null)
@@ -56,7 +57,7 @@ func _show_ocean_map() -> void:
 
 func _set_active_panel(panel: Control) -> void:
 	_active_panel = panel
-	for candidate: Control in [_build_panel, _production_panel, _world_map_panel, _survivor_panel, _merchant_panel]:
+	for candidate: Control in [_goal_panel, _build_panel, _production_panel, _world_map_panel, _survivor_panel, _merchant_panel]:
 		candidate.visible = candidate == _active_panel
 	_left_panel_scroll.visible = _active_panel != null
 	var is_build_mode: bool = _active_panel == _build_panel
@@ -110,7 +111,7 @@ func _apply_compact_layout(viewport_size: Vector2) -> void:
 
 
 func _apply_styles() -> void:
-	for panel: Control in [_build_panel, _production_panel, _world_map_panel, _survivor_panel, _merchant_panel, _survival_hud]:
+	for panel: Control in [_goal_panel, _build_panel, _production_panel, _world_map_panel, _survivor_panel, _merchant_panel, _survival_hud]:
 		var style: StyleBoxFlat = StyleBoxFlat.new()
 		style.bg_color = Color(0.045, 0.12, 0.15, 0.90)
 		style.corner_radius_top_left = 18
@@ -135,7 +136,7 @@ func _apply_styles() -> void:
 	nav_style.border_width_right = 2
 	nav_style.border_color = Color(0.73, 0.45, 0.22, 0.85)
 	_bottom_navigation.add_theme_stylebox_override(&"panel", nav_style)
-	for button: Button in [$BottomNavigation/Buttons/MapButton, $BottomNavigation/Buttons/BuildButton, $BottomNavigation/Buttons/SupplyButton, $BottomNavigation/Buttons/CrewButton, $BottomNavigation/Buttons/StorageButton, $BottomNavigation/Buttons/MerchantButton]:
+	for button: Button in [$BottomNavigation/Buttons/MapButton, $BottomNavigation/Buttons/GoalButton, $BottomNavigation/Buttons/BuildButton, $BottomNavigation/Buttons/SupplyButton, $BottomNavigation/Buttons/CrewButton, $BottomNavigation/Buttons/MerchantButton]:
 		var normal: StyleBoxFlat = StyleBoxFlat.new()
 		normal.bg_color = Color("b9783c")
 		normal.corner_radius_top_left = 14
@@ -148,3 +149,21 @@ func _apply_styles() -> void:
 		button.add_theme_stylebox_override(&"hover", hover)
 		button.add_theme_color_override(&"font_color", Color("302017"))
 		button.add_theme_font_size_override(&"font_size", 20)
+
+
+func open_panel(panel_id: StringName) -> void:
+	match panel_id:
+		&"build":
+			_set_active_panel(_build_panel)
+		&"supply":
+			_set_active_panel(_production_panel)
+		&"map":
+			_set_active_panel(_world_map_panel)
+		&"crew":
+			_set_active_panel(_survivor_panel)
+		&"merchant":
+			_set_active_panel(_merchant_panel)
+		&"goal":
+			_set_active_panel(_goal_panel)
+		_:
+			_set_active_panel(null)

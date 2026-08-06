@@ -1,0 +1,8 @@
+{
+  "id": "quest_first_shelter",
+  "display_name_key": "data.quest.first_shelter.name",
+  "description_key": "data.quest.first_shelter.description",
+  "objective_type": "build_building",
+  "target_id": "building_rain_collector",
+  "target_amount": 1
+}

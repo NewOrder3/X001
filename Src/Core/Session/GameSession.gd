@@ -14,6 +14,7 @@ var _simulation_clock: SimulationClock
 var _survival_system: SurvivalSystem
 var _production_system: ProductionSystem
 var _merchant_system: MerchantSystem
+var _quest_system: QuestSystem
 var _survivor_system: SurvivorSystem
 var _random_service: RandomService
 var _progression_system: ProgressionSystem
@@ -35,6 +36,7 @@ func _init() -> void:
 	_survival_system = SurvivalSystem.new(_data_registry, _simulation_clock)
 	_production_system = ProductionSystem.new(_data_registry, _inventory_system, _simulation_clock)
 	_merchant_system = MerchantSystem.new(_data_registry, _inventory_system)
+	_quest_system = QuestSystem.new(_data_registry)
 	_survivor_system = SurvivorSystem.new(_data_registry, _inventory_system)
 	_random_service = RandomService.new()
 	_progression_system = ProgressionSystem.new(_data_registry, _inventory_system)
@@ -66,6 +68,11 @@ func create_new_game(world_seed: int) -> bool:
 		return false
 	if not _merchant_system.initialize_new_state(_state.merchant_state):
 		_last_error = GameText.get_text(&"message.merchant.unavailable")
+		_state = null
+		_is_disposed = true
+		return false
+	if not _quest_system.initialize_new_state(_state.quest_state):
+		_last_error = GameText.get_text(&"message.quest.unavailable")
 		_state = null
 		_is_disposed = true
 		return false
@@ -111,6 +118,10 @@ func load_state_at(state: GameState, current_unix_seconds: int) -> bool:
 		return false
 	if not _merchant_system.activate_loaded_state(_state.merchant_state):
 		_last_error = GameText.get_text(&"message.merchant.unavailable")
+		_state = null
+		return false
+	if not _quest_system.activate_loaded_state(_state.quest_state):
+		_last_error = GameText.get_text(&"message.quest.unavailable")
 		_state = null
 		return false
 	_last_offline_settlement_report = _survival_system.activate_loaded_state(
@@ -204,6 +215,34 @@ func get_progression_system() -> ProgressionSystem:
 
 func get_merchant_system() -> MerchantSystem:
 	return _merchant_system
+
+
+func get_quest_system() -> QuestSystem:
+	return _quest_system
+
+
+func get_quest_state() -> QuestState:
+	if not has_active_state():
+		return null
+	return _state.quest_state
+
+
+func get_active_quests() -> Array[QuestDefinition]:
+	if not has_active_state():
+		return []
+	return _quest_system.get_active_quests(_state)
+
+
+func get_quest_progress(quest_id: StringName) -> int:
+	if not has_active_state():
+		return 0
+	return _quest_system.get_progress(_state, quest_id)
+
+
+func get_quest_definition(quest_id: StringName) -> QuestDefinition:
+	if _data_registry == null or not _data_registry.has_quest(quest_id):
+		return null
+	return _data_registry.get_quest(quest_id)
 
 
 func get_merchant_state() -> MerchantState:
@@ -567,6 +606,8 @@ func _settle_completed_battle() -> bool:
 		if boss.defeat_durability_loss > 0.0:
 			_survival_system.apply_durability_loss(_state.survival_state, boss.id, boss.defeat_durability_loss)
 	battle.settlement_applied = true
+	if battle.did_win:
+		_quest_system.record_battle_victory(_state, battle.boss_id)
 	return true
 
 

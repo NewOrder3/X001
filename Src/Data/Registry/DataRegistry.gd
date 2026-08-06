@@ -9,6 +9,7 @@ const PROGRESSION_DIRECTORY: String = "res://Data/Progression"
 const SURVIVAL_DIRECTORY: String = "res://Data/Survival"
 const RECIPE_DIRECTORY: String = "res://Data/Recipes"
 const MERCHANT_DIRECTORY: String = "res://Data/Merchants"
+const QUEST_DIRECTORY: String = "res://Data/Quests"
 const REGION_DIRECTORY: String = "res://Data/Regions"
 const ENCOUNTER_DIRECTORY: String = "res://Data/Encounters"
 const SURVIVOR_DIRECTORY: String = "res://Data/Survivors"
@@ -22,6 +23,7 @@ var _progression_directory: String
 var _survival_directory: String
 var _recipe_directory: String
 var _merchant_directory: String
+var _quest_directory: String
 var _region_directory: String
 var _encounter_directory: String
 var _survivor_directory: String
@@ -35,6 +37,7 @@ var _survival_configs: Dictionary[StringName, SurvivalConfigDefinition] = {}
 var _recipes: Dictionary[StringName, RecipeDefinition] = {}
 var _merchants: Dictionary[StringName, MerchantDefinition] = {}
 var _merchant_offers: Dictionary[StringName, MerchantOfferDefinition] = {}
+var _quests: Dictionary[StringName, QuestDefinition] = {}
 var _regions: Dictionary[StringName, RegionDefinition] = {}
 var _encounters: Dictionary[StringName, EncounterDefinition] = {}
 var _survivors: Dictionary[StringName, SurvivorDefinition] = {}
@@ -51,6 +54,7 @@ func _init(
 	new_survival_directory: String = SURVIVAL_DIRECTORY,
 	new_recipe_directory: String = "",
 	new_merchant_directory: String = "",
+	new_quest_directory: String = "",
 	new_region_directory: String = "",
 	new_encounter_directory: String = "",
 	new_survivor_directory: String = "",
@@ -64,9 +68,12 @@ func _init(
 	_survival_directory = new_survival_directory
 	_recipe_directory = RECIPE_DIRECTORY if new_recipe_directory.is_empty() and new_item_directory == ITEM_DIRECTORY and new_building_directory == BUILDING_DIRECTORY else new_recipe_directory
 	_merchant_directory = new_merchant_directory
+	_quest_directory = new_quest_directory
 	var use_default_content_directories: bool = new_item_directory == ITEM_DIRECTORY and new_building_directory == BUILDING_DIRECTORY and new_survival_directory == SURVIVAL_DIRECTORY
 	if _merchant_directory.is_empty() and use_default_content_directories:
 		_merchant_directory = MERCHANT_DIRECTORY
+	if _quest_directory.is_empty() and use_default_content_directories:
+		_quest_directory = QUEST_DIRECTORY
 	_region_directory = REGION_DIRECTORY if new_region_directory.is_empty() and use_default_content_directories else new_region_directory
 	_encounter_directory = ENCOUNTER_DIRECTORY if new_encounter_directory.is_empty() and use_default_content_directories else new_encounter_directory
 	_survivor_directory = SURVIVOR_DIRECTORY if new_survivor_directory.is_empty() and use_default_content_directories else new_survivor_directory
@@ -122,6 +129,13 @@ func load_all() -> bool:
 		for definition: MerchantDefinition in merchant_definitions:
 			if not _register_merchant(definition):
 				return _fail_load(_last_error)
+	if not _quest_directory.is_empty():
+		var quest_definitions: Array[QuestDefinition] = loader.load_quests(_quest_directory)
+		if not loader.get_last_error().is_empty():
+			return _fail_load(loader.get_last_error())
+		for definition: QuestDefinition in quest_definitions:
+			if not _register_quest(definition):
+				return _fail_load(_last_error)
 	if not _region_directory.is_empty():
 		var region_definitions: Array[RegionDefinition] = loader.load_regions(_region_directory)
 		if not loader.get_last_error().is_empty():
@@ -176,6 +190,8 @@ func load_all() -> bool:
 		return _fail_load(_last_error)
 	if not _validate_battle_references():
 		return _fail_load(_last_error)
+	if not _validate_quest_references():
+		return _fail_load(_last_error)
 
 	return true
 
@@ -227,6 +243,13 @@ func get_merchant_offer(id: StringName) -> MerchantOfferDefinition:
 		push_error("DATA: Unknown merchant offer ID '%s'." % String(id))
 		return null
 	return _merchant_offers[id]
+
+
+func get_quest(id: StringName) -> QuestDefinition:
+	if not _quests.has(id):
+		push_error("DATA: Unknown quest Definition ID '%s'." % String(id))
+		return null
+	return _quests[id]
 
 
 func get_region(id: StringName) -> RegionDefinition:
@@ -321,6 +344,10 @@ func has_merchant_offer(id: StringName) -> bool:
 	return _merchant_offers.has(id)
 
 
+func has_quest(id: StringName) -> bool:
+	return _quests.has(id)
+
+
 func has_region(id: StringName) -> bool:
 	return _regions.has(id)
 
@@ -377,6 +404,10 @@ func get_merchant_offer_count() -> int:
 	return _merchant_offers.size()
 
 
+func get_quest_count() -> int:
+	return _quests.size()
+
+
 func get_region_count() -> int:
 	return _regions.size()
 
@@ -409,6 +440,17 @@ func get_merchants() -> Array[MerchantDefinition]:
 	var definitions: Array[MerchantDefinition] = []
 	for merchant_id: StringName in ids:
 		definitions.append(_merchants[merchant_id])
+	return definitions
+
+
+func get_quests() -> Array[QuestDefinition]:
+	var ids: Array[StringName] = []
+	for quest_id: StringName in _quests:
+		ids.append(quest_id)
+	ids.sort()
+	var definitions: Array[QuestDefinition] = []
+	for quest_id: StringName in ids:
+		definitions.append(_quests[quest_id])
 	return definitions
 
 
@@ -469,6 +511,13 @@ func _register_merchant(definition: MerchantDefinition) -> bool:
 		if not _register_id(offer.id):
 			return false
 		_merchant_offers[offer.id] = offer
+	return true
+
+
+func _register_quest(definition: QuestDefinition) -> bool:
+	if not _register_id(definition.id):
+		return false
+	_quests[definition.id] = definition
 	return true
 
 
@@ -563,6 +612,35 @@ func _validate_merchant_references() -> bool:
 			for item_id: StringName in offer.cost:
 				if not _items.has(item_id):
 					_set_error("Merchant '%s' offer '%s' references unknown cost item '%s'." % [String(merchant.id), String(offer.id), String(item_id)])
+					return false
+	return true
+
+
+func _validate_quest_references() -> bool:
+	if _quests.is_empty():
+		return true
+	for quest: QuestDefinition in _quests.values():
+		var target_id: StringName = quest.target_id
+		match quest.objective_type:
+			QuestDefinition.ObjectiveType.BUILD_BUILDING:
+				if not _buildings.has(target_id):
+					_set_error("Quest '%s' references unknown building '%s'." % [String(quest.id), String(target_id)])
+					return false
+			QuestDefinition.ObjectiveType.HAVE_ITEM:
+				if not _items.has(target_id):
+					_set_error("Quest '%s' references unknown item '%s'." % [String(quest.id), String(target_id)])
+					return false
+			QuestDefinition.ObjectiveType.RECRUIT_SURVIVOR:
+				if target_id != &"" and not _survivors.has(target_id):
+					_set_error("Quest '%s' references unknown survivor '%s'." % [String(quest.id), String(target_id)])
+					return false
+			QuestDefinition.ObjectiveType.WIN_BATTLE:
+				if not _bosses.has(target_id):
+					_set_error("Quest '%s' references unknown boss '%s'." % [String(quest.id), String(target_id)])
+					return false
+			QuestDefinition.ObjectiveType.EXPLORE_REGION:
+				if not _regions.has(target_id):
+					_set_error("Quest '%s' references unknown region '%s'." % [String(quest.id), String(target_id)])
 					return false
 	return true
 
@@ -704,6 +782,7 @@ func _clear() -> void:
 	_recipes.clear()
 	_merchants.clear()
 	_merchant_offers.clear()
+	_quests.clear()
 	_regions.clear()
 	_encounters.clear()
 	_survivors.clear()

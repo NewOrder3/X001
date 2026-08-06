@@ -1,0 +1,7 @@
+{
+  "id": "quest_first_expand",
+  "display_name_key": "data.quest.first_expand.name",
+  "description_key": "data.quest.first_expand.description",
+  "objective_type": "upgrade_raft",
+  "target_amount": 2
+}
