@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://Src/UI/GameHudLayout.gd" id="8_hud_layout"]
 [ext_resource type="Script" path="res://Src/Survival/View/OfflineSettlementPanel.gd" id="9_offline_settlement_panel"]
 [ext_resource type="Script" path="res://Src/Exploration/View/WorldMapPanel.gd" id="10_world_map_panel"]
+[ext_resource type="Script" path="res://Src/Survivor/View/SurvivorPanel.gd" id="11_survivor_panel"]
 
 [node name="GameRoot" type="Node"]
 script = ExtResource("1_game")
@@ -197,6 +198,48 @@ custom_minimum_size = Vector2(0, 350)
 layout_mode = 2
 size_flags_horizontal = 3
 script = ExtResource("10_world_map_panel")
+
+[node name="SurvivorPanel" type="PanelContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn"]
+custom_minimum_size = Vector2(0, 410)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("11_survivor_panel")
+
+[node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "ui.survivor.title"
+
+[node name="LineupLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="PendingCards" type="VBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="OwnedCards" type="VBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SurvivorStatusLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
 
 [node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel"]
 layout_mode = 2

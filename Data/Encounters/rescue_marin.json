@@ -1,0 +1,7 @@
+{
+  "id": "event_rescue_marin",
+  "display_name_key": "data.encounter.rescue_marin.name",
+  "description_key": "data.encounter.rescue_marin.description",
+  "outcome_type": "rescue",
+  "survivor_id": "survivor_marin"
+}

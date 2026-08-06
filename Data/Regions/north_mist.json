@@ -5,5 +5,5 @@
   "q": 0,
   "r": -1,
   "is_starting_region": false,
-  "encounter_ids": ["event_resource_cache", "event_calm_sea", "event_sudden_storm"]
+  "encounter_ids": ["event_resource_cache", "event_calm_sea", "event_sudden_storm", "event_rescue_yue"]
 }

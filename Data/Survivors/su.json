@@ -1,0 +1,9 @@
+{
+  "id": "survivor_su",
+  "display_name_key": "data.survivor.su.name",
+  "description_key": "data.survivor.su.description",
+  "skill_id": "skill_harpoon_throw",
+  "passive_id": "passive_critical",
+  "passive_value_per_level": 0.05,
+  "upgrade_cost": {"item_wood": 2}
+}

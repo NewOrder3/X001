@@ -81,6 +81,10 @@ func test_default_registry_loads_s3_recipe_definitions() -> void:
 	assert_true(registry.load_all(), registry.get_last_error())
 	assert_eq(registry.get_recipe_count(), 2)
 	assert_not_null(registry.get_recipe(&"recipe_grill_fish"))
+	assert_eq(registry.get_survivor_count(), 4)
+	assert_eq(registry.get_skill_count(), 4)
+	assert_not_null(registry.get_survivor(&"survivor_marin"))
+	assert_not_null(registry.get_skill(&"skill_anchor_strike"))
 
 
 func test_default_definition_text_uses_stable_key_and_chinese_translation() -> void:

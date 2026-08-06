@@ -163,3 +163,52 @@ data.fixture.duplicate_item.name,重复测试物品
 data.fixture.duplicate_item.description,与其他测试定义共用 ID。
 data.fixture.duplicate_building.name,重复测试建筑
 data.fixture.duplicate_building.description,与其他测试定义共用 ID。
+ui.survivor.title,伙伴与编队（S5）
+ui.survivor.pending,待招募：%s
+ui.survivor.pending_empty,尚未发现等待救援的伙伴。
+ui.survivor.roster_empty,尚未招募伙伴。航行时留意救援信号。
+ui.survivor.lineup,出战编队（%d/%d）：%s
+ui.survivor.lineup_empty,暂无出战伙伴
+ui.survivor.recruit,招募 %s
+ui.survivor.add_to_lineup,加入编队
+ui.survivor.remove_from_lineup,移出编队
+ui.survivor.upgrade,升级（%s）
+ui.survivor.card,%s　Lv%d\n%s\n技能：%s\n被动：%s +%.2f / 级
+message.session.start_before_recruiting,请先开始游戏再管理伙伴。
+message.survivor.state_unavailable,伙伴状态不可用。
+message.survivor.unavailable,该伙伴不可用。
+message.survivor.not_rescued,该伙伴尚未被救援。
+message.survivor.already_recruited,该伙伴已加入队伍。
+message.survivor.not_recruited,该伙伴尚未招募。
+message.survivor.max_level,该伙伴已达到 Lv10。
+message.survivor.insufficient_resources,升级材料不足。
+message.survivor.invalid_lineup,编队中存在未招募或重复的伙伴。
+message.survivor.lineup_full,最多只能安排 3 名出战伙伴。
+message.survivor.recruited,%s 已加入队伍。
+message.survivor.upgraded,%s 升至 Lv%d。
+message.survivor.lineup_updated,出战编队已更新。
+message.exploration.arrived_rescue,已抵达%s：发现了等待救援的 %s。
+data.encounter.rescue_marin.name,漂流的海员
+data.encounter.rescue_marin.description,一名海员正抓着破损的救生圈等待援手。
+data.encounter.rescue_yue.name,迷雾中的信号
+data.encounter.rescue_yue.description,雾中传来有节奏的求救哨声。
+data.encounter.rescue_bo.name,浅滩求生者
+data.encounter.rescue_bo.description,一位医护人员在浅滩的浮木旁等待救援。
+data.encounter.rescue_su.name,远处的求救火光
+data.encounter.rescue_su.description,漂流木筏上的火光指引你靠近。
+data.survivor.marin.name,马林
+data.survivor.marin.description,经验丰富的甲板水手，擅长用锚链制造破绽。
+data.survivor.yue.name,岳岚
+data.survivor.yue.description,沉着的船体维修师，能在混战中守住阵线。
+data.survivor.bo.name,阿波
+data.survivor.bo.description,曾任海上急救员，总能让队伍重新振作。
+data.survivor.su.name,苏澈
+data.survivor.su.description,敏捷的渔猎人，出手时机极其精准。
+data.skill.anchor_strike.name,锚击
+data.skill.anchor_strike.description,以沉重锚链压制敌人；战斗效果将在 S6 接入。
+data.skill.tide_guard.name,潮汐守卫
+data.skill.tide_guard.description,以稳固姿态保护队伍；战斗效果将在 S6 接入。
+data.skill.first_aid.name,紧急包扎
+data.skill.first_aid.description,快速处理伤口；战斗效果将在 S6 接入。
+data.skill.harpoon_throw.name,鱼叉投掷
+data.skill.harpoon_throw.description,瞄准破绽投出鱼叉；战斗效果将在 S6 接入。

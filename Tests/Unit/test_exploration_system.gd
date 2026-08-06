@@ -97,6 +97,22 @@ func test_storm_encounter_applies_durability_loss() -> void:
 	assert_true(found_storm, "Expected at least one fixed seed to resolve a storm.")
 
 
+func test_rescue_encounter_offers_a_unique_recruitment() -> void:
+	var found_rescue: bool = false
+	for seed: int in range(1, 128):
+		var session: GameSession = _create_session(seed)
+		var command_result: CommandResult = session.execute_command(ExploreRegionCommand.new(&"region_west_shoals"))
+		var exploration_result: ExplorationResult = session.get_last_exploration_result()
+		if command_result.succeeded and exploration_result != null and exploration_result.rescued_survivor_id != &"":
+			found_rescue = true
+			assert_eq(exploration_result.rescued_survivor_id, &"survivor_bo")
+			assert_true(session.get_survivor_state().pending_recruitment_ids.has(&"survivor_bo"))
+			assert_true(session.execute_command(RecruitSurvivorCommand.new(&"survivor_bo")).succeeded)
+			assert_false(session.get_survivor_system().offer_recruitment(session.get_survivor_state(), &"survivor_bo"))
+			break
+	assert_true(found_rescue, "Expected at least one fixed seed to resolve a rescue.")
+
+
 func _create_session(seed: int) -> GameSession:
 	var session: GameSession = GameSession.new()
 	assert_true(session.create_new_game(seed), session.get_last_error())

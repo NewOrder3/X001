@@ -12,6 +12,7 @@ var encounter_id: StringName
 var reward_items: Dictionary[StringName, int]
 var durability_loss: float
 var stamina_cost: int
+var rescued_survivor_id: StringName
 
 
 func _init(
@@ -24,6 +25,7 @@ func _init(
 	new_reward_items: Dictionary[StringName, int] = {},
 	new_durability_loss: float = 0.0,
 	new_stamina_cost: int = 0,
+	new_rescued_survivor_id: StringName = &"",
 ) -> void:
 	succeeded = new_succeeded
 	error_code = new_error_code
@@ -34,6 +36,7 @@ func _init(
 	reward_items = new_reward_items.duplicate()
 	durability_loss = new_durability_loss
 	stamina_cost = new_stamina_cost
+	rescued_survivor_id = new_rescued_survivor_id
 
 
 static func failure(error: StringName, message_text: String) -> ExplorationResult:

@@ -1,0 +1,9 @@
+{
+  "id": "survivor_yue",
+  "display_name_key": "data.survivor.yue.name",
+  "description_key": "data.survivor.yue.description",
+  "skill_id": "skill_tide_guard",
+  "passive_id": "passive_defense",
+  "passive_value_per_level": 1.0,
+  "upgrade_cost": {"item_wood": 3}
+}

@@ -16,6 +16,7 @@ const REQUIRED_BUILDING_ID: StringName = &"building_rudder"
 var _data_registry: DataRegistry
 var _inventory_system: InventorySystem
 var _survival_system: SurvivalSystem
+var _survivor_system: SurvivorSystem
 var _random_service: RandomService
 
 
@@ -23,11 +24,13 @@ func _init(
 	new_data_registry: DataRegistry,
 	new_inventory_system: InventorySystem,
 	new_survival_system: SurvivalSystem,
+	new_survivor_system: SurvivorSystem,
 	new_random_service: RandomService,
 ) -> void:
 	_data_registry = new_data_registry
 	_inventory_system = new_inventory_system
 	_survival_system = new_survival_system
+	_survivor_system = new_survivor_system
 	_random_service = new_random_service
 
 
@@ -112,6 +115,7 @@ func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResu
 	var reward_items: Dictionary[StringName, int] = {}
 	var durability_loss: float = 0.0
 	var encounter_id: StringName = &""
+	var rescued_survivor_id: StringName = &""
 	var message: String = GameText.format(&"message.exploration.arrived_calm", [target.get_display_name()])
 	if encounter != null:
 		encounter_id = encounter.id
@@ -128,6 +132,9 @@ func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResu
 				encounter.durability_loss,
 			)
 			durability_loss = durability_result.durability_loss if durability_result.succeeded else 0.0
+		if encounter.outcome_type == EncounterDefinition.OutcomeType.RESCUE:
+			if _survivor_system != null and _survivor_system.offer_recruitment(state.survivor_state, encounter.survivor_id):
+				rescued_survivor_id = encounter.survivor_id
 		message = _get_encounter_message(target, encounter, reward_items, durability_loss)
 
 	var result: ExplorationResult = ExplorationResult.new(
@@ -140,6 +147,7 @@ func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResu
 		reward_items,
 		durability_loss,
 		consume_result.stamina_cost,
+		rescued_survivor_id,
 	)
 	exploration_completed.emit(result)
 	return result
@@ -189,6 +197,9 @@ func _get_encounter_message(
 			return GameText.format(&"message.exploration.arrived_rewards", [region.get_display_name(), _format_rewards(rewards)])
 		EncounterDefinition.OutcomeType.STORM:
 			return GameText.format(&"message.exploration.arrived_storm", [region.get_display_name(), durability_loss])
+		EncounterDefinition.OutcomeType.RESCUE:
+			var survivor: SurvivorDefinition = _data_registry.get_survivor(encounter.survivor_id)
+			return GameText.format(&"message.exploration.arrived_rescue", [region.get_display_name(), survivor.get_display_name()])
 	return GameText.format(&"message.exploration.arrived_encounter", [region.get_display_name(), encounter.get_description()])
 
 

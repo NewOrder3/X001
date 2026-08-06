@@ -13,6 +13,7 @@ var _gathering_system: GatheringSystem
 var _simulation_clock: SimulationClock
 var _survival_system: SurvivalSystem
 var _production_system: ProductionSystem
+var _survivor_system: SurvivorSystem
 var _random_service: RandomService
 var _exploration_system: ExplorationSystem
 var _session_command_system: SessionCommandSystem
@@ -29,8 +30,9 @@ func _init() -> void:
 	_simulation_clock = SimulationClock.new()
 	_survival_system = SurvivalSystem.new(_data_registry, _simulation_clock)
 	_production_system = ProductionSystem.new(_data_registry, _inventory_system, _simulation_clock)
+	_survivor_system = SurvivorSystem.new(_data_registry, _inventory_system)
 	_random_service = RandomService.new()
-	_exploration_system = ExplorationSystem.new(_data_registry, _inventory_system, _survival_system, _random_service)
+	_exploration_system = ExplorationSystem.new(_data_registry, _inventory_system, _survival_system, _survivor_system, _random_service)
 	_session_command_system = SessionCommandSystem.new()
 
 
@@ -81,6 +83,10 @@ func load_state_at(state: GameState, current_unix_seconds: int) -> bool:
 		return false
 
 	_state = state
+	if not _survivor_system.activate_loaded_state(_state.survivor_state):
+		_last_error = GameText.get_text(&"message.survivor.state_unavailable")
+		_state = null
+		return false
 	_last_offline_settlement_report = _survival_system.activate_loaded_state(
 		_state.survival_state,
 		current_unix_seconds,
@@ -199,6 +205,28 @@ func get_survival_system() -> SurvivalSystem:
 	return _survival_system
 
 
+func get_survivor_state() -> SurvivorState:
+	if not has_active_state():
+		return null
+	return _state.survivor_state
+
+
+func get_survivor_system() -> SurvivorSystem:
+	return _survivor_system
+
+
+func get_survivor_definition(survivor_id: StringName) -> SurvivorDefinition:
+	if _data_registry == null or not _data_registry.has_survivor(survivor_id):
+		return null
+	return _data_registry.get_survivor(survivor_id)
+
+
+func get_skill_definition(skill_id: StringName) -> SkillDefinition:
+	if _data_registry == null or not _data_registry.has_skill(skill_id):
+		return null
+	return _data_registry.get_skill(skill_id)
+
+
 func can_perform_survival_action(action_type: StringName) -> SurvivalActionResult:
 	if not has_active_state():
 		return SurvivalActionResult.failure(
@@ -278,6 +306,24 @@ func execute_set_production_enabled(command: SetProductionEnabledCommand) -> Com
 	if not has_active_state():
 		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_operating"))
 	return _production_system.set_enabled(_state, command.building_instance_id, command.is_enabled)
+
+
+func execute_recruit_survivor(command: RecruitSurvivorCommand) -> CommandResult:
+	if not has_active_state() or command == null:
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_recruiting"))
+	return _survivor_system.recruit(_state, command.survivor_id)
+
+
+func execute_upgrade_survivor(command: UpgradeSurvivorCommand) -> CommandResult:
+	if not has_active_state() or command == null:
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_recruiting"))
+	return _survivor_system.upgrade(_state, command.survivor_id)
+
+
+func execute_set_lineup(command: SetLineupCommand) -> CommandResult:
+	if not has_active_state() or command == null:
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_recruiting"))
+	return _survivor_system.set_lineup(_state.survivor_state, command.lineup_ids)
 
 
 func get_production_system() -> ProductionSystem:

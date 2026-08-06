@@ -96,6 +96,32 @@ func load_encounters(directory_path: String) -> Array[EncounterDefinition]:
 	return definitions
 
 
+func load_survivors(directory_path: String) -> Array[SurvivorDefinition]:
+	var definitions: Array[SurvivorDefinition] = []
+	var entries: Array[Dictionary] = _load_json_entries(directory_path)
+	if not _last_error.is_empty():
+		return definitions
+	for entry: Dictionary in entries:
+		var definition: SurvivorDefinition = _create_survivor_definition(entry["data"], entry["source_path"])
+		if definition == null:
+			return []
+		definitions.append(definition)
+	return definitions
+
+
+func load_skills(directory_path: String) -> Array[SkillDefinition]:
+	var definitions: Array[SkillDefinition] = []
+	var entries: Array[Dictionary] = _load_json_entries(directory_path)
+	if not _last_error.is_empty():
+		return definitions
+	for entry: Dictionary in entries:
+		var definition: SkillDefinition = _create_skill_definition(entry["data"], entry["source_path"])
+		if definition == null:
+			return []
+		definitions.append(definition)
+	return definitions
+
+
 func get_last_error() -> String:
 	return _last_error
 
@@ -316,11 +342,14 @@ func _create_encounter_definition(data: Dictionary, source_path: String) -> Enco
 			outcome_type = EncounterDefinition.OutcomeType.EMPTY
 		"storm":
 			outcome_type = EncounterDefinition.OutcomeType.STORM
+		"rescue":
+			outcome_type = EncounterDefinition.OutcomeType.RESCUE
 		_:
 			_set_error("Definition '%s' has an unknown outcome_type '%s'." % [source_path, outcome_name])
 			return null
 	var reward_items: Dictionary[StringName, int] = _read_optional_item_amounts(data, "reward_items", source_path)
 	var durability_loss: float = _read_optional_nonnegative_float(data, "durability_loss", source_path, 0.0)
+	var survivor_id: StringName = _read_optional_prefixed_id(data, "survivor_id", "survivor_", source_path)
 	if not _last_error.is_empty():
 		return null
 	if outcome_type == EncounterDefinition.OutcomeType.RESOURCE and reward_items.is_empty():
@@ -335,7 +364,41 @@ func _create_encounter_definition(data: Dictionary, source_path: String) -> Enco
 	if outcome_type != EncounterDefinition.OutcomeType.STORM and durability_loss > 0.0:
 		_set_error("Only storm encounters may define durability_loss in '%s'." % source_path)
 		return null
-	return EncounterDefinition.new(id, display_name_key, description_key, outcome_type, reward_items, durability_loss)
+	if outcome_type == EncounterDefinition.OutcomeType.RESCUE and survivor_id == &"":
+		_set_error("Rescue encounter '%s' requires survivor_id." % source_path)
+		return null
+	if outcome_type != EncounterDefinition.OutcomeType.RESCUE and survivor_id != &"":
+		_set_error("Only rescue encounters may define survivor_id in '%s'." % source_path)
+		return null
+	return EncounterDefinition.new(id, display_name_key, description_key, outcome_type, reward_items, durability_loss, survivor_id)
+
+
+func _create_survivor_definition(data: Dictionary, source_path: String) -> SurvivorDefinition:
+	var id: StringName = _read_id(data, source_path)
+	if _last_error.is_empty() and not String(id).begins_with("survivor_"):
+		_set_error("Definition '%s' requires an ID beginning with 'survivor_'." % source_path)
+	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
+	var description_key: StringName = _read_required_text_key(data, "description_key", source_path)
+	var skill_id: StringName = _read_optional_prefixed_id(data, "skill_id", "skill_", source_path)
+	var passive_id: String = _read_required_string(data, "passive_id", source_path)
+	var passive_value_per_level: float = _read_positive_float(data, "passive_value_per_level", source_path)
+	var upgrade_cost: Dictionary[StringName, int] = _read_item_amounts(data, "upgrade_cost", source_path)
+	if not _last_error.is_empty() or skill_id == &"" or passive_id.is_empty():
+		if _last_error.is_empty():
+			_set_error("Definition '%s' requires a skill_id and passive_id." % source_path)
+		return null
+	return SurvivorDefinition.new(id, display_name_key, description_key, skill_id, StringName(passive_id), passive_value_per_level, upgrade_cost)
+
+
+func _create_skill_definition(data: Dictionary, source_path: String) -> SkillDefinition:
+	var id: StringName = _read_id(data, source_path)
+	if _last_error.is_empty() and not String(id).begins_with("skill_"):
+		_set_error("Definition '%s' requires an ID beginning with 'skill_'." % source_path)
+	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
+	var description_key: StringName = _read_required_text_key(data, "description_key", source_path)
+	if not _last_error.is_empty():
+		return null
+	return SkillDefinition.new(id, display_name_key, description_key)
 
 
 func _read_id(data: Dictionary, source_path: String) -> StringName:

@@ -41,6 +41,15 @@ func execute(session: GameSession, command: GameCommand) -> CommandResult:
 	if command is ExploreRegionCommand:
 		var explore_command: ExploreRegionCommand = command as ExploreRegionCommand
 		return _complete(command, session.execute_explore_region(explore_command))
+	if command is RecruitSurvivorCommand:
+		var recruit_command: RecruitSurvivorCommand = command as RecruitSurvivorCommand
+		return _complete(command, session.execute_recruit_survivor(recruit_command))
+	if command is UpgradeSurvivorCommand:
+		var upgrade_command: UpgradeSurvivorCommand = command as UpgradeSurvivorCommand
+		return _complete(command, session.execute_upgrade_survivor(upgrade_command))
+	if command is SetLineupCommand:
+		var lineup_command: SetLineupCommand = command as SetLineupCommand
+		return _complete(command, session.execute_set_lineup(lineup_command))
 
 	return _reject(
 		command,

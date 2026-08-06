@@ -59,6 +59,25 @@ func test_save_marks_survival_state_for_offline_settlement() -> void:
 	assert_true(loaded_state.survival_state.offline_settlement_pending)
 
 
+func test_save_load_restores_survivor_roster_pending_rescues_and_lineup() -> void:
+	var state: GameState = GameState.new(8644)
+	state.survivor_state.survivors[&"survivor_marin"] = SurvivorInstance.new(&"survivor_marin", &"survivor_marin", 4)
+	state.survivor_state.pending_recruitment_ids = [&"survivor_yue"]
+	state.survivor_state.lineup_ids = [&"survivor_marin"]
+	var service: SaveService = SaveService.new()
+	service.set_active_state(state)
+
+	assert_true(service.save_game(&"save_survivor_state_test"))
+	var loaded_state: GameState = service.load_game(&"save_survivor_state_test")
+
+	assert_not_null(loaded_state)
+	if loaded_state == null:
+		return
+	assert_eq(loaded_state.survivor_state.survivors[&"survivor_marin"].level, 4)
+	assert_eq(loaded_state.survivor_state.pending_recruitment_ids, [&"survivor_yue"])
+	assert_eq(loaded_state.survivor_state.lineup_ids, [&"survivor_marin"])
+
+
 func test_migrate_v1_adds_missing_state_sections() -> void:
 	var source_state: GameState = GameState.new(2468)
 	var v1_data: Dictionary = {
@@ -127,3 +146,24 @@ func test_migrate_v4_adds_offline_settlement_defaults() -> void:
 	assert_eq(migrated_survival_data.get("last_online_unix_seconds"), 0)
 	assert_eq(migrated_survival_data.get("last_offline_settlement_unix_seconds"), 0)
 	assert_false(migrated_survival_data.get("offline_settlement_pending", true))
+
+
+func test_migrate_v6_adds_survivor_state_when_missing() -> void:
+	var source_state: GameState = GameState.new(9755)
+	var v6_data: Dictionary = {
+		"save_version": 6,
+		"world_seed": 9755,
+		"game_state": {
+			"world_seed": 9755,
+			"raft_state": source_state.raft_state.to_save_data(),
+			"inventory_state": source_state.inventory_state.to_save_data(),
+			"survival_state": {},
+			"production_state": source_state.production_state.to_save_data(),
+			"world_state": source_state.world_state.to_save_data(),
+		},
+	}
+	var service: SaveService = SaveService.new()
+	var migrated_data: Dictionary = service.migrate(v6_data)
+	var game_state_data: Dictionary = migrated_data.get("game_state", {}) as Dictionary
+	assert_eq(int(migrated_data.get("save_version", 0)), SaveService.CURRENT_SAVE_VERSION)
+	assert_eq(game_state_data.get("survivor_state", {}), {})

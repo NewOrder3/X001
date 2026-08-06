@@ -1,0 +1,7 @@
+{
+  "id": "event_rescue_yue",
+  "display_name_key": "data.encounter.rescue_yue.name",
+  "description_key": "data.encounter.rescue_yue.description",
+  "outcome_type": "rescue",
+  "survivor_id": "survivor_yue"
+}

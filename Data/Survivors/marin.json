@@ -1,0 +1,9 @@
+{
+  "id": "survivor_marin",
+  "display_name_key": "data.survivor.marin.name",
+  "description_key": "data.survivor.marin.description",
+  "skill_id": "skill_anchor_strike",
+  "passive_id": "passive_attack",
+  "passive_value_per_level": 2.0,
+  "upgrade_cost": {"item_wood": 2}
+}

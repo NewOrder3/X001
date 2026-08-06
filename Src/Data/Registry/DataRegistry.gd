@@ -9,6 +9,8 @@ const SURVIVAL_DIRECTORY: String = "res://Data/Survival"
 const RECIPE_DIRECTORY: String = "res://Data/Recipes"
 const REGION_DIRECTORY: String = "res://Data/Regions"
 const ENCOUNTER_DIRECTORY: String = "res://Data/Encounters"
+const SURVIVOR_DIRECTORY: String = "res://Data/Survivors"
+const SKILL_DIRECTORY: String = "res://Data/Skills"
 
 var _item_directory: String
 var _building_directory: String
@@ -16,12 +18,16 @@ var _survival_directory: String
 var _recipe_directory: String
 var _region_directory: String
 var _encounter_directory: String
+var _survivor_directory: String
+var _skill_directory: String
 var _items: Dictionary[StringName, ItemDefinition] = {}
 var _buildings: Dictionary[StringName, BuildingDefinition] = {}
 var _survival_configs: Dictionary[StringName, SurvivalConfigDefinition] = {}
 var _recipes: Dictionary[StringName, RecipeDefinition] = {}
 var _regions: Dictionary[StringName, RegionDefinition] = {}
 var _encounters: Dictionary[StringName, EncounterDefinition] = {}
+var _survivors: Dictionary[StringName, SurvivorDefinition] = {}
+var _skills: Dictionary[StringName, SkillDefinition] = {}
 var _registered_ids: Dictionary[StringName, bool] = {}
 var _last_error: String = ""
 
@@ -33,14 +39,18 @@ func _init(
 	new_recipe_directory: String = "",
 	new_region_directory: String = "",
 	new_encounter_directory: String = "",
+	new_survivor_directory: String = "",
+	new_skill_directory: String = "",
 ) -> void:
 	_item_directory = new_item_directory
 	_building_directory = new_building_directory
 	_survival_directory = new_survival_directory
 	_recipe_directory = RECIPE_DIRECTORY if new_recipe_directory.is_empty() and new_item_directory == ITEM_DIRECTORY and new_building_directory == BUILDING_DIRECTORY else new_recipe_directory
-	var use_default_world_directories: bool = new_item_directory == ITEM_DIRECTORY and new_building_directory == BUILDING_DIRECTORY and new_survival_directory == SURVIVAL_DIRECTORY
-	_region_directory = REGION_DIRECTORY if new_region_directory.is_empty() and use_default_world_directories else new_region_directory
-	_encounter_directory = ENCOUNTER_DIRECTORY if new_encounter_directory.is_empty() and use_default_world_directories else new_encounter_directory
+	var use_default_content_directories: bool = new_item_directory == ITEM_DIRECTORY and new_building_directory == BUILDING_DIRECTORY and new_survival_directory == SURVIVAL_DIRECTORY
+	_region_directory = REGION_DIRECTORY if new_region_directory.is_empty() and use_default_content_directories else new_region_directory
+	_encounter_directory = ENCOUNTER_DIRECTORY if new_encounter_directory.is_empty() and use_default_content_directories else new_encounter_directory
+	_survivor_directory = SURVIVOR_DIRECTORY if new_survivor_directory.is_empty() and use_default_content_directories else new_survivor_directory
+	_skill_directory = SKILL_DIRECTORY if new_skill_directory.is_empty() and use_default_content_directories else new_skill_directory
 
 
 func load_all() -> bool:
@@ -88,9 +98,25 @@ func load_all() -> bool:
 		for definition: EncounterDefinition in encounter_definitions:
 			if not _register_encounter(definition):
 				return _fail_load(_last_error)
+	if not _skill_directory.is_empty():
+		var skill_definitions: Array[SkillDefinition] = loader.load_skills(_skill_directory)
+		if not loader.get_last_error().is_empty():
+			return _fail_load(loader.get_last_error())
+		for definition: SkillDefinition in skill_definitions:
+			if not _register_skill(definition):
+				return _fail_load(_last_error)
+	if not _survivor_directory.is_empty():
+		var survivor_definitions: Array[SurvivorDefinition] = loader.load_survivors(_survivor_directory)
+		if not loader.get_last_error().is_empty():
+			return _fail_load(loader.get_last_error())
+		for definition: SurvivorDefinition in survivor_definitions:
+			if not _register_survivor(definition):
+				return _fail_load(_last_error)
 	if not _validate_building_item_references():
 		return _fail_load(_last_error)
 	if not _validate_world_references():
+		return _fail_load(_last_error)
+	if not _validate_survivor_references():
 		return _fail_load(_last_error)
 
 	return true
@@ -136,6 +162,20 @@ func get_encounter(id: StringName) -> EncounterDefinition:
 		push_error("DATA: Unknown encounter Definition ID '%s'." % String(id))
 		return null
 	return _encounters[id]
+
+
+func get_survivor(id: StringName) -> SurvivorDefinition:
+	if not _survivors.has(id):
+		push_error("DATA: Unknown survivor Definition ID '%s'." % String(id))
+		return null
+	return _survivors[id]
+
+
+func get_skill(id: StringName) -> SkillDefinition:
+	if not _skills.has(id):
+		push_error("DATA: Unknown skill Definition ID '%s'." % String(id))
+		return null
+	return _skills[id]
 
 
 func get_regions() -> Array[RegionDefinition]:
@@ -184,6 +224,14 @@ func has_encounter(id: StringName) -> bool:
 	return _encounters.has(id)
 
 
+func has_survivor(id: StringName) -> bool:
+	return _survivors.has(id)
+
+
+func has_skill(id: StringName) -> bool:
+	return _skills.has(id)
+
+
 func get_last_error() -> String:
 	return _last_error
 
@@ -210,6 +258,14 @@ func get_region_count() -> int:
 
 func get_encounter_count() -> int:
 	return _encounters.size()
+
+
+func get_survivor_count() -> int:
+	return _survivors.size()
+
+
+func get_skill_count() -> int:
+	return _skills.size()
 
 
 func _register_item(definition: ItemDefinition) -> bool:
@@ -251,6 +307,20 @@ func _register_encounter(definition: EncounterDefinition) -> bool:
 	if not _register_id(definition.id):
 		return false
 	_encounters[definition.id] = definition
+	return true
+
+
+func _register_survivor(definition: SurvivorDefinition) -> bool:
+	if not _register_id(definition.id):
+		return false
+	_survivors[definition.id] = definition
+	return true
+
+
+func _register_skill(definition: SkillDefinition) -> bool:
+	if not _register_id(definition.id):
+		return false
+	_skills[definition.id] = definition
 	return true
 
 
@@ -322,6 +392,26 @@ func _validate_world_references() -> bool:
 			if not _items.has(item_id):
 				_set_error("Encounter '%s' references unknown reward item '%s'." % [String(encounter.id), String(item_id)])
 				return false
+		if encounter.survivor_id != &"" and not _survivors.has(encounter.survivor_id):
+			_set_error("Encounter '%s' references unknown survivor '%s'." % [String(encounter.id), String(encounter.survivor_id)])
+			return false
+	return true
+
+
+func _validate_survivor_references() -> bool:
+	if _survivors.is_empty() and _skills.is_empty():
+		return true
+	if _survivors.is_empty() or _skills.is_empty():
+		_set_error("Survivor Definitions require both survivors and skills.")
+		return false
+	for survivor: SurvivorDefinition in _survivors.values():
+		if not _skills.has(survivor.skill_id):
+			_set_error("Survivor '%s' references unknown skill '%s'." % [String(survivor.id), String(survivor.skill_id)])
+			return false
+		for item_id: StringName in survivor.upgrade_cost:
+			if not _items.has(item_id):
+				_set_error("Survivor '%s' references unknown upgrade item '%s'." % [String(survivor.id), String(item_id)])
+				return false
 	return true
 
 
@@ -332,6 +422,8 @@ func _clear() -> void:
 	_recipes.clear()
 	_regions.clear()
 	_encounters.clear()
+	_survivors.clear()
+	_skills.clear()
 	_registered_ids.clear()
 	_last_error = ""
 
@@ -343,6 +435,8 @@ func _fail_load(message: String) -> bool:
 	_recipes.clear()
 	_regions.clear()
 	_encounters.clear()
+	_survivors.clear()
+	_skills.clear()
 	_registered_ids.clear()
 	_last_error = message
 	return false

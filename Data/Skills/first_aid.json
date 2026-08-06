@@ -1,0 +1,5 @@
+{
+  "id": "skill_first_aid",
+  "display_name_key": "data.skill.first_aid.name",
+  "description_key": "data.skill.first_aid.description"
+}

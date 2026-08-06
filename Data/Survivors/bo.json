@@ -1,0 +1,9 @@
+{
+  "id": "survivor_bo",
+  "display_name_key": "data.survivor.bo.name",
+  "description_key": "data.survivor.bo.description",
+  "skill_id": "skill_first_aid",
+  "passive_id": "passive_recovery",
+  "passive_value_per_level": 0.5,
+  "upgrade_cost": {"item_raw_fish": 1}
+}
