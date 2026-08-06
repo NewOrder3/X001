@@ -1,0 +1,12 @@
+{
+  "id": "building_fishing_net",
+  "display_name_key": "data.building.fishing_net.name",
+  "description_key": "data.building.fishing_net.description",
+  "footprint_width": 1,
+  "footprint_height": 1,
+  "build_cost": {
+    "item_wood": 4
+  },
+  "capability_tags": ["fishing"],
+  "recipe_id": "recipe_fish_net"
+}

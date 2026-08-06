@@ -1,0 +1,15 @@
+{
+  "id": "building_storage_rack",
+  "display_name_key": "data.building.storage_rack.name",
+  "description_key": "data.building.storage_rack.description",
+  "footprint_width": 1,
+  "footprint_height": 1,
+  "build_cost": {
+    "item_wood": 5
+  },
+  "storage_capacity_bonus": {
+    "item_wood": 20,
+    "item_raw_fish": 10,
+    "item_grilled_fish": 10
+  }
+}

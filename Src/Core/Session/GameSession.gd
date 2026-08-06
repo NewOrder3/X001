@@ -13,6 +13,7 @@ var _gathering_system: GatheringSystem
 var _simulation_clock: SimulationClock
 var _survival_system: SurvivalSystem
 var _production_system: ProductionSystem
+var _merchant_system: MerchantSystem
 var _survivor_system: SurvivorSystem
 var _random_service: RandomService
 var _progression_system: ProgressionSystem
@@ -33,6 +34,7 @@ func _init() -> void:
 	_simulation_clock = SimulationClock.new()
 	_survival_system = SurvivalSystem.new(_data_registry, _simulation_clock)
 	_production_system = ProductionSystem.new(_data_registry, _inventory_system, _simulation_clock)
+	_merchant_system = MerchantSystem.new(_data_registry, _inventory_system)
 	_survivor_system = SurvivorSystem.new(_data_registry, _inventory_system)
 	_random_service = RandomService.new()
 	_progression_system = ProgressionSystem.new(_data_registry, _inventory_system)
@@ -59,6 +61,11 @@ func create_new_game(world_seed: int) -> bool:
 		return false
 	if not _progression_system.initialize_new_state(_state.progression_state):
 		_last_error = GameText.get_text(&"message.progression.raft_unavailable")
+		_state = null
+		_is_disposed = true
+		return false
+	if not _merchant_system.initialize_new_state(_state.merchant_state):
+		_last_error = GameText.get_text(&"message.merchant.unavailable")
 		_state = null
 		_is_disposed = true
 		return false
@@ -100,6 +107,10 @@ func load_state_at(state: GameState, current_unix_seconds: int) -> bool:
 		return false
 	if not _progression_system.activate_loaded_state(_state):
 		_last_error = GameText.get_text(&"message.progression.raft_unavailable")
+		_state = null
+		return false
+	if not _merchant_system.activate_loaded_state(_state.merchant_state):
+		_last_error = GameText.get_text(&"message.merchant.unavailable")
 		_state = null
 		return false
 	_last_offline_settlement_report = _survival_system.activate_loaded_state(
@@ -191,6 +202,46 @@ func get_progression_system() -> ProgressionSystem:
 	return _progression_system
 
 
+func get_merchant_system() -> MerchantSystem:
+	return _merchant_system
+
+
+func get_merchant_state() -> MerchantState:
+	if not has_active_state():
+		return null
+	return _state.merchant_state
+
+
+func get_merchants() -> Array[MerchantDefinition]:
+	if not has_active_state():
+		return []
+	return _data_registry.get_merchants()
+
+
+func get_merchant_offer(offer_id: StringName) -> MerchantOfferDefinition:
+	if _data_registry == null or not _data_registry.has_merchant_offer(offer_id):
+		return null
+	return _data_registry.get_merchant_offer(offer_id)
+
+
+func get_merchant_stock(offer_id: StringName) -> int:
+	if not has_active_state():
+		return 0
+	return _merchant_system.get_stock(_state.merchant_state, offer_id)
+
+
+func can_buy_merchant_item(offer_id: StringName) -> CommandResult:
+	if not has_active_state():
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_merchant"))
+	return _merchant_system.can_buy(_state, offer_id)
+
+
+func execute_buy_merchant_item(command: BuyMerchantItemCommand) -> CommandResult:
+	if not has_active_state() or command == null:
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_merchant"))
+	return _merchant_system.buy(_state, command.offer_id)
+
+
 func get_raft_level() -> int:
 	if not has_active_state():
 		return 0
@@ -207,6 +258,17 @@ func is_unlock_available(unlock_id: StringName) -> bool:
 	if not has_active_state():
 		return false
 	return _progression_system.is_unlock_available(_state, unlock_id)
+
+
+func is_boss_unlocked(boss_id: StringName) -> bool:
+	if not has_active_state():
+		return false
+	var boss: BossDefinition = get_boss_definition(boss_id)
+	if boss == null:
+		return false
+	if boss.unlock_id == &"":
+		return true
+	return _progression_system.is_unlock_available(_state, boss.unlock_id)
 
 
 func get_world_state() -> WorldState:
@@ -444,6 +506,8 @@ func execute_start_battle(command: StartBattleCommand) -> CommandResult:
 	var start_validation: BattleActionResult = _battle_system.can_start(_state, command.boss_id)
 	if not start_validation.succeeded:
 		return CommandResult.failure(start_validation.error_code, start_validation.message)
+	if not is_boss_unlocked(command.boss_id):
+		return CommandResult.failure(&"boss_locked", GameText.get_text(&"message.battle.boss_locked"))
 	if not _can_settle_battle_victory(command.boss_id):
 		return CommandResult.failure(&"battle_settlement_failed", GameText.get_text(&"message.battle.settlement_failed"))
 	var precheck: SurvivalActionResult = consume_survival_action_stamina(SurvivalSystem.ACTION_BATTLE)

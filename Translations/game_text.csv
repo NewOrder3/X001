@@ -259,3 +259,31 @@ message.progression.max_level,竹筏已升至最高等级。
 message.progression.insufficient_resources,木材不足，无法扩建竹筏。
 message.progression.raft_upgraded,竹筏扩建至 Lv%d，甲板变为 %d×%d。
 message.session.start_before_upgrading,请先开始游戏再扩建竹筏。
+data.building.desalinator.name,海水淡化器
+data.building.desalinator.description,将海水蒸馏成可饮用的淡水。
+data.building.fishing_net.name,渔网
+data.building.fishing_net.description,在竹筏边缘布网，自动捕获生鱼。
+data.building.storage_rack.name,储物架
+data.building.storage_rack.description,扩充木材与食物的存放空间。
+data.recipe.desalinate.name,蒸馏海水
+data.recipe.fish_net.name,收网捕鱼
+data.boss.reef_leviathan.name,暗礁巨鳗
+data.boss.reef_leviathan.description,潜伏在暗礁带的大型掠食者，需要更强的编队才能挑战。
+ui.production.toggle_desalinator,启停淡化器
+ui.production.toggle_fishing_net,启停渔网
+ui.survivor.challenge_reef,挑战区域 Boss
+ui.survivor.challenge_reef_locked,区域 Boss（竹筏 Lv2 解锁）
+message.battle.boss_locked,尚未解锁该 Boss。
+data.merchant.wandering.name,流浪商人
+data.merchant.wandering.description,漂泊的货郎，用海货换取你需要的东西。
+ui.merchant.title,%s
+ui.merchant.offer,购买 %s×%d（%s）· 库存 %d
+ui.merchant.empty,商人暂时没有货物。
+ui.merchant.status_initial,商人靠岸了，看看有什么可以交换。
+message.merchant.unavailable,商人数据不可用。
+message.merchant.unknown_offer,商人没有这件货物。
+message.merchant.insufficient_resources,交换材料不足。
+message.merchant.inventory_full,背包已满，无法收纳货物。
+message.merchant.out_of_stock,该货物已售罄。
+message.merchant.purchased,购入 %d 份%s。
+message.session.start_before_merchant,请先开始游戏再与商人交易。

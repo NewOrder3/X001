@@ -1,0 +1,28 @@
+{
+  "id": "merchant_wandering",
+  "display_name_key": "data.merchant.wandering.name",
+  "description_key": "data.merchant.wandering.description",
+  "offers": [
+    {
+      "offer_id": "offer_fresh_water",
+      "item_id": "item_fresh_water",
+      "amount": 1,
+      "cost": {"item_wood": 2},
+      "stock": 5
+    },
+    {
+      "offer_id": "offer_grilled_fish",
+      "item_id": "item_grilled_fish",
+      "amount": 1,
+      "cost": {"item_raw_fish": 2},
+      "stock": 5
+    },
+    {
+      "offer_id": "offer_wood_bundle",
+      "item_id": "item_wood",
+      "amount": 5,
+      "cost": {"item_raw_fish": 3},
+      "stock": 3
+    }
+  ]
+}

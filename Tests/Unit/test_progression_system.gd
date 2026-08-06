@@ -107,3 +107,22 @@ func test_migrate_v8_adds_raft_level_defaults() -> void:
 	var game_state_data: Dictionary = migrated_data.get("game_state", {}) as Dictionary
 	var progression_data: Dictionary = game_state_data.get("progression_state", {}) as Dictionary
 	assert_eq(int(progression_data.get("raft_level", 0)), 1)
+
+
+func test_regional_boss_unlock_requires_raft_level_two_and_gates_battle() -> void:
+	var session: GameSession = GameSession.new()
+	assert_true(session.create_new_game(906), session.get_last_error())
+	assert_true(session.get_survivor_system().offer_recruitment(session.get_survivor_state(), &"survivor_marin"))
+	assert_true(session.execute_command(RecruitSurvivorCommand.new(&"survivor_marin")).succeeded)
+	assert_true(session.execute_command(SetLineupCommand.new([&"survivor_marin"])).succeeded)
+
+	assert_false(session.is_boss_unlocked(&"boss_reef_leviathan"))
+	assert_true(session.is_boss_unlocked(&"boss_tutorial_sea_beast"))
+	var stamina_before: int = session.get_survival_state().stamina
+	var locked_result: CommandResult = session.execute_command(StartBattleCommand.new(&"boss_reef_leviathan"))
+	assert_false(locked_result.succeeded)
+	assert_eq(locked_result.error_code, &"boss_locked")
+	assert_eq(session.get_survival_state().stamina, stamina_before)
+
+	assert_true(session.execute_command(UpgradeRaftCommand.new()).succeeded)
+	assert_true(session.is_boss_unlocked(&"boss_reef_leviathan"))

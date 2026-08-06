@@ -14,6 +14,9 @@ extends Control
 @onready var _select_repair_button: Button = %SelectRepairStationButton
 @onready var _select_tank_button: Button = %SelectWaterTankButton
 @onready var _select_rudder_button: Button = %SelectRudderButton
+@onready var _select_desalinator_button: Button = %SelectDesalinatorButton
+@onready var _select_fishing_net_button: Button = %SelectFishingNetButton
+@onready var _select_storage_rack_button: Button = %SelectStorageRackButton
 @onready var _confirm_button: Button = %ConfirmBuildButton
 @onready var _cancel_button: Button = %CancelBuildButton
 @onready var _facility_list: VBoxContainer = %FacilityList
@@ -35,6 +38,9 @@ func _ready() -> void:
 		_select_repair_button.pressed.connect(_select_building.bind(&"building_repair_station"))
 		_select_tank_button.pressed.connect(_select_building.bind(&"building_water_tank"))
 		_select_rudder_button.pressed.connect(_select_building.bind(&"building_rudder"))
+		_select_desalinator_button.pressed.connect(_select_building.bind(&"building_desalinator"))
+		_select_fishing_net_button.pressed.connect(_select_building.bind(&"building_fishing_net"))
+		_select_storage_rack_button.pressed.connect(_select_building.bind(&"building_storage_rack"))
 	_raft_upgrade_button.pressed.connect(_upgrade_raft)
 	_confirm_button.pressed.connect(_on_confirm_pressed)
 	_cancel_button.pressed.connect(_on_cancel_pressed)
@@ -148,12 +154,18 @@ func _refresh() -> void:
 	_refresh_select_button(_select_repair_button, &"building_repair_station")
 	_refresh_select_button(_select_tank_button, &"building_water_tank")
 	_refresh_select_button(_select_rudder_button, &"building_rudder")
+	_refresh_select_button(_select_desalinator_button, &"building_desalinator")
+	_refresh_select_button(_select_fishing_net_button, &"building_fishing_net")
+	_refresh_select_button(_select_storage_rack_button, &"building_storage_rack")
 	_confirm_button.disabled = _selected_building_id == &"" or not _has_selected_cell
 	_select_collector_button.disabled = _session == null
 	_select_campfire_button.disabled = _session == null
 	_select_repair_button.disabled = _session == null
 	_select_tank_button.disabled = _session == null
 	_select_rudder_button.disabled = _session == null
+	_select_desalinator_button.disabled = _session == null
+	_select_fishing_net_button.disabled = _session == null
+	_select_storage_rack_button.disabled = _session == null
 	_refresh_facility_list()
 
 

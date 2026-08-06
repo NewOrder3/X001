@@ -14,6 +14,8 @@ extends PanelContainer
 @onready var _toggle_collector_button: Button = %ToggleCollectorButton
 @onready var _toggle_campfire_button: Button = %ToggleCampfireButton
 @onready var _toggle_repair_button: Button = %ToggleRepairButton
+@onready var _toggle_desalinator_button: Button = %ToggleDesalinatorButton
+@onready var _toggle_fishing_net_button: Button = %ToggleFishingNetButton
 
 var _session: GameSession = null
 
@@ -27,6 +29,8 @@ func _ready() -> void:
 	_toggle_collector_button.pressed.connect(_toggle_facility.bind(&"building_rain_collector"))
 	_toggle_campfire_button.pressed.connect(_toggle_facility.bind(&"building_campfire"))
 	_toggle_repair_button.pressed.connect(_toggle_facility.bind(&"building_repair_station"))
+	_toggle_desalinator_button.pressed.connect(_toggle_facility.bind(&"building_desalinator"))
+	_toggle_fishing_net_button.pressed.connect(_toggle_facility.bind(&"building_fishing_net"))
 	_refresh()
 
 

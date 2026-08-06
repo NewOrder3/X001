@@ -8,6 +8,7 @@ const BUILDING_DIRECTORY: String = "res://Data/Buildings"
 const PROGRESSION_DIRECTORY: String = "res://Data/Progression"
 const SURVIVAL_DIRECTORY: String = "res://Data/Survival"
 const RECIPE_DIRECTORY: String = "res://Data/Recipes"
+const MERCHANT_DIRECTORY: String = "res://Data/Merchants"
 const REGION_DIRECTORY: String = "res://Data/Regions"
 const ENCOUNTER_DIRECTORY: String = "res://Data/Encounters"
 const SURVIVOR_DIRECTORY: String = "res://Data/Survivors"
@@ -20,6 +21,7 @@ var _building_directory: String
 var _progression_directory: String
 var _survival_directory: String
 var _recipe_directory: String
+var _merchant_directory: String
 var _region_directory: String
 var _encounter_directory: String
 var _survivor_directory: String
@@ -31,6 +33,8 @@ var _buildings: Dictionary[StringName, BuildingDefinition] = {}
 var _progressions: Dictionary[StringName, ProgressionDefinition] = {}
 var _survival_configs: Dictionary[StringName, SurvivalConfigDefinition] = {}
 var _recipes: Dictionary[StringName, RecipeDefinition] = {}
+var _merchants: Dictionary[StringName, MerchantDefinition] = {}
+var _merchant_offers: Dictionary[StringName, MerchantOfferDefinition] = {}
 var _regions: Dictionary[StringName, RegionDefinition] = {}
 var _encounters: Dictionary[StringName, EncounterDefinition] = {}
 var _survivors: Dictionary[StringName, SurvivorDefinition] = {}
@@ -46,6 +50,7 @@ func _init(
 	new_building_directory: String = BUILDING_DIRECTORY,
 	new_survival_directory: String = SURVIVAL_DIRECTORY,
 	new_recipe_directory: String = "",
+	new_merchant_directory: String = "",
 	new_region_directory: String = "",
 	new_encounter_directory: String = "",
 	new_survivor_directory: String = "",
@@ -58,7 +63,10 @@ func _init(
 	_building_directory = new_building_directory
 	_survival_directory = new_survival_directory
 	_recipe_directory = RECIPE_DIRECTORY if new_recipe_directory.is_empty() and new_item_directory == ITEM_DIRECTORY and new_building_directory == BUILDING_DIRECTORY else new_recipe_directory
+	_merchant_directory = new_merchant_directory
 	var use_default_content_directories: bool = new_item_directory == ITEM_DIRECTORY and new_building_directory == BUILDING_DIRECTORY and new_survival_directory == SURVIVAL_DIRECTORY
+	if _merchant_directory.is_empty() and use_default_content_directories:
+		_merchant_directory = MERCHANT_DIRECTORY
 	_region_directory = REGION_DIRECTORY if new_region_directory.is_empty() and use_default_content_directories else new_region_directory
 	_encounter_directory = ENCOUNTER_DIRECTORY if new_encounter_directory.is_empty() and use_default_content_directories else new_encounter_directory
 	_survivor_directory = SURVIVOR_DIRECTORY if new_survivor_directory.is_empty() and use_default_content_directories else new_survivor_directory
@@ -107,6 +115,13 @@ func load_all() -> bool:
 		for definition: RecipeDefinition in recipe_definitions:
 			if not _register_recipe(definition):
 				return _fail_load(_last_error)
+	if not _merchant_directory.is_empty():
+		var merchant_definitions: Array[MerchantDefinition] = loader.load_merchants(_merchant_directory)
+		if not loader.get_last_error().is_empty():
+			return _fail_load(loader.get_last_error())
+		for definition: MerchantDefinition in merchant_definitions:
+			if not _register_merchant(definition):
+				return _fail_load(_last_error)
 	if not _region_directory.is_empty():
 		var region_definitions: Array[RegionDefinition] = loader.load_regions(_region_directory)
 		if not loader.get_last_error().is_empty():
@@ -153,6 +168,8 @@ func load_all() -> bool:
 		return _fail_load(_last_error)
 	if not _validate_progression_references():
 		return _fail_load(_last_error)
+	if not _validate_merchant_references():
+		return _fail_load(_last_error)
 	if not _validate_world_references():
 		return _fail_load(_last_error)
 	if not _validate_survivor_references():
@@ -196,6 +213,20 @@ func get_recipe(id: StringName) -> RecipeDefinition:
 		push_error("DATA: Unknown recipe Definition ID '%s'." % String(id))
 		return null
 	return _recipes[id]
+
+
+func get_merchant(id: StringName) -> MerchantDefinition:
+	if not _merchants.has(id):
+		push_error("DATA: Unknown merchant Definition ID '%s'." % String(id))
+		return null
+	return _merchants[id]
+
+
+func get_merchant_offer(id: StringName) -> MerchantOfferDefinition:
+	if not _merchant_offers.has(id):
+		push_error("DATA: Unknown merchant offer ID '%s'." % String(id))
+		return null
+	return _merchant_offers[id]
 
 
 func get_region(id: StringName) -> RegionDefinition:
@@ -282,6 +313,14 @@ func has_recipe(id: StringName) -> bool:
 	return _recipes.has(id)
 
 
+func has_merchant(id: StringName) -> bool:
+	return _merchants.has(id)
+
+
+func has_merchant_offer(id: StringName) -> bool:
+	return _merchant_offers.has(id)
+
+
 func has_region(id: StringName) -> bool:
 	return _regions.has(id)
 
@@ -330,6 +369,14 @@ func get_recipe_count() -> int:
 	return _recipes.size()
 
 
+func get_merchant_count() -> int:
+	return _merchants.size()
+
+
+func get_merchant_offer_count() -> int:
+	return _merchant_offers.size()
+
+
 func get_region_count() -> int:
 	return _regions.size()
 
@@ -352,6 +399,17 @@ func get_boss_count() -> int:
 
 func get_reward_count() -> int:
 	return _rewards.size()
+
+
+func get_merchants() -> Array[MerchantDefinition]:
+	var ids: Array[StringName] = []
+	for merchant_id: StringName in _merchants:
+		ids.append(merchant_id)
+	ids.sort()
+	var definitions: Array[MerchantDefinition] = []
+	for merchant_id: StringName in ids:
+		definitions.append(_merchants[merchant_id])
+	return definitions
 
 
 func get_raft_level_progression(raft_level_value: int) -> ProgressionDefinition:
@@ -400,6 +458,17 @@ func _register_recipe(definition: RecipeDefinition) -> bool:
 	if not _register_id(definition.id):
 		return false
 	_recipes[definition.id] = definition
+	return true
+
+
+func _register_merchant(definition: MerchantDefinition) -> bool:
+	if not _register_id(definition.id):
+		return false
+	_merchants[definition.id] = definition
+	for offer: MerchantOfferDefinition in definition.offers:
+		if not _register_id(offer.id):
+			return false
+		_merchant_offers[offer.id] = offer
 	return true
 
 
@@ -480,6 +549,21 @@ func _validate_building_item_references() -> bool:
 			if not _items.has(item_id):
 				_set_error("Recipe '%s' references unknown output item '%s'." % [String(recipe.id), String(item_id)])
 				return false
+	return true
+
+
+func _validate_merchant_references() -> bool:
+	if _merchants.is_empty():
+		return true
+	for merchant: MerchantDefinition in _merchants.values():
+		for offer: MerchantOfferDefinition in merchant.offers:
+			if not _items.has(offer.item_id):
+				_set_error("Merchant '%s' offer '%s' references unknown item '%s'." % [String(merchant.id), String(offer.id), String(offer.item_id)])
+				return false
+			for item_id: StringName in offer.cost:
+				if not _items.has(item_id):
+					_set_error("Merchant '%s' offer '%s' references unknown cost item '%s'." % [String(merchant.id), String(offer.id), String(item_id)])
+					return false
 	return true
 
 
@@ -601,6 +685,9 @@ func _validate_battle_references() -> bool:
 		if not _rewards.has(boss.reward_id):
 			_set_error("Boss '%s' references unknown reward '%s'." % [String(boss.id), String(boss.reward_id)])
 			return false
+		if boss.unlock_id != &"" and get_unlock_progression(boss.unlock_id) == null:
+			_set_error("Boss '%s' references unknown unlock '%s'." % [String(boss.id), String(boss.unlock_id)])
+			return false
 	for reward: RewardDefinition in _rewards.values():
 		for item_id: StringName in reward.item_rewards:
 			if not _items.has(item_id):
@@ -615,6 +702,8 @@ func _clear() -> void:
 	_progressions.clear()
 	_survival_configs.clear()
 	_recipes.clear()
+	_merchants.clear()
+	_merchant_offers.clear()
 	_regions.clear()
 	_encounters.clear()
 	_survivors.clear()

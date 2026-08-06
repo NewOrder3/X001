@@ -1,0 +1,9 @@
+{
+  "id": "reward_reef_cache",
+  "item_rewards": {
+    "item_wood": 8,
+    "item_grilled_fish": 2,
+    "item_fresh_water": 2
+  },
+  "survivor_experience": 25
+}

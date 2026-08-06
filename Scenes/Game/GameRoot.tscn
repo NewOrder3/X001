@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://Src/SceneFlow/GameRoot.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="2_ui"]
@@ -20,6 +20,7 @@
 [ext_resource type="Script" path="res://Src/Exploration/View/DynamicOceanMap.gd" id="18_dynamic_ocean"]
 [ext_resource type="Script" path="res://Src/UI/ResourceRibbon.gd" id="19_resource_ribbon"]
 [ext_resource type="Script" path="res://Src/Exploration/View/OceanMapHUD.gd" id="20_ocean_hud"]
+[ext_resource type="Script" path="res://Src/Merchant/View/MerchantPanel.gd" id="21_merchant_panel"]
 
 [node name="GameRoot" type="Node"]
 script = ExtResource("1_game")
@@ -175,6 +176,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 text = "仓库"
 
+[node name="MerchantButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/BottomNavigation/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "商人"
+
 [node name="OfflineSettlementPanel" type="PanelContainer" parent="UIRoot/WindowLayer"]
 layout_mode = 0
 offset_left = 700.0
@@ -328,6 +334,18 @@ expand_icon = true
 icon_max_width = 40
 text = "ui.build.select_building"
 
+[node name="SelectDesalinatorButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
+unique_name_in_owner = true
+text = "ui.build.select_building"
+
+[node name="SelectFishingNetButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
+unique_name_in_owner = true
+text = "ui.build.select_building"
+
+[node name="SelectStorageRackButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
+unique_name_in_owner = true
+text = "ui.build.select_building"
+
 [node name="BuildActions" type="HBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 theme_override_constants/separation = 12
 
@@ -401,6 +419,11 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "挑战教学 Boss"
 
+[node name="ChallengeReefButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "ui.survivor.challenge_reef_locked"
+
 [node name="PendingCards" type="VBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -415,6 +438,39 @@ theme_override_constants/separation = 8
 unique_name_in_owner = true
 layout_mode = 2
 autowrap_mode = 2
+
+[node name="MerchantPanel" type="PanelContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn"]
+custom_minimum_size = Vector2(0, 330)
+layout_mode = 2
+size_flags_horizontal = 3
+script = ExtResource("21_merchant_panel")
+
+[node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/MerchantPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="Content" type="VBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/MerchantPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/MerchantPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "ui.merchant.status_initial"
+
+[node name="MerchantOfferList" type="VBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/MerchantPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="MerchantStatusLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/MerchantPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+text = "ui.merchant.status_initial"
 
 [node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel"]
 layout_mode = 2
@@ -539,6 +595,14 @@ text = "ui.production.toggle_campfire"
 [node name="ToggleRepairButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/ToggleActions"]
 unique_name_in_owner = true
 text = "ui.production.toggle_repair"
+
+[node name="ToggleDesalinatorButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/ToggleActions"]
+unique_name_in_owner = true
+text = "ui.production.toggle_desalinator"
+
+[node name="ToggleFishingNetButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content/ToggleActions"]
+unique_name_in_owner = true
+text = "ui.production.toggle_fishing_net"
 
 [node name="FacilityLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel/Margin/Content"]
 unique_name_in_owner = true

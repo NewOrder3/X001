@@ -44,6 +44,9 @@ func execute(session: GameSession, command: GameCommand) -> CommandResult:
 	if command is SetProductionEnabledCommand:
 		var set_production_command: SetProductionEnabledCommand = command as SetProductionEnabledCommand
 		return _complete(command, session.execute_set_production_enabled(set_production_command))
+	if command is BuyMerchantItemCommand:
+		var buy_merchant_command: BuyMerchantItemCommand = command as BuyMerchantItemCommand
+		return _complete(command, session.execute_buy_merchant_item(buy_merchant_command))
 	if command is ExploreRegionCommand:
 		var explore_command: ExploreRegionCommand = command as ExploreRegionCommand
 		return _complete(command, session.execute_explore_region(explore_command))

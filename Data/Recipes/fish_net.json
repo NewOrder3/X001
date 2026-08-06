@@ -1,0 +1,10 @@
+{
+  "id": "recipe_fish_net",
+  "display_name_key": "data.recipe.fish_net.name",
+  "cycle_seconds": 30,
+  "input_items": {},
+  "output_items": {
+    "item_raw_fish": 1
+  },
+  "required_capability_tag": "fishing"
+}

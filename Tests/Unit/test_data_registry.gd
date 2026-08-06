@@ -76,19 +76,30 @@ func test_load_all_rejects_survival_threshold_above_its_maximum() -> void:
 	assert_eq(registry.get_survival_config_count(), 0)
 
 
-func test_default_registry_loads_s3_recipe_definitions() -> void:
+func test_default_registry_loads_full_content_definitions() -> void:
 	var registry: DataRegistry = DataRegistry.new()
 	assert_true(registry.load_all(), registry.get_last_error())
-	assert_eq(registry.get_recipe_count(), 2)
+	assert_eq(registry.get_recipe_count(), 4)
+	assert_eq(registry.get_building_count(), 8)
+	assert_eq(registry.get_merchant_count(), 1)
+	assert_eq(registry.get_merchant_offer_count(), 3)
 	assert_not_null(registry.get_recipe(&"recipe_grill_fish"))
 	assert_eq(registry.get_survivor_count(), 4)
 	assert_eq(registry.get_skill_count(), 4)
-	assert_eq(registry.get_boss_count(), 1)
-	assert_eq(registry.get_reward_count(), 1)
+	assert_eq(registry.get_boss_count(), 2)
+	assert_eq(registry.get_reward_count(), 2)
 	assert_not_null(registry.get_survivor(&"survivor_marin"))
 	assert_not_null(registry.get_skill(&"skill_anchor_strike"))
 	assert_not_null(registry.get_boss(&"boss_tutorial_sea_beast"))
 	assert_not_null(registry.get_reward(&"reward_tutorial_cache"))
+	assert_not_null(registry.get_building(&"building_desalinator"))
+	assert_not_null(registry.get_building(&"building_fishing_net"))
+	assert_not_null(registry.get_building(&"building_storage_rack"))
+	assert_not_null(registry.get_boss(&"boss_reef_leviathan"))
+	assert_not_null(registry.get_reward(&"reward_reef_cache"))
+	assert_not_null(registry.get_merchant(&"merchant_wandering"))
+	assert_not_null(registry.get_merchant_offer(&"offer_fresh_water"))
+	assert_not_null(registry.get_merchant_offer(&"offer_wood_bundle"))
 	assert_eq(registry.get_skill(&"skill_anchor_strike").power, 10)
 
 

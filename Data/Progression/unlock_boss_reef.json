@@ -1,0 +1,6 @@
+{
+  "id": "progression_unlock_boss_reef",
+  "kind": "unlock",
+  "unlock_id": "unlock_boss_reef",
+  "required_raft_level": 2
+}

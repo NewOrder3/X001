@@ -1,0 +1,12 @@
+{
+  "id": "recipe_desalinate",
+  "display_name_key": "data.recipe.desalinate.name",
+  "cycle_seconds": 25,
+  "input_items": {
+    "item_seawater": 2
+  },
+  "output_items": {
+    "item_fresh_water": 1
+  },
+  "required_capability_tag": "water_desalination"
+}

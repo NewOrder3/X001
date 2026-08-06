@@ -1,3 +1,8 @@
+## Shared domain-event container owned by SessionCommandSystem.
+## The signals are intentionally emitted and connected from other classes
+## (SessionCommandSystem, SceneRouter, tests, tools), so the unused_signal
+## static-analysis warning does not apply to this class.
+@warning_ignore("unused_signal")
 class_name SessionEvents
 extends RefCounted
 

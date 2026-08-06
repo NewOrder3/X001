@@ -14,6 +14,8 @@ const ALLOWED_PREFIXES: Array[String] = [
 	"event",
 	"quest",
 	"unlock",
+	"merchant",
+	"offer",
 	"progression",
 	"survival",
 	"reward",

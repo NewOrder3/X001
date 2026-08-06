@@ -9,6 +9,7 @@ var description_key: StringName
 var max_health: int
 var attack_damage: int
 var reward_id: StringName
+var unlock_id: StringName
 var victory_durability_loss: float
 var defeat_durability_loss: float
 
@@ -22,6 +23,7 @@ func _init(
 	new_reward_id: StringName,
 	new_victory_durability_loss: float,
 	new_defeat_durability_loss: float,
+	new_unlock_id: StringName = &"",
 ) -> void:
 	id = new_id
 	display_name_key = new_display_name_key
@@ -31,6 +33,7 @@ func _init(
 	reward_id = new_reward_id
 	victory_durability_loss = new_victory_durability_loss
 	defeat_durability_loss = new_defeat_durability_loss
+	unlock_id = new_unlock_id
 
 
 func get_display_name() -> String:

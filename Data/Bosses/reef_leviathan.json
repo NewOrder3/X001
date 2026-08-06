@@ -1,0 +1,11 @@
+{
+  "id": "boss_reef_leviathan",
+  "display_name_key": "data.boss.reef_leviathan.name",
+  "description_key": "data.boss.reef_leviathan.description",
+  "max_health": 55,
+  "attack_damage": 6,
+  "reward_id": "reward_reef_cache",
+  "unlock_id": "unlock_boss_reef",
+  "victory_durability_loss": 6,
+  "defeat_durability_loss": 12
+}

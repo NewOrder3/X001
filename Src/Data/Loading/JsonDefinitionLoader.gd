@@ -53,6 +53,19 @@ func load_progressions(directory_path: String) -> Array[ProgressionDefinition]:
 	return definitions
 
 
+func load_merchants(directory_path: String) -> Array[MerchantDefinition]:
+	var definitions: Array[MerchantDefinition] = []
+	var entries: Array[Dictionary] = _load_json_entries(directory_path)
+	if not _last_error.is_empty():
+		return definitions
+	for entry: Dictionary in entries:
+		var definition: MerchantDefinition = _create_merchant_definition(entry["data"], entry["source_path"])
+		if definition == null:
+			return []
+		definitions.append(definition)
+	return definitions
+
+
 func load_recipes(directory_path: String) -> Array[RecipeDefinition]:
 	var definitions: Array[RecipeDefinition] = []
 	var entries: Array[Dictionary] = _load_json_entries(directory_path)
@@ -327,6 +340,52 @@ func _create_progression_definition(data: Dictionary, source_path: String) -> Pr
 	)
 
 
+func _create_merchant_definition(data: Dictionary, source_path: String) -> MerchantDefinition:
+	var id: StringName = _read_id(data, source_path)
+	if _last_error.is_empty() and not String(id).begins_with("merchant_"):
+		_set_error("Definition '%s' requires an ID beginning with 'merchant_'." % source_path)
+	var display_name_key: StringName = _read_required_text_key(data, "display_name_key", source_path)
+	var description_key: StringName = _read_required_text_key(data, "description_key", source_path)
+	var offers: Array[MerchantOfferDefinition] = _read_merchant_offers(data, "offers", source_path)
+	if not _last_error.is_empty():
+		return null
+	return MerchantDefinition.new(id, display_name_key, description_key, offers)
+
+
+func _read_merchant_offers(
+	data: Dictionary,
+	field_name: String,
+	source_path: String,
+) -> Array[MerchantOfferDefinition]:
+	var offers: Array[MerchantOfferDefinition] = []
+	var raw_offers: Variant = data.get(field_name)
+	if not raw_offers is Array or raw_offers.is_empty():
+		_set_error("Definition '%s' requires a non-empty array field named '%s'." % [source_path, field_name])
+		return offers
+	var seen_ids: Dictionary[StringName, bool] = {}
+	for raw_offer: Variant in raw_offers:
+		if not raw_offer is Dictionary:
+			_set_error("Definition '%s' has a non-object entry in '%s'." % [source_path, field_name])
+			return []
+		var offer_id: StringName = _read_required_prefixed_id(raw_offer, "offer_id", "offer_", source_path)
+		if not _last_error.is_empty():
+			return []
+		if seen_ids.has(offer_id):
+			_set_error("Definition '%s' duplicates offer '%s'." % [source_path, String(offer_id)])
+			return []
+		seen_ids[offer_id] = true
+		var item_id: StringName = _read_required_prefixed_id(raw_offer, "item_id", "item_", source_path)
+		if not _last_error.is_empty():
+			return []
+		var amount: int = _read_optional_positive_int(raw_offer, "amount", source_path, 1)
+		var cost: Dictionary[StringName, int] = _read_item_amounts(raw_offer, "cost", source_path)
+		var stock: int = _read_optional_positive_int(raw_offer, "stock", source_path, 1)
+		if not _last_error.is_empty():
+			return []
+		offers.append(MerchantOfferDefinition.new(offer_id, item_id, amount, cost, stock))
+	return offers
+
+
 func _create_recipe_definition(data: Dictionary, source_path: String) -> RecipeDefinition:
 	var id: StringName = _read_id(data, source_path)
 	if _last_error.is_empty() and not String(id).begins_with("recipe_"):
@@ -520,13 +579,14 @@ func _create_boss_definition(data: Dictionary, source_path: String) -> BossDefin
 	var max_health: int = _read_positive_int(data, "max_health", source_path)
 	var attack_damage: int = _read_positive_int(data, "attack_damage", source_path)
 	var reward_id: StringName = _read_optional_prefixed_id(data, "reward_id", "reward_", source_path)
+	var unlock_id: StringName = _read_optional_prefixed_id(data, "unlock_id", "unlock_", source_path)
 	var victory_durability_loss: float = _read_nonnegative_float(data, "victory_durability_loss", source_path)
 	var defeat_durability_loss: float = _read_nonnegative_float(data, "defeat_durability_loss", source_path)
 	if not _last_error.is_empty() or reward_id == &"":
 		if _last_error.is_empty():
 			_set_error("Definition '%s' requires a reward_id." % source_path)
 		return null
-	return BossDefinition.new(id, display_name_key, description_key, max_health, attack_damage, reward_id, victory_durability_loss, defeat_durability_loss)
+	return BossDefinition.new(id, display_name_key, description_key, max_health, attack_damage, reward_id, victory_durability_loss, defeat_durability_loss, unlock_id)
 
 
 func _create_reward_definition(data: Dictionary, source_path: String) -> RewardDefinition:
@@ -660,6 +720,13 @@ func _read_optional_prefixed_id(data: Dictionary, field_name: String, prefix: St
 		_set_error("Definition '%s' has an invalid ID in '%s'." % [source_path, field_name])
 		return &""
 	return id
+
+
+func _read_required_prefixed_id(data: Dictionary, field_name: String, prefix: String, source_path: String) -> StringName:
+	if not data.has(field_name):
+		_set_error("Definition '%s' requires a string field named '%s'." % [source_path, field_name])
+		return &""
+	return _read_optional_prefixed_id(data, field_name, prefix, source_path)
 
 
 func _read_optional_tags(data: Dictionary, field_name: String, source_path: String) -> Array[StringName]:

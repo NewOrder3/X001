@@ -1,0 +1,12 @@
+{
+  "id": "building_desalinator",
+  "display_name_key": "data.building.desalinator.name",
+  "description_key": "data.building.desalinator.description",
+  "footprint_width": 1,
+  "footprint_height": 1,
+  "build_cost": {
+    "item_wood": 6
+  },
+  "capability_tags": ["water_desalination"],
+  "recipe_id": "recipe_desalinate"
+}

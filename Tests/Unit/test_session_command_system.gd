@@ -73,6 +73,24 @@ func test_set_production_enabled_command_returns_system_result_and_rejection_eve
 	assert_eq(_rejection_error_code, &"not_a_production_facility")
 
 
+func test_buy_merchant_item_command_returns_system_result_and_rejection_event() -> void:
+	var session: GameSession = _create_session()
+	_bind_rejection_event(session)
+
+	var success_result: CommandResult = session.execute_command(BuyMerchantItemCommand.new(&"offer_fresh_water"))
+	assert_true(success_result.succeeded, success_result.message)
+	assert_eq(session.get_item_amount(&"item_wood"), 8)
+	assert_eq(session.get_item_amount(&"item_fresh_water"), 1)
+	assert_true(session.get_inventory_system().spend_cost(session.get_state().inventory_state, {&"item_wood": 8}))
+
+	var failure_result: CommandResult = session.execute_command(BuyMerchantItemCommand.new(&"offer_fresh_water"))
+	assert_false(failure_result.succeeded)
+	assert_eq(failure_result.error_code, MerchantSystem.ERROR_INSUFFICIENT_RESOURCES)
+	assert_eq(_rejection_count, 1)
+	assert_eq(_rejected_command_type, &"buy_merchant_item")
+	assert_eq(_rejection_error_code, MerchantSystem.ERROR_INSUFFICIENT_RESOURCES)
+
+
 func _create_session() -> GameSession:
 	var session: GameSession = GameSession.new()
 	var result: CommandResult = session.execute_command(CreateNewGameCommand.new(50))

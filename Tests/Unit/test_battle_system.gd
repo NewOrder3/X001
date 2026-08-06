@@ -80,6 +80,35 @@ func test_active_battle_round_trips_through_save_data() -> void:
 	assert_true(loaded_session.load_state_at(loaded_state, 1_710_000_000), loaded_session.get_last_error())
 
 
+func test_regional_boss_requires_stronger_lineup_and_settles_rewards() -> void:
+	var session: GameSession = _create_lineup_session()
+	var state: GameState = session.get_state()
+	assert_true(session.execute_command(UpgradeRaftCommand.new()).succeeded)
+	assert_true(session.execute_command(GatherResourcesCommand.new(&"item_wood", 6)).succeeded)
+	assert_true(session.execute_command(UpgradeSurvivorCommand.new(&"survivor_marin")).succeeded)
+	assert_true(session.execute_command(UpgradeSurvivorCommand.new(&"survivor_marin")).succeeded)
+	var stamina_before: int = state.survival_state.stamina
+	var durability_before: float = state.survival_state.durability
+	var wood_before: int = session.get_item_amount(&"item_wood")
+
+	var start_result: CommandResult = session.execute_command(StartBattleCommand.new(&"boss_reef_leviathan"))
+	assert_true(start_result.succeeded, start_result.message)
+	assert_eq(state.survival_state.stamina, stamina_before - 1)
+	assert_true(session.execute_command(BattleActionCommand.new(&"survivor_marin", true)).succeeded)
+	while state.battle_state.status == BattleState.Status.ACTIVE:
+		var attack_result: CommandResult = session.execute_command(BattleActionCommand.new(&"survivor_marin", false))
+		assert_true(attack_result.succeeded, attack_result.message)
+
+	assert_true(state.battle_state.did_win)
+	assert_true(state.battle_state.settlement_applied)
+	assert_eq(state.survival_state.stamina, stamina_before - 1)
+	assert_eq(session.get_item_amount(&"item_wood"), wood_before + 8)
+	assert_eq(session.get_item_amount(&"item_grilled_fish"), 2)
+	assert_eq(session.get_item_amount(&"item_fresh_water"), 2)
+	assert_eq(state.survivor_state.survivors[&"survivor_marin"].experience, 25)
+	assert_eq(state.survival_state.durability, durability_before - 6.0)
+
+
 func _create_lineup_session() -> GameSession:
 	var session: GameSession = GameSession.new()
 	assert_true(session.create_new_game(801), session.get_last_error())

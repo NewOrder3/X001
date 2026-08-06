@@ -105,6 +105,46 @@ func test_thirty_minute_run_keeps_inventory_bounded_and_saveable() -> void:
 		assert_eq(loaded_state.inventory_state.item_amounts.get(&"item_grilled_fish", 0), 10)
 
 
+func test_desalinator_converts_seawater_into_fresh_water() -> void:
+	var session: GameSession = GameSession.new()
+	assert_true(session.create_new_game(17), session.get_last_error())
+	assert_true(session.execute_gather_resources(GatherResourcesCommand.new(&"item_seawater", 2)).succeeded)
+	assert_true(session.execute_place_building(
+		PlaceBuildingCommand.new(&"building_desalinator", Vector2i(0, 0), 0)
+	).succeeded)
+
+	_advance_seconds(session, 25)
+
+	assert_eq(session.get_item_amount(&"item_seawater"), 0)
+	assert_eq(session.get_item_amount(&"item_fresh_water"), 1)
+
+
+func test_fishing_net_produces_raw_fish_without_input() -> void:
+	var session: GameSession = GameSession.new()
+	assert_true(session.create_new_game(18), session.get_last_error())
+	assert_true(session.execute_place_building(
+		PlaceBuildingCommand.new(&"building_fishing_net", Vector2i(0, 0), 0)
+	).succeeded)
+
+	_advance_seconds(session, 30)
+	assert_eq(session.get_item_amount(&"item_raw_fish"), 1)
+	_advance_seconds(session, 60)
+	assert_eq(session.get_item_amount(&"item_raw_fish"), 3)
+
+
+func test_storage_rack_expands_storage_capacity() -> void:
+	var session: GameSession = GameSession.new()
+	assert_true(session.create_new_game(19), session.get_last_error())
+	assert_true(session.execute_place_building(
+		PlaceBuildingCommand.new(&"building_storage_rack", Vector2i(0, 0), 0)
+	).succeeded)
+	var state: GameState = session.get_state()
+	assert_eq(session.get_inventory_system().get_capacity(state, &"item_wood"), 119)
+	assert_eq(session.get_inventory_system().get_capacity(state, &"item_raw_fish"), 20)
+	assert_eq(session.get_inventory_system().get_capacity(state, &"item_grilled_fish"), 20)
+	assert_eq(session.get_inventory_system().get_capacity(state, &"item_fresh_water"), 20)
+
+
 func _advance_seconds(session: GameSession, seconds: int) -> void:
 	for _second: int in range(seconds):
 		session.advance_simulation(1.0)

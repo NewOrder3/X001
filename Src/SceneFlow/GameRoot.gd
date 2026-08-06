@@ -9,6 +9,7 @@ extends Node
 @onready var _production_panel: ProductionPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel
 @onready var _world_map_panel: WorldMapPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel
 @onready var _survivor_panel: SurvivorPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel
+@onready var _merchant_panel: MerchantPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/MerchantPanel
 @onready var _offline_settlement_panel: OfflineSettlementPanel = $UIRoot/WindowLayer/OfflineSettlementPanel
 @onready var _resource_ribbon: ResourceRibbon = $UIRoot/HUDLayer/GameHudLayout/ResourceRibbon
 @onready var _ocean_map_hud: OceanMapHUD = $UIRoot/HUDLayer/GameHudLayout/OceanMapHUD
@@ -52,6 +53,7 @@ func _bind_views() -> void:
 	_production_panel.bind_session(_session)
 	_world_map_panel.bind_session(_session)
 	_survivor_panel.bind_session(_session)
+	_merchant_panel.bind_session(_session)
 	_offline_settlement_panel.show_report(_session.get_last_offline_settlement_report())
 	_resource_ribbon.bind_session(_session)
 	_ocean_map_hud.bind_session(_session)
