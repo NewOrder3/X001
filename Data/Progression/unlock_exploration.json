@@ -1,0 +1,7 @@
+{
+  "id": "progression_unlock_exploration",
+  "kind": "unlock",
+  "unlock_id": "unlock_exploration",
+  "required_building_id": "building_rudder",
+  "required_raft_level": 1
+}

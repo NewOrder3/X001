@@ -248,3 +248,14 @@ message.building.upgrade_unavailable,找不到要升级的设施。
 message.building.max_level,该设施已达到最高等级。
 message.building.insufficient_upgrade_resources,升级材料不足，继续探索海面收集资源吧。
 message.building.upgraded,%s 已升级至 Lv%d。
+ui.build.raft_no_session,竹筏等级：--
+ui.build.raft_level,竹筏等级：Lv%d（甲板 %d×%d）
+ui.build.raft_level_max,竹筏等级：Lv%d（甲板 %d×%d，已满级）
+ui.build.upgrade_raft,扩建竹筏
+ui.build.upgrade_raft_cost,扩建竹筏（%s）
+ui.build.upgrade_raft_max,已满级
+message.progression.raft_unavailable,竹筏成长数据不可用。
+message.progression.max_level,竹筏已升至最高等级。
+message.progression.insufficient_resources,木材不足，无法扩建竹筏。
+message.progression.raft_upgraded,竹筏扩建至 Lv%d，甲板变为 %d×%d。
+message.session.start_before_upgrading,请先开始游戏再扩建竹筏。

@@ -284,6 +284,15 @@ unique_name_in_owner = true
 theme_override_font_sizes/font_size = 20
 text = "ui.build.wood"
 
+[node name="RaftLevelLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
+unique_name_in_owner = true
+theme_override_font_sizes/font_size = 18
+text = "ui.build.raft_no_session"
+
+[node name="RaftUpgradeButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
+unique_name_in_owner = true
+text = "ui.build.upgrade_raft"
+
 [node name="SelectRainCollectorButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/RaftBuildPanel/Margin/Content"]
 unique_name_in_owner = true
 icon = ExtResource("12_rain_collector")

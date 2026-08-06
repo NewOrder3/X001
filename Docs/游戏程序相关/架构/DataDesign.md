@@ -27,7 +27,8 @@
 | `region` | 海域/区域 Definition | `region_shallow_sea` |
 | `event` | 事件 Definition | `event_storm_warning` |
 | `quest` | 任务 Definition | `quest_first_sail` |
-| `progression` | 解锁与进度节点 | `progression_building_tier_1` |
+| `unlock` | 解锁规则 ID（非 Definition） | `unlock_exploration` |
+| `progression` | 解锁与进度节点 | `progression_building_tier_one` |
 | `survival` | 生存规则配置 Definition | `survival_default` |
 | `recipe` | 生产配方 Definition | `recipe_grill_fish` |
 

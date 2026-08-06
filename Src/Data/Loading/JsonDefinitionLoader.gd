@@ -40,6 +40,19 @@ func load_buildings(directory_path: String) -> Array[BuildingDefinition]:
 	return definitions
 
 
+func load_progressions(directory_path: String) -> Array[ProgressionDefinition]:
+	var definitions: Array[ProgressionDefinition] = []
+	var entries: Array[Dictionary] = _load_json_entries(directory_path)
+	if not _last_error.is_empty():
+		return definitions
+	for entry: Dictionary in entries:
+		var definition: ProgressionDefinition = _create_progression_definition(entry["data"], entry["source_path"])
+		if definition == null:
+			return []
+		definitions.append(definition)
+	return definitions
+
+
 func load_recipes(directory_path: String) -> Array[RecipeDefinition]:
 	var definitions: Array[RecipeDefinition] = []
 	var entries: Array[Dictionary] = _load_json_entries(directory_path)
@@ -251,6 +264,66 @@ func _create_building_definition(data: Dictionary, source_path: String) -> Build
 		storage_capacity_bonus,
 		durability_recovery,
 		recovery_multiplier,
+	)
+
+
+func _create_progression_definition(data: Dictionary, source_path: String) -> ProgressionDefinition:
+	var id: StringName = _read_id(data, source_path)
+	if _last_error.is_empty() and not String(id).begins_with("progression_"):
+		_set_error("Definition '%s' requires an ID beginning with 'progression_'." % source_path)
+	var kind_name: String = _read_required_string(data, "kind", source_path)
+	if not _last_error.is_empty():
+		return null
+
+	var raft_level: int = 0
+	var raft_width: int = 0
+	var raft_height: int = 0
+	var upgrade_cost: Dictionary[StringName, int] = {}
+	var unlock_id: StringName = &""
+	var required_building_id: StringName = &""
+	var required_raft_level: int = 0
+	match kind_name:
+		"raft_level":
+			raft_level = _read_positive_int(data, "raft_level", source_path)
+			raft_width = _read_positive_int(data, "raft_width", source_path)
+			raft_height = _read_positive_int(data, "raft_height", source_path)
+			upgrade_cost = _read_optional_item_amounts(data, "upgrade_cost", source_path)
+		"unlock":
+			var unlock_id_text: String = _read_required_string(data, "unlock_id", source_path)
+			if not _last_error.is_empty():
+				return null
+			if not unlock_id_text.begins_with("unlock_"):
+				_set_error("Definition '%s' requires unlock_id beginning with 'unlock_'." % source_path)
+				return null
+			unlock_id = StringName(unlock_id_text)
+			required_building_id = _read_optional_prefixed_id(data, "required_building_id", "building_", source_path)
+			required_raft_level = _read_optional_positive_int(data, "required_raft_level", source_path, 1)
+		_:
+			_set_error("Definition '%s' has unsupported progression kind '%s'." % [source_path, kind_name])
+	if not _last_error.is_empty():
+		return null
+
+	if kind_name == "raft_level":
+		if unlock_id != &"" or required_building_id != &"" or required_raft_level > 0:
+			_set_error("Definition '%s' mixes raft_level fields into an unlock node." % source_path)
+			return null
+	else:
+		if raft_level != 0 or raft_width != 0 or raft_height != 0 or not upgrade_cost.is_empty():
+			_set_error("Definition '%s' mixes unlock fields into a raft_level node." % source_path)
+			return null
+	if not _last_error.is_empty():
+		return null
+
+	return ProgressionDefinition.new(
+		id,
+		ProgressionDefinition.Kind.RAFT_LEVEL if kind_name == "raft_level" else ProgressionDefinition.Kind.UNLOCK,
+		raft_level,
+		raft_width,
+		raft_height,
+		upgrade_cost,
+		unlock_id,
+		required_building_id,
+		required_raft_level,
 	)
 
 

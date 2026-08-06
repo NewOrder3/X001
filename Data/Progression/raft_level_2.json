@@ -1,0 +1,10 @@
+{
+  "id": "progression_raft_lv2",
+  "kind": "raft_level",
+  "raft_level": 2,
+  "raft_width": 4,
+  "raft_height": 4,
+  "upgrade_cost": {
+    "item_wood": 20
+  }
+}

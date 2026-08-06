@@ -5,6 +5,7 @@ extends RefCounted
 
 const ITEM_DIRECTORY: String = "res://Data/Items"
 const BUILDING_DIRECTORY: String = "res://Data/Buildings"
+const PROGRESSION_DIRECTORY: String = "res://Data/Progression"
 const SURVIVAL_DIRECTORY: String = "res://Data/Survival"
 const RECIPE_DIRECTORY: String = "res://Data/Recipes"
 const REGION_DIRECTORY: String = "res://Data/Regions"
@@ -16,6 +17,7 @@ const REWARD_DIRECTORY: String = "res://Data/Rewards"
 
 var _item_directory: String
 var _building_directory: String
+var _progression_directory: String
 var _survival_directory: String
 var _recipe_directory: String
 var _region_directory: String
@@ -26,6 +28,7 @@ var _boss_directory: String
 var _reward_directory: String
 var _items: Dictionary[StringName, ItemDefinition] = {}
 var _buildings: Dictionary[StringName, BuildingDefinition] = {}
+var _progressions: Dictionary[StringName, ProgressionDefinition] = {}
 var _survival_configs: Dictionary[StringName, SurvivalConfigDefinition] = {}
 var _recipes: Dictionary[StringName, RecipeDefinition] = {}
 var _regions: Dictionary[StringName, RegionDefinition] = {}
@@ -49,6 +52,7 @@ func _init(
 	new_skill_directory: String = "",
 	new_boss_directory: String = "",
 	new_reward_directory: String = "",
+	new_progression_directory: String = "",
 ) -> void:
 	_item_directory = new_item_directory
 	_building_directory = new_building_directory
@@ -61,6 +65,7 @@ func _init(
 	_skill_directory = SKILL_DIRECTORY if new_skill_directory.is_empty() and use_default_content_directories else new_skill_directory
 	_boss_directory = BOSS_DIRECTORY if new_boss_directory.is_empty() and use_default_content_directories else new_boss_directory
 	_reward_directory = REWARD_DIRECTORY if new_reward_directory.is_empty() and use_default_content_directories else new_reward_directory
+	_progression_directory = PROGRESSION_DIRECTORY if new_progression_directory.is_empty() and use_default_content_directories else new_progression_directory
 
 
 func load_all() -> bool:
@@ -80,6 +85,14 @@ func load_all() -> bool:
 	for definition: BuildingDefinition in building_definitions:
 		if not _register_building(definition):
 			return _fail_load(_last_error)
+
+	if not _progression_directory.is_empty():
+		var progression_definitions: Array[ProgressionDefinition] = loader.load_progressions(_progression_directory)
+		if not loader.get_last_error().is_empty():
+			return _fail_load(loader.get_last_error())
+		for definition: ProgressionDefinition in progression_definitions:
+			if not _register_progression(definition):
+				return _fail_load(_last_error)
 
 	var survival_definitions: Array[SurvivalConfigDefinition] = loader.load_survival_configs(_survival_directory)
 	if not loader.get_last_error().is_empty():
@@ -138,6 +151,8 @@ func load_all() -> bool:
 				return _fail_load(_last_error)
 	if not _validate_building_item_references():
 		return _fail_load(_last_error)
+	if not _validate_progression_references():
+		return _fail_load(_last_error)
 	if not _validate_world_references():
 		return _fail_load(_last_error)
 	if not _validate_survivor_references():
@@ -160,6 +175,13 @@ func get_building(id: StringName) -> BuildingDefinition:
 		push_error("DATA: Unknown building Definition ID '%s'." % String(id))
 		return null
 	return _buildings[id]
+
+
+func get_progression(id: StringName) -> ProgressionDefinition:
+	if not _progressions.has(id):
+		push_error("DATA: Unknown progression Definition ID '%s'." % String(id))
+		return null
+	return _progressions[id]
 
 
 func get_survival_config(id: StringName) -> SurvivalConfigDefinition:
@@ -248,6 +270,10 @@ func has_building(id: StringName) -> bool:
 	return _buildings.has(id)
 
 
+func has_progression(id: StringName) -> bool:
+	return _progressions.has(id)
+
+
 func has_survival_config(id: StringName) -> bool:
 	return _survival_configs.has(id)
 
@@ -292,6 +318,10 @@ func get_building_count() -> int:
 	return _buildings.size()
 
 
+func get_progression_count() -> int:
+	return _progressions.size()
+
+
 func get_survival_config_count() -> int:
 	return _survival_configs.size()
 
@@ -324,6 +354,20 @@ func get_reward_count() -> int:
 	return _rewards.size()
 
 
+func get_raft_level_progression(raft_level_value: int) -> ProgressionDefinition:
+	for definition: ProgressionDefinition in _progressions.values():
+		if definition.is_raft_level() and definition.raft_level == raft_level_value:
+			return definition
+	return null
+
+
+func get_unlock_progression(unlock_id: StringName) -> ProgressionDefinition:
+	for definition: ProgressionDefinition in _progressions.values():
+		if definition.is_unlock() and definition.unlock_id == unlock_id:
+			return definition
+	return null
+
+
 func _register_item(definition: ItemDefinition) -> bool:
 	if not _register_id(definition.id):
 		return false
@@ -335,6 +379,13 @@ func _register_building(definition: BuildingDefinition) -> bool:
 	if not _register_id(definition.id):
 		return false
 	_buildings[definition.id] = definition
+	return true
+
+
+func _register_progression(definition: ProgressionDefinition) -> bool:
+	if not _register_id(definition.id):
+		return false
+	_progressions[definition.id] = definition
 	return true
 
 
@@ -432,6 +483,61 @@ func _validate_building_item_references() -> bool:
 	return true
 
 
+func _validate_progression_references() -> bool:
+	if _progressions.is_empty():
+		return true
+	var raft_levels: Dictionary[int, bool] = {}
+	var unlock_ids: Dictionary[StringName, bool] = {}
+	var max_raft_level: int = 0
+	for definition: ProgressionDefinition in _progressions.values():
+		if definition.is_raft_level():
+			if raft_levels.has(definition.raft_level):
+				_set_error("Progression '%s' duplicates raft level %d." % [String(definition.id), definition.raft_level])
+				return false
+			raft_levels[definition.raft_level] = true
+			max_raft_level = maxi(max_raft_level, definition.raft_level)
+			for item_id: StringName in definition.upgrade_cost:
+				if not _items.has(item_id):
+					_set_error("Progression '%s' references unknown cost item '%s'." % [String(definition.id), String(item_id)])
+					return false
+		else:
+			if definition.unlock_id == &"":
+				_set_error("Progression '%s' requires a non-empty unlock_id." % String(definition.id))
+				return false
+			if unlock_ids.has(definition.unlock_id):
+				_set_error("Progression '%s' duplicates unlock '%s'." % [String(definition.id), String(definition.unlock_id)])
+				return false
+			unlock_ids[definition.unlock_id] = true
+			if definition.required_building_id != &"" and not _buildings.has(definition.required_building_id):
+				_set_error("Progression '%s' references unknown building '%s'." % [String(definition.id), String(definition.required_building_id)])
+				return false
+	if raft_levels.is_empty():
+		_set_error("Progression Definitions require at least one raft level.")
+		return false
+	if not raft_levels.has(1):
+		_set_error("Progression Definitions require raft level 1.")
+		return false
+	for level: int in range(1, max_raft_level + 1):
+		if not raft_levels.has(level):
+			_set_error("Progression raft levels must be contiguous; missing level %d." % level)
+			return false
+		var level_definition: ProgressionDefinition = get_raft_level_progression(level)
+		if level_definition.raft_width <= 0 or level_definition.raft_height <= 0:
+			_set_error("Progression '%s' requires positive raft dimensions." % String(level_definition.id))
+			return false
+		if level < max_raft_level and level_definition.upgrade_cost.is_empty():
+			_set_error("Progression raft level %d requires an upgrade_cost." % level)
+			return false
+		if level == max_raft_level and not level_definition.upgrade_cost.is_empty():
+			_set_error("Progression final raft level %d must not define upgrade_cost." % level)
+			return false
+	for definition: ProgressionDefinition in _progressions.values():
+		if definition.is_unlock() and definition.required_raft_level > max_raft_level:
+			_set_error("Progression '%s' requires raft level %d above the maximum %d." % [String(definition.id), definition.required_raft_level, max_raft_level])
+			return false
+	return true
+
+
 func _validate_world_references() -> bool:
 	if _regions.is_empty() and _encounters.is_empty():
 		return true
@@ -506,6 +612,7 @@ func _validate_battle_references() -> bool:
 func _clear() -> void:
 	_items.clear()
 	_buildings.clear()
+	_progressions.clear()
 	_survival_configs.clear()
 	_recipes.clear()
 	_regions.clear()

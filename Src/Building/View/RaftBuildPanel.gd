@@ -6,6 +6,8 @@ extends Control
 @export var build_view_path: NodePath
 
 @onready var _wood_label: Label = %WoodLabel
+@onready var _raft_level_label: Label = %RaftLevelLabel
+@onready var _raft_upgrade_button: Button = %RaftUpgradeButton
 @onready var _status_label: Label = %BuildStatusLabel
 @onready var _select_collector_button: Button = %SelectRainCollectorButton
 @onready var _select_campfire_button: Button = %SelectCampfireButton
@@ -33,6 +35,7 @@ func _ready() -> void:
 		_select_repair_button.pressed.connect(_select_building.bind(&"building_repair_station"))
 		_select_tank_button.pressed.connect(_select_building.bind(&"building_water_tank"))
 		_select_rudder_button.pressed.connect(_select_building.bind(&"building_rudder"))
+	_raft_upgrade_button.pressed.connect(_upgrade_raft)
 	_confirm_button.pressed.connect(_on_confirm_pressed)
 	_cancel_button.pressed.connect(_on_cancel_pressed)
 	_refresh()
@@ -49,6 +52,9 @@ func bind_session(session: GameSession) -> void:
 			building_system.building_placed.connect(_on_building_placed)
 		if not building_system.building_upgraded.is_connected(_on_building_upgraded):
 			building_system.building_upgraded.connect(_on_building_upgraded)
+		var progression_system: ProgressionSystem = _session.get_progression_system()
+		if not progression_system.raft_upgraded.is_connected(_on_raft_upgraded):
+			progression_system.raft_upgraded.connect(_on_raft_upgraded)
 	_refresh()
 
 
@@ -103,10 +109,24 @@ func _on_building_upgraded(_instance_id: StringName, _new_level: int) -> void:
 		_build_view.queue_redraw()
 
 
+func _on_raft_upgraded(_new_level: int) -> void:
+	_refresh()
+	if _build_view != null:
+		_build_view.queue_redraw()
+
+
 func _upgrade_building(instance_id: StringName) -> void:
 	if _session == null:
 		return
 	var result: CommandResult = _session.execute_command(UpgradeBuildingCommand.new(instance_id))
+	_status_label.text = result.message
+	_refresh()
+
+
+func _upgrade_raft() -> void:
+	if _session == null:
+		return
+	var result: CommandResult = _session.execute_command(UpgradeRaftCommand.new())
 	_status_label.text = result.message
 	_refresh()
 
@@ -122,6 +142,7 @@ func _refresh() -> void:
 	if _session != null:
 		wood_amount = _session.get_item_amount(&"item_wood")
 	_wood_label.text = GameText.format(&"ui.build.wood", [wood_amount])
+	_refresh_raft_upgrade()
 	_refresh_select_button(_select_collector_button, &"building_rain_collector")
 	_refresh_select_button(_select_campfire_button, &"building_campfire")
 	_refresh_select_button(_select_repair_button, &"building_repair_station")
@@ -134,6 +155,31 @@ func _refresh() -> void:
 	_select_tank_button.disabled = _session == null
 	_select_rudder_button.disabled = _session == null
 	_refresh_facility_list()
+
+
+func _refresh_raft_upgrade() -> void:
+	if _session == null or not _session.has_active_state():
+		_raft_level_label.text = GameText.get_text(&"ui.build.raft_no_session")
+		_raft_upgrade_button.text = GameText.get_text(&"ui.build.upgrade_raft")
+		_raft_upgrade_button.disabled = true
+		return
+	var raft_level: int = _session.get_raft_level()
+	var deck_size: Vector2i = _session.get_raft_state().grid.get_deck_size()
+	var upgrade_cost: Dictionary[StringName, int] = _session.get_raft_upgrade_cost()
+	if upgrade_cost.is_empty():
+		_raft_level_label.text = GameText.format(&"ui.build.raft_level_max", [raft_level, deck_size.x, deck_size.y])
+		_raft_upgrade_button.text = GameText.get_text(&"ui.build.upgrade_raft_max")
+		_raft_upgrade_button.disabled = true
+		return
+	_raft_level_label.text = GameText.format(&"ui.build.raft_level", [raft_level, deck_size.x, deck_size.y])
+	_raft_upgrade_button.text = GameText.format(
+		&"ui.build.upgrade_raft_cost",
+		[_format_cost(upgrade_cost)],
+	)
+	_raft_upgrade_button.disabled = not _session.get_inventory_system().can_afford(
+		_session.get_state().inventory_state,
+		upgrade_cost,
+	)
 
 
 func _refresh_facility_list() -> void:

@@ -13,6 +13,25 @@ func _init() -> void:
 		for y: int in range(-1, 2):
 			_deck_cells[Vector2i(x, y)] = true
 
+
+func expand_deck_to(width: int, height: int) -> bool:
+	if width <= 0 or height <= 0:
+		return false
+	var min_x: int = -((width - 1) / 2)
+	var max_x: int = min_x + width - 1
+	var min_y: int = -((height - 1) / 2)
+	var max_y: int = min_y + height - 1
+	var added_cells: bool = false
+	for x: int in range(min_x, max_x + 1):
+		for y: int in range(min_y, max_y + 1):
+			var cell: Vector2i = Vector2i(x, y)
+			if not _deck_cells.has(cell):
+				_deck_cells[cell] = true
+				added_cells = true
+	if added_cells:
+		grid_changed.emit()
+	return true
+
 func set_building_footprint(building_id: StringName, footprint: Vector2i) -> void:
 	_footprints[building_id] = footprint
 
@@ -59,6 +78,25 @@ func get_deck_cells() -> Array[Vector2i]:
 	for cell: Vector2i in _deck_cells:
 		cells.append(cell)
 	return cells
+
+
+func get_deck_size() -> Vector2i:
+	if _deck_cells.is_empty():
+		return Vector2i.ZERO
+	var min_cell: Vector2i = Vector2i.ZERO
+	var max_cell: Vector2i = Vector2i.ZERO
+	var is_first: bool = true
+	for cell: Vector2i in _deck_cells:
+		if is_first:
+			min_cell = cell
+			max_cell = cell
+			is_first = false
+			continue
+		min_cell.x = mini(min_cell.x, cell.x)
+		min_cell.y = mini(min_cell.y, cell.y)
+		max_cell.x = maxi(max_cell.x, cell.x)
+		max_cell.y = maxi(max_cell.y, cell.y)
+	return Vector2i(max_cell.x - min_cell.x + 1, max_cell.y - min_cell.y + 1)
 
 
 func to_save_data() -> Dictionary:

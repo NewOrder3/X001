@@ -15,6 +15,7 @@ var _survival_system: SurvivalSystem
 var _production_system: ProductionSystem
 var _survivor_system: SurvivorSystem
 var _random_service: RandomService
+var _progression_system: ProgressionSystem
 var _exploration_system: ExplorationSystem
 var _battle_system: BattleSystem
 var _session_command_system: SessionCommandSystem
@@ -34,7 +35,8 @@ func _init() -> void:
 	_production_system = ProductionSystem.new(_data_registry, _inventory_system, _simulation_clock)
 	_survivor_system = SurvivorSystem.new(_data_registry, _inventory_system)
 	_random_service = RandomService.new()
-	_exploration_system = ExplorationSystem.new(_data_registry, _inventory_system, _survival_system, _survivor_system, _random_service)
+	_progression_system = ProgressionSystem.new(_data_registry, _inventory_system)
+	_exploration_system = ExplorationSystem.new(_data_registry, _inventory_system, _survival_system, _survivor_system, _random_service, _progression_system)
 	_battle_system = BattleSystem.new(_data_registry, _random_service)
 	_session_command_system = SessionCommandSystem.new()
 
@@ -52,6 +54,11 @@ func create_new_game(world_seed: int) -> bool:
 		int(Time.get_unix_time_from_system()),
 	):
 		_last_error = GameText.get_text(&"message.survival.state_unavailable")
+		_state = null
+		_is_disposed = true
+		return false
+	if not _progression_system.initialize_new_state(_state.progression_state):
+		_last_error = GameText.get_text(&"message.progression.raft_unavailable")
 		_state = null
 		_is_disposed = true
 		return false
@@ -89,6 +96,10 @@ func load_state_at(state: GameState, current_unix_seconds: int) -> bool:
 	_state = state
 	if not _survivor_system.activate_loaded_state(_state.survivor_state):
 		_last_error = GameText.get_text(&"message.survivor.state_unavailable")
+		_state = null
+		return false
+	if not _progression_system.activate_loaded_state(_state):
+		_last_error = GameText.get_text(&"message.progression.raft_unavailable")
 		_state = null
 		return false
 	_last_offline_settlement_report = _survival_system.activate_loaded_state(
@@ -168,6 +179,34 @@ func get_raft_state() -> RaftState:
 	if not has_active_state():
 		return null
 	return _state.raft_state
+
+
+func get_progression_state() -> ProgressionState:
+	if not has_active_state():
+		return null
+	return _state.progression_state
+
+
+func get_progression_system() -> ProgressionSystem:
+	return _progression_system
+
+
+func get_raft_level() -> int:
+	if not has_active_state():
+		return 0
+	return _state.progression_state.raft_level
+
+
+func get_raft_upgrade_cost() -> Dictionary[StringName, int]:
+	if not has_active_state():
+		return {}
+	return _progression_system.get_raft_upgrade_cost(_state.progression_state)
+
+
+func is_unlock_available(unlock_id: StringName) -> bool:
+	if not has_active_state():
+		return false
+	return _progression_system.is_unlock_available(_state, unlock_id)
 
 
 func get_world_state() -> WorldState:
@@ -380,7 +419,13 @@ func get_reachable_regions() -> Array[RegionDefinition]:
 
 
 func is_exploration_unlocked() -> bool:
-	return has_active_state() and _exploration_system.is_unlocked(_state)
+	return has_active_state() and _progression_system.is_unlock_available(_state, ProgressionSystem.UNLOCK_EXPLORATION)
+
+
+func execute_upgrade_raft(_command: UpgradeRaftCommand) -> CommandResult:
+	if not has_active_state():
+		return CommandResult.failure(&"inactive_session", GameText.get_text(&"message.session.start_before_upgrading"))
+	return _progression_system.upgrade_raft(_state)
 
 
 func execute_explore_region(command: ExploreRegionCommand) -> CommandResult:

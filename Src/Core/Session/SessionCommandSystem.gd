@@ -32,6 +32,9 @@ func execute(session: GameSession, command: GameCommand) -> CommandResult:
 	if command is UpgradeBuildingCommand:
 		var upgrade_building_command: UpgradeBuildingCommand = command as UpgradeBuildingCommand
 		return _complete(command, session.execute_upgrade_building(upgrade_building_command))
+	if command is UpgradeRaftCommand:
+		var upgrade_raft_command: UpgradeRaftCommand = command as UpgradeRaftCommand
+		return _complete(command, session.execute_upgrade_raft(upgrade_raft_command))
 	if command is GatherResourcesCommand:
 		var gather_command: GatherResourcesCommand = command as GatherResourcesCommand
 		return _complete(command, session.execute_gather_resources(gather_command))

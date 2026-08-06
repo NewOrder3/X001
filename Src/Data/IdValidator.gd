@@ -13,6 +13,7 @@ const ALLOWED_PREFIXES: Array[String] = [
 	"region",
 	"event",
 	"quest",
+	"unlock",
 	"progression",
 	"survival",
 	"reward",

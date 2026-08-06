@@ -1,7 +1,7 @@
 class_name SaveService
 extends RefCounted
 
-const CURRENT_SAVE_VERSION: int = 8
+const CURRENT_SAVE_VERSION: int = 9
 const SAVE_DIRECTORY: String = "user://saves"
 
 var _active_state: GameState = null
@@ -118,6 +118,9 @@ func migrate(data: Dictionary) -> Dictionary:
 		elif version == 7:
 			migrated_data = _v7_to_v8(migrated_data)
 			version = 8
+		elif version == 8:
+			migrated_data = _v8_to_v9(migrated_data)
+			version = 9
 		else:
 			_fail("No migration exists for save version %d." % version)
 			return {}
@@ -139,7 +142,7 @@ func _serialize_game_state(state: GameState) -> Dictionary:
 		"survivor_state": state.survivor_state.to_save_data(),
 		"world_state": state.world_state.to_save_data(),
 		"battle_state": state.battle_state.to_save_data(),
-		"progression_state": {},
+		"progression_state": state.progression_state.to_save_data(),
 	}
 
 
@@ -178,6 +181,10 @@ func _deserialize_game_state(data: Dictionary) -> GameState:
 	var raw_battle_state: Variant = data.get("battle_state", {})
 	if not raw_battle_state is Dictionary or not state.battle_state.load_from_save_data(raw_battle_state):
 		_fail("Save game_state contains an invalid battle_state.")
+		return null
+	var raw_progression_state: Variant = data.get("progression_state", {})
+	if not raw_progression_state is Dictionary or not state.progression_state.load_from_save_data(raw_progression_state):
+		_fail("Save game_state contains an invalid progression_state.")
 		return null
 	return state
 
@@ -289,6 +296,20 @@ func _v7_to_v8(data: Dictionary) -> Dictionary:
 		return {}
 	var game_state_data: Dictionary = raw_game_state.duplicate(true)
 	game_state_data["battle_state"] = {}
+	migrated_data["game_state"] = game_state_data
+	return migrated_data
+
+
+func _v8_to_v9(data: Dictionary) -> Dictionary:
+	var migrated_data: Dictionary = data.duplicate(true)
+	var raw_game_state: Variant = migrated_data.get("game_state")
+	if not raw_game_state is Dictionary:
+		_fail("Version 8 save is missing a valid game_state object.")
+		return {}
+	var game_state_data: Dictionary = raw_game_state.duplicate(true)
+	var raw_progression_state: Variant = game_state_data.get("progression_state")
+	if not raw_progression_state is Dictionary or raw_progression_state.is_empty():
+		game_state_data["progression_state"] = {"raft_level": 1}
 	migrated_data["game_state"] = game_state_data
 	return migrated_data
 

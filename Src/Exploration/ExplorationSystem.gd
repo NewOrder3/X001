@@ -11,7 +11,6 @@ const ERROR_UNKNOWN_REGION: StringName = &"unknown_region"
 const ERROR_NOT_ADJACENT: StringName = &"not_adjacent"
 const ERROR_INVENTORY_FULL: StringName = &"inventory_full"
 const ERROR_EXPLORATION_LOCKED: StringName = &"exploration_locked"
-const REQUIRED_BUILDING_ID: StringName = &"building_rudder"
 const GENERATED_REGION_PREFIX: String = "region_open_sea_q"
 
 var _data_registry: DataRegistry
@@ -19,6 +18,7 @@ var _inventory_system: InventorySystem
 var _survival_system: SurvivalSystem
 var _survivor_system: SurvivorSystem
 var _random_service: RandomService
+var _progression_system: ProgressionSystem
 
 
 func _init(
@@ -27,12 +27,14 @@ func _init(
 	new_survival_system: SurvivalSystem,
 	new_survivor_system: SurvivorSystem,
 	new_random_service: RandomService,
+	new_progression_system: ProgressionSystem,
 ) -> void:
 	_data_registry = new_data_registry
 	_inventory_system = new_inventory_system
 	_survival_system = new_survival_system
 	_survivor_system = new_survivor_system
 	_random_service = new_random_service
+	_progression_system = new_progression_system
 
 
 func initialize_new_state(state: WorldState) -> bool:
@@ -93,7 +95,7 @@ func get_region_definition(region_id: StringName) -> RegionDefinition:
 
 
 func is_unlocked(state: GameState) -> bool:
-	return _has_required_rudder(state)
+	return _progression_system != null and _progression_system.is_unlock_available(state, ProgressionSystem.UNLOCK_EXPLORATION)
 
 
 func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResult:
@@ -101,7 +103,7 @@ func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResu
 		return ExplorationResult.failure(ERROR_INVALID_WORLD_STATE, GameText.get_text(&"message.exploration.no_world_state"))
 	if _data_registry == null or not _has_region(command.target_region_id):
 		return ExplorationResult.failure(ERROR_UNKNOWN_REGION, GameText.get_text(&"message.exploration.region_unavailable"))
-	if not _has_required_rudder(state):
+	if not is_unlocked(state):
 		return ExplorationResult.failure(ERROR_EXPLORATION_LOCKED, GameText.get_text(&"message.exploration.rudder_required"))
 	if not _has_region(state.world_state.current_region_id):
 		return ExplorationResult.failure(ERROR_INVALID_WORLD_STATE, GameText.get_text(&"message.exploration.current_region_unavailable"))
@@ -249,15 +251,6 @@ func _can_receive_rewards(state: GameState, rewards: Dictionary[StringName, int]
 		if not _inventory_system.can_add(state.inventory_state, item_id, rewards[item_id], capacity):
 			return false
 	return true
-
-
-func _has_required_rudder(state: GameState) -> bool:
-	if state == null or state.raft_state == null:
-		return false
-	for building: BuildingInstance in state.raft_state.building_instances.values():
-		if building.building_id == REQUIRED_BUILDING_ID:
-			return true
-	return false
 
 
 func _get_consumed_key(region_id: StringName, encounter_id: StringName) -> StringName:
