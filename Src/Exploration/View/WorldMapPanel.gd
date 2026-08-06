@@ -3,20 +3,28 @@ extends PanelContainer
 
 ## S4 map input surface. It submits a command and renders only public session queries/results.
 
+signal navigate_requested(panel_id: StringName)
+signal boss_challenge_requested(boss_id: StringName)
+
 @onready var _current_region_label: Label = %CurrentRegionLabel
 @onready var _region_buttons: VBoxContainer = %RegionButtons
 @onready var _preview_label: Label = %ExplorationPreviewLabel
 @onready var _confirm_button: Button = %ConfirmExploreButton
 @onready var _cancel_button: Button = %CancelExploreButton
 @onready var _status_label: Label = %ExplorationStatusLabel
+@onready var _rescue_continue_button: Button = %RescueContinueButton
+@onready var _boss_challenge_button: Button = %BossChallengeButton
 
 var _session: GameSession = null
 var _selected_region_id: StringName = &""
+var _available_boss_id: StringName = &""
 
 
 func _ready() -> void:
 	_confirm_button.pressed.connect(_confirm_exploration)
 	_cancel_button.pressed.connect(_cancel_selection)
+	_rescue_continue_button.pressed.connect(navigate_requested.emit.bind(&"crew"))
+	_boss_challenge_button.pressed.connect(_challenge_boss)
 	_refresh()
 
 
@@ -51,6 +59,7 @@ func _confirm_exploration() -> void:
 	var result: CommandResult = _session.execute_command(ExploreRegionCommand.new(_selected_region_id))
 	_status_label.text = result.message
 	if result.succeeded:
+		_rescue_continue_button.visible = _session.get_last_exploration_result().rescued_survivor_id != &""
 		_selected_region_id = &""
 	_refresh()
 
@@ -63,6 +72,7 @@ func _cancel_selection() -> void:
 
 func _on_exploration_completed(result: ExplorationResult) -> void:
 	_status_label.text = result.message
+	_rescue_continue_button.visible = result.rescued_survivor_id != &""
 	_selected_region_id = &""
 	_refresh()
 
@@ -95,11 +105,14 @@ func _refresh() -> void:
 	_confirm_button.disabled = true
 	_cancel_button.disabled = _selected_region_id == &""
 	if _session == null or not _session.has_active_state():
+		_rescue_continue_button.hide()
+		_boss_challenge_button.hide()
 		_current_region_label.text = GameText.get_text(&"ui.world_map.current_empty")
 		_preview_label.text = GameText.get_text(&"ui.world_map.start_hint")
 		return
 
 	var world_state: WorldState = _session.get_world_state()
+	_refresh_boss_challenge()
 	var current_region: RegionDefinition = _session.get_region_definition(world_state.current_region_id)
 	_current_region_label.text = GameText.format(&"ui.world_map.current", [
 		current_region.get_display_name(),
@@ -137,3 +150,23 @@ func _refresh() -> void:
 		GameText.get_text(&"ui.world_map.ready") if is_unlocked and action_check.succeeded else (GameText.get_text(&"ui.world_map.build_rudder") if not is_unlocked else action_check.message),
 	])
 	_confirm_button.disabled = not is_unlocked or not action_check.succeeded
+
+
+func _challenge_boss() -> void:
+	if _available_boss_id != &"":
+		boss_challenge_requested.emit(_available_boss_id)
+
+
+func _refresh_boss_challenge() -> void:
+	_available_boss_id = &""
+	var current_quest: QuestDefinition = _session.get_current_quest()
+	if current_quest != null and current_quest.objective_type == QuestDefinition.ObjectiveType.WIN_BATTLE:
+		_available_boss_id = current_quest.target_id
+	elif _session.is_boss_unlocked(&"boss_reef_leviathan"):
+		_available_boss_id = &"boss_reef_leviathan"
+	_boss_challenge_button.visible = _available_boss_id != &""
+	if _available_boss_id == &"":
+		return
+	var boss: BossDefinition = _session.get_boss_definition(_available_boss_id)
+	_boss_challenge_button.text = GameText.format(&"ui.world_map.boss_threat", [boss.get_display_name() if boss != null else String(_available_boss_id)])
+	_boss_challenge_button.disabled = _session.get_survivor_state().lineup_ids.is_empty()

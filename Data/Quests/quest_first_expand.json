@@ -3,5 +3,7 @@
   "display_name_key": "data.quest.first_expand.name",
   "description_key": "data.quest.first_expand.description",
   "objective_type": "upgrade_raft",
-  "target_amount": 2
+  "target_amount": 2,
+  "sort_order": 50,
+  "prerequisite_quest_ids": ["quest_first_crew"]
 }

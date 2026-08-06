@@ -120,7 +120,7 @@ func execute(state: GameState, command: ExploreRegionCommand) -> ExplorationResu
 	if not action_check.succeeded:
 		return ExplorationResult.failure(action_check.error_code, action_check.message)
 
-	var encounter: EncounterDefinition = _resolve_encounter(state.world_state, target)
+	var encounter: EncounterDefinition = _resolve_encounter(state, target)
 	if encounter != null and not _can_receive_rewards(state, encounter.reward_items):
 		return ExplorationResult.failure(ERROR_INVENTORY_FULL, GameText.get_text(&"message.exploration.reward_inventory_full"))
 
@@ -233,16 +233,25 @@ func _decode_coordinate(encoded_value: String) -> Variant:
 	return null
 
 
-func _resolve_encounter(state: WorldState, region: RegionDefinition) -> EncounterDefinition:
+func _resolve_encounter(state: GameState, region: RegionDefinition) -> EncounterDefinition:
+	if _is_tutorial_rescue_required(state, region):
+		return _data_registry.get_encounter(&"event_rescue_bo")
 	var available_encounters: Array[StringName] = []
 	for encounter_id: StringName in region.encounter_ids:
-		if not state.is_encounter_consumed(_get_consumed_key(region.id, encounter_id)):
+		if not state.world_state.is_encounter_consumed(_get_consumed_key(region.id, encounter_id)):
 			available_encounters.append(encounter_id)
 	if available_encounters.is_empty():
 		return null
 	var stream_id: StringName = StringName("%s%s" % [EXPLORATION_STREAM_PREFIX, String(region.id)])
 	var selected_index: int = _random_service.range_i_from_stream(stream_id, 0, available_encounters.size() - 1)
 	return _data_registry.get_encounter(available_encounters[selected_index])
+
+
+func _is_tutorial_rescue_required(state: GameState, region: RegionDefinition) -> bool:
+	if _data_registry == null or _survivor_system == null or region.id != &"region_west_shoals":
+		return false
+	var survivor_state: SurvivorState = state.survivor_state
+	return survivor_state != null and not survivor_state.survivors.has(&"survivor_bo") and not survivor_state.pending_recruitment_ids.has(&"survivor_bo")
 
 
 func _can_receive_rewards(state: GameState, rewards: Dictionary[StringName, int]) -> bool:

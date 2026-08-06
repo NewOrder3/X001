@@ -7,8 +7,6 @@ extends PanelContainer
 @onready var _lineup_label: Label = %LineupLabel
 @onready var _owned_cards: VBoxContainer = %OwnedCards
 @onready var _status_label: Label = %SurvivorStatusLabel
-@onready var _challenge_boss_button: Button = %ChallengeBossButton
-@onready var _challenge_reef_button: Button = %ChallengeReefButton
 
 const PORTRAIT_BY_SURVIVOR_ID := {
 	&"survivor_bo": preload("res://Assets/Temp/partner/partner_portrait_01.png"),
@@ -21,8 +19,6 @@ var _session: GameSession = null
 
 
 func _ready() -> void:
-	_challenge_boss_button.pressed.connect(_challenge_boss.bind(&"boss_tutorial_sea_beast"))
-	_challenge_reef_button.pressed.connect(_challenge_boss.bind(&"boss_reef_leviathan"))
 	_refresh()
 
 
@@ -47,19 +43,12 @@ func _refresh() -> void:
 	_clear_children(_pending_cards)
 	_clear_children(_owned_cards)
 	if _session == null or not _session.has_active_state():
-		_challenge_boss_button.disabled = true
-		_challenge_reef_button.disabled = true
-		_challenge_reef_button.text = GameText.get_text(&"ui.survivor.challenge_reef_locked")
 		_lineup_label.text = GameText.format(&"ui.survivor.lineup", [0, SurvivorState.MAX_LINEUP_SIZE, GameText.get_text(&"ui.survivor.lineup_empty")])
 		_add_empty_label(_pending_cards, &"ui.survivor.pending_empty")
 		_add_empty_label(_owned_cards, &"ui.survivor.roster_empty")
 		return
 
 	var state: SurvivorState = _session.get_survivor_state()
-	_challenge_boss_button.disabled = state.lineup_ids.is_empty()
-	var reef_unlocked: bool = _session.is_boss_unlocked(&"boss_reef_leviathan")
-	_challenge_reef_button.disabled = state.lineup_ids.is_empty() or not reef_unlocked
-	_challenge_reef_button.text = GameText.get_text(&"ui.survivor.challenge_reef" if reef_unlocked else &"ui.survivor.challenge_reef_locked")
 	var lineup_names: PackedStringArray = []
 	for survivor_id: StringName in state.lineup_ids:
 		var definition: SurvivorDefinition = _session.get_survivor_definition(survivor_id)
@@ -156,10 +145,6 @@ func _toggle_lineup(survivor_id: StringName) -> void:
 	else:
 		lineup_ids.append(survivor_id)
 	_submit(SetLineupCommand.new(lineup_ids))
-
-
-func _challenge_boss(boss_id: StringName) -> void:
-	_submit(StartBattleCommand.new(boss_id))
 
 
 func _submit(command: GameCommand) -> void:

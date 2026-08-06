@@ -11,6 +11,8 @@ extends Node
 @onready var _survivor_panel: SurvivorPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel
 @onready var _merchant_panel: MerchantPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/MerchantPanel
 @onready var _goal_panel: GoalPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/GoalPanel
+@onready var _current_goal_hud: CurrentGoalHud = $UIRoot/HUDLayer/GameHudLayout/CurrentGoalHud
+@onready var _quest_feedback_banner: QuestFeedbackBanner = $UIRoot/HUDLayer/GameHudLayout/QuestFeedbackBanner
 @onready var _menu_panel: GameMenuPanel = $UIRoot/WindowLayer/GameMenuPanel
 @onready var _ui_root: UIRoot = $UIRoot
 @onready var _offline_settlement_panel: OfflineSettlementPanel = $UIRoot/WindowLayer/OfflineSettlementPanel
@@ -28,6 +30,11 @@ func _ready() -> void:
 	_dynamic_ocean_map.set_navigation_mode(true)
 	_set_build_mode(false)
 	_goal_panel.navigate_requested.connect(_hud_layout.open_panel)
+	_goal_panel.battle_requested.connect(_start_goal_battle)
+	_current_goal_hud.navigate_requested.connect(_hud_layout.open_panel)
+	_current_goal_hud.battle_requested.connect(_start_goal_battle)
+	_world_map_panel.navigate_requested.connect(_hud_layout.open_panel)
+	_world_map_panel.boss_challenge_requested.connect(_start_goal_battle)
 	_ui_root.register_window(&"game_menu", _menu_panel)
 	_hud_layout.menu_requested.connect(_open_menu)
 	_menu_panel.close_requested.connect(_close_menu)
@@ -63,10 +70,20 @@ func _bind_views() -> void:
 	_survivor_panel.bind_session(_session)
 	_merchant_panel.bind_session(_session)
 	_goal_panel.bind_session(_session)
+	_current_goal_hud.bind_session(_session)
+	_quest_feedback_banner.bind_session(_session)
 	_menu_panel.bind_session(_session)
 	_offline_settlement_panel.show_report(_session.get_last_offline_settlement_report())
 	_resource_ribbon.bind_session(_session)
 	_ocean_map_hud.bind_session(_session)
+
+
+func _start_goal_battle(boss_id: StringName) -> void:
+	if _session == null:
+		return
+	var result: CommandResult = _session.execute_command(StartBattleCommand.new(boss_id))
+	if not result.succeeded:
+		_ui_root.show_popup(result.message)
 
 
 func _open_menu() -> void:

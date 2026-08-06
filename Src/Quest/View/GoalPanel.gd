@@ -4,6 +4,7 @@ extends PanelContainer
 ## New-player goal list with one-tap navigation into the related panel.
 
 signal navigate_requested(panel_id: StringName)
+signal battle_requested(boss_id: StringName)
 
 @onready var _goal_list: VBoxContainer = %GoalList
 @onready var _status_label: Label = %GoalStatusLabel
@@ -71,8 +72,12 @@ func _refresh() -> void:
 		card.add_child(description)
 		var action: Button = Button.new()
 		action.custom_minimum_size = Vector2(0.0, 44.0)
-		action.text = GameText.get_text(&"ui.goal.navigate")
-		action.pressed.connect(navigate_requested.emit.bind(_get_panel_id(quest)))
+		var is_battle_goal: bool = quest.objective_type == QuestDefinition.ObjectiveType.WIN_BATTLE
+		action.text = GameText.get_text(&"ui.current_goal.challenge" if is_battle_goal else &"ui.goal.navigate")
+		if is_battle_goal:
+			action.pressed.connect(battle_requested.emit.bind(quest.target_id))
+		else:
+			action.pressed.connect(navigate_requested.emit.bind(_get_panel_id(quest)))
 		card.add_child(action)
 		_goal_list.add_child(card)
 

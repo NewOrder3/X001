@@ -233,6 +233,18 @@ func get_active_quests() -> Array[QuestDefinition]:
 	return _quest_system.get_active_quests(_state)
 
 
+func get_current_quest() -> QuestDefinition:
+	if not has_active_state():
+		return null
+	return _quest_system.get_current_quest(_state)
+
+
+func evaluate_quests() -> Array[StringName]:
+	if not has_active_state():
+		return []
+	return _quest_system.evaluate(_state)
+
+
 func get_quest_progress(quest_id: StringName) -> int:
 	if not has_active_state():
 		return 0
@@ -474,6 +486,7 @@ func execute_use_food(command: UseFoodCommand) -> CommandResult:
 		return CommandResult.failure(&"insufficient_resources", GameText.get_text(&"message.session.no_food"))
 	if not _survival_system.restore_supply(_state.survival_state, definition.supply_restore_amount):
 		return CommandResult.failure(&"supply_full", GameText.get_text(&"message.session.supplies_full"))
+	_quest_system.record_item_used(_state, command.item_id, 1)
 	return CommandResult.success(GameText.format(&"message.session.supplies_restored", [definition.supply_restore_amount]))
 
 

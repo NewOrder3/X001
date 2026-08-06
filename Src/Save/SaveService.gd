@@ -1,7 +1,7 @@
 class_name SaveService
 extends RefCounted
 
-const CURRENT_SAVE_VERSION: int = 11
+const CURRENT_SAVE_VERSION: int = 12
 const SAVE_DIRECTORY: String = "user://saves"
 
 var _active_state: GameState = null
@@ -131,6 +131,9 @@ func migrate(data: Dictionary) -> Dictionary:
 		elif version == 10:
 			migrated_data = _v10_to_v11(migrated_data)
 			version = 11
+		elif version == 11:
+			migrated_data = _v11_to_v12(migrated_data)
+			version = 12
 		else:
 			_fail("No migration exists for save version %d." % version)
 			return {}
@@ -360,6 +363,25 @@ func _v10_to_v11(data: Dictionary) -> Dictionary:
 	var raw_quest_state: Variant = game_state_data.get("quest_state")
 	if not raw_quest_state is Dictionary or raw_quest_state.is_empty():
 		game_state_data["quest_state"] = {"completed_quest_ids": [], "defeated_boss_ids": []}
+	migrated_data["game_state"] = game_state_data
+	return migrated_data
+
+
+func _v11_to_v12(data: Dictionary) -> Dictionary:
+	var migrated_data: Dictionary = data.duplicate(true)
+	var raw_game_state: Variant = migrated_data.get("game_state")
+	if not raw_game_state is Dictionary:
+		_fail("Version 11 save is missing a valid game_state object.")
+		return {}
+	var game_state_data: Dictionary = raw_game_state.duplicate(true)
+	var raw_quest_state: Variant = game_state_data.get("quest_state")
+	if not raw_quest_state is Dictionary:
+		_fail("Version 11 save has an invalid quest_state.")
+		return {}
+	var quest_state_data: Dictionary = raw_quest_state.duplicate(true)
+	if not quest_state_data.has("used_item_counts"):
+		quest_state_data["used_item_counts"] = {}
+	game_state_data["quest_state"] = quest_state_data
 	migrated_data["game_state"] = game_state_data
 	return migrated_data
 

@@ -4,5 +4,7 @@
   "description_key": "data.quest.first_shelter.description",
   "objective_type": "build_building",
   "target_id": "building_rain_collector",
-  "target_amount": 1
+  "target_amount": 1,
+  "sort_order": 10,
+  "prerequisite_quest_ids": []
 }

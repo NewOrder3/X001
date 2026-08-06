@@ -313,6 +313,8 @@ message.merchant.purchased,购入 %d 份%s。
 message.session.start_before_merchant,请先开始游戏再与商人交易。
 data.quest.first_shelter.name,建造集雨器
 data.quest.first_shelter.description,在竹筏上建造一座集雨器，开始收集淡水。
+data.quest.first_drink.name,饮用第一份淡水
+data.quest.first_drink.description,等待集雨器产出淡水后饮用一份，恢复补给。
 data.quest.first_sail.name,驶向西部浅滩
 data.quest.first_sail.description,建造船舵后探索相邻的西部浅滩海域。
 data.quest.first_crew.name,救起一位伙伴
@@ -324,6 +326,13 @@ data.quest.first_boss.description,编队后击败礁海巨兽，检验你的战�
 ui.goal.title,%s（%d/%d）
 ui.goal.navigate,去完成
 ui.goal.all_done,所有新手目标已完成，继续探索海面吧！
-ui.goal.status_hint,按顺序完成目标，可一键跳转到对应面板。
+ui.goal.status_hint,当前只显示下一项主目标，可一键前往完成。
 ui.goal.status_initial,开始游戏后显示新手目标。
+ui.current_goal.initial,开始游戏后显示当前主目标。
+ui.current_goal.complete,新手航程已完成
+ui.current_goal.title,主目标：%s（%d/%d）
+ui.current_goal.challenge,挑战 Boss
+ui.quest_feedback.completed,%s 已完成！\n下一步：%s
+ui.world_map.view_rescued_survivor,查看获救伙伴
+ui.world_map.boss_threat,海图威胁：挑战%s
 message.quest.unavailable,新手目标数据不可用。

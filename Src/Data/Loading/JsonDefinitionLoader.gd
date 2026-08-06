@@ -380,6 +380,9 @@ func _create_quest_definition(data: Dictionary, source_path: String) -> QuestDef
 		"have_item":
 			objective_type = QuestDefinition.ObjectiveType.HAVE_ITEM
 			target_id = _read_required_prefixed_id(data, "target_id", "item_", source_path)
+		"use_item":
+			objective_type = QuestDefinition.ObjectiveType.USE_ITEM
+			target_id = _read_required_prefixed_id(data, "target_id", "item_", source_path)
 		"upgrade_raft":
 			objective_type = QuestDefinition.ObjectiveType.UPGRADE_RAFT
 			if data.has("target_id"):
@@ -396,9 +399,11 @@ func _create_quest_definition(data: Dictionary, source_path: String) -> QuestDef
 		_:
 			_set_error("Definition '%s' has unsupported quest objective '%s'." % [source_path, objective_name])
 	var target_amount: int = _read_positive_int(data, "target_amount", source_path)
+	var sort_order: int = _read_positive_int(data, "sort_order", source_path)
+	var prerequisite_quest_ids: Array[StringName] = _read_optional_prefixed_ids(data, "prerequisite_quest_ids", "quest_", source_path)
 	if not _last_error.is_empty():
 		return null
-	return QuestDefinition.new(id, display_name_key, description_key, objective_type, target_id, target_amount)
+	return QuestDefinition.new(id, display_name_key, description_key, objective_type, target_id, target_amount, sort_order, prerequisite_quest_ids)
 
 
 func _read_merchant_offers(
@@ -776,6 +781,26 @@ func _read_required_prefixed_id(data: Dictionary, field_name: String, prefix: St
 		_set_error("Definition '%s' requires a string field named '%s'." % [source_path, field_name])
 		return &""
 	return _read_optional_prefixed_id(data, field_name, prefix, source_path)
+
+
+func _read_optional_prefixed_ids(data: Dictionary, field_name: String, prefix: String, source_path: String) -> Array[StringName]:
+	var ids: Array[StringName] = []
+	if not data.has(field_name):
+		return ids
+	var raw_ids: Variant = data.get(field_name)
+	if not raw_ids is Array:
+		_set_error("Definition '%s' requires an array field named '%s'." % [source_path, field_name])
+		return ids
+	for raw_id: Variant in raw_ids:
+		if typeof(raw_id) != TYPE_STRING:
+			_set_error("Definition '%s' field '%s' must contain only string IDs." % [source_path, field_name])
+			return ids
+		var id: StringName = StringName(raw_id)
+		if not IdValidator.is_valid_id(id) or not String(id).begins_with(prefix) or ids.has(id):
+			_set_error("Definition '%s' field '%s' contains an invalid or duplicate ID '%s'." % [source_path, field_name, String(id)])
+			return ids
+		ids.append(id)
+	return ids
 
 
 func _read_optional_tags(data: Dictionary, field_name: String, source_path: String) -> Array[StringName]:

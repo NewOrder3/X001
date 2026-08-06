@@ -4,5 +4,7 @@
   "description_key": "data.quest.first_boss.description",
   "objective_type": "win_battle",
   "target_id": "boss_tutorial_sea_beast",
-  "target_amount": 1
+  "target_amount": 1,
+  "sort_order": 60,
+  "prerequisite_quest_ids": ["quest_first_expand"]
 }

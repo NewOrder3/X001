@@ -4,5 +4,7 @@
   "description_key": "data.quest.first_sail.description",
   "objective_type": "explore_region",
   "target_id": "region_west_shoals",
-  "target_amount": 1
+  "target_amount": 1,
+  "sort_order": 30,
+  "prerequisite_quest_ids": ["quest_first_drink"]
 }

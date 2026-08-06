@@ -14,6 +14,8 @@ signal menu_requested
 @onready var _left_panel_scroll: ScrollContainer = $LeftPanelScroll
 @onready var _survival_hud: Control = $SurvivalHUD
 @onready var _resource_ribbon: Control = $ResourceRibbon
+@onready var _current_goal_hud: Control = $CurrentGoalHud
+@onready var _quest_feedback_banner: Control = $QuestFeedbackBanner
 @onready var _bottom_navigation: PanelContainer = $BottomNavigation
 @onready var _build_panel: Control = $LeftPanelScroll/LeftPanelColumn/RaftBuildPanel
 @onready var _production_panel: Control = $LeftPanelScroll/LeftPanelColumn/ProductionPanel
@@ -85,8 +87,13 @@ func _apply_layout() -> void:
 
 
 func _apply_wide_layout(viewport_size: Vector2) -> void:
+	_voyage_header.visible = _active_panel != _build_panel
 	_resource_ribbon.position = Vector2(DRAWER_MARGIN, DRAWER_MARGIN)
 	_resource_ribbon.size = Vector2(330.0, 92.0)
+	_current_goal_hud.position = Vector2((viewport_size.x - 480.0) * 0.5, 24.0)
+	_current_goal_hud.size = Vector2(480.0, 132.0)
+	_quest_feedback_banner.position = Vector2((viewport_size.x - 480.0) * 0.5, 174.0)
+	_quest_feedback_banner.size = Vector2(480.0, 76.0)
 	_survival_hud.position = Vector2(viewport_size.x - 300.0 - DRAWER_MARGIN, DRAWER_MARGIN + 52.0)
 	_survival_hud.size = Vector2(300.0, 154.0)
 	_menu_button.position = Vector2(viewport_size.x - 132.0 - DRAWER_MARGIN, DRAWER_MARGIN)
@@ -94,7 +101,7 @@ func _apply_wide_layout(viewport_size: Vector2) -> void:
 	_bottom_navigation.size = Vector2(minf(900.0, viewport_size.x - 280.0), 112.0)
 	_bottom_navigation.position = Vector2((viewport_size.x - _bottom_navigation.size.x) * 0.5, viewport_size.y - 136.0)
 	_voyage_header.size = Vector2(520.0, 88.0)
-	_voyage_header.position = Vector2((viewport_size.x - _voyage_header.size.x) * 0.5, 24.0)
+	_voyage_header.position = Vector2((viewport_size.x - _voyage_header.size.x) * 0.5, 258.0)
 	_voyage_status.size = Vector2(minf(680.0, viewport_size.x - 420.0), 58.0)
 	_voyage_status.position = Vector2((viewport_size.x - _voyage_status.size.x) * 0.5, viewport_size.y - 214.0)
 	if _active_panel != null:
@@ -105,27 +112,31 @@ func _apply_wide_layout(viewport_size: Vector2) -> void:
 
 
 func _apply_compact_layout(viewport_size: Vector2) -> void:
+	_voyage_header.hide()
 	_resource_ribbon.position = Vector2(16.0, 16.0)
 	_resource_ribbon.size = Vector2(viewport_size.x * 0.48 - 20.0, 76.0)
-	_survival_hud.position = Vector2(viewport_size.x * 0.48 + 4.0, 68.0)
+	_survival_hud.position = Vector2(viewport_size.x * 0.48 + 4.0, 16.0)
 	_survival_hud.size = Vector2(viewport_size.x * 0.52 - 20.0, 116.0)
+	_current_goal_hud.position = Vector2(16.0, 142.0)
+	_current_goal_hud.size = Vector2(viewport_size.x - 32.0, 112.0)
+	_quest_feedback_banner.position = Vector2(16.0, 262.0)
+	_quest_feedback_banner.size = Vector2(viewport_size.x - 32.0, 68.0)
 	_menu_button.position = Vector2(16.0, 16.0)
 	_menu_button.size = Vector2(96.0, 44.0)
 	_bottom_navigation.position = Vector2(16.0, viewport_size.y - 102.0)
 	_bottom_navigation.size = Vector2(viewport_size.x - 32.0, 86.0)
-	_voyage_header.position = Vector2(viewport_size.x * 0.18, 104.0)
+	_voyage_header.position = Vector2(viewport_size.x * 0.18, 340.0)
 	_voyage_header.size = Vector2(viewport_size.x * 0.64, 76.0)
 	_voyage_status.position = Vector2(20.0, viewport_size.y - 154.0)
 	_voyage_status.size = Vector2(viewport_size.x - 40.0, 44.0)
 	if _active_panel != null:
-		_left_panel_scroll.position = Vector2(16.0, 144.0)
+		_left_panel_scroll.position = Vector2(16.0, 344.0)
 		_left_panel_scroll.size = Vector2(viewport_size.x - 32.0, maxf(160.0, viewport_size.y - 262.0))
-		_left_panel_scroll.position.y = 196.0
-		_left_panel_scroll.size.y = maxf(140.0, viewport_size.y - 314.0)
+		_left_panel_scroll.size.y = maxf(140.0, viewport_size.y - 462.0)
 
 
 func _apply_styles() -> void:
-	for panel: Control in [_goal_panel, _build_panel, _production_panel, _world_map_panel, _survivor_panel, _merchant_panel, _survival_hud]:
+	for panel: Control in [_goal_panel, _build_panel, _production_panel, _world_map_panel, _survivor_panel, _merchant_panel, _survival_hud, _current_goal_hud, _quest_feedback_banner]:
 		var style: StyleBoxFlat = StyleBoxFlat.new()
 		style.bg_color = Color(0.045, 0.12, 0.15, 0.90)
 		style.corner_radius_top_left = 18

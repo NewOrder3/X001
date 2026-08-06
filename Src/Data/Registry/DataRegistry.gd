@@ -630,6 +630,10 @@ func _validate_quest_references() -> bool:
 				if not _items.has(target_id):
 					_set_error("Quest '%s' references unknown item '%s'." % [String(quest.id), String(target_id)])
 					return false
+			QuestDefinition.ObjectiveType.USE_ITEM:
+				if not _items.has(target_id):
+					_set_error("Quest '%s' references unknown item '%s'." % [String(quest.id), String(target_id)])
+					return false
 			QuestDefinition.ObjectiveType.RECRUIT_SURVIVOR:
 				if target_id != &"" and not _survivors.has(target_id):
 					_set_error("Quest '%s' references unknown survivor '%s'." % [String(quest.id), String(target_id)])
@@ -642,6 +646,14 @@ func _validate_quest_references() -> bool:
 				if not _regions.has(target_id):
 					_set_error("Quest '%s' references unknown region '%s'." % [String(quest.id), String(target_id)])
 					return false
+		for prerequisite_id: StringName in quest.prerequisite_quest_ids:
+			if prerequisite_id == quest.id or not _quests.has(prerequisite_id):
+				_set_error("Quest '%s' references an invalid prerequisite '%s'." % [String(quest.id), String(prerequisite_id)])
+				return false
+			var prerequisite: QuestDefinition = _quests[prerequisite_id]
+			if prerequisite.sort_order >= quest.sort_order:
+				_set_error("Quest '%s' prerequisite '%s' must have a lower sort_order." % [String(quest.id), String(prerequisite_id)])
+				return false
 	return true
 
 

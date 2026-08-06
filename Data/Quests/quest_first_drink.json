@@ -1,0 +1,10 @@
+{
+  "id": "quest_first_drink",
+  "display_name_key": "data.quest.first_drink.name",
+  "description_key": "data.quest.first_drink.description",
+  "objective_type": "use_item",
+  "target_id": "item_fresh_water",
+  "target_amount": 1,
+  "sort_order": 20,
+  "prerequisite_quest_ids": ["quest_first_shelter"]
+}

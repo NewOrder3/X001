@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=26 format=3]
 
 [ext_resource type="Script" path="res://Src/SceneFlow/GameRoot.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="2_ui"]
@@ -23,6 +23,8 @@
 [ext_resource type="Script" path="res://Src/Merchant/View/MerchantPanel.gd" id="21_merchant_panel"]
 [ext_resource type="Script" path="res://Src/Quest/View/GoalPanel.gd" id="22_goal_panel"]
 [ext_resource type="Script" path="res://Src/UI/GameMenuPanel.gd" id="23_game_menu"]
+[ext_resource type="Script" path="res://Src/Quest/View/CurrentGoalHud.gd" id="24_current_goal"]
+[ext_resource type="Script" path="res://Src/Quest/View/QuestFeedbackBanner.gd" id="25_quest_feedback"]
 
 [node name="GameRoot" type="Node"]
 script = ExtResource("1_game")
@@ -124,6 +126,63 @@ text_overrun_behavior = 3
 layout_mode = 0
 mouse_filter = 2
 script = ExtResource("19_resource_ribbon")
+
+[node name="CurrentGoalHud" type="PanelContainer" parent="UIRoot/HUDLayer/GameHudLayout"]
+layout_mode = 0
+mouse_filter = 0
+script = ExtResource("24_current_goal")
+
+[node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/GameHudLayout/CurrentGoalHud"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/CurrentGoalHud/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CurrentGoalTitleLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/CurrentGoalHud/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.70, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="CurrentGoalDescriptionLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/CurrentGoalHud/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.93, 0.92, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+text_overrun_behavior = 3
+
+[node name="CurrentGoalActionButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/CurrentGoalHud/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+
+[node name="QuestFeedbackBanner" type="PanelContainer" parent="UIRoot/HUDLayer/GameHudLayout"]
+layout_mode = 0
+mouse_filter = 2
+script = ExtResource("25_quest_feedback")
+
+[node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/GameHudLayout/QuestFeedbackBanner"]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 14
+
+[node name="QuestFeedbackLabel" type="Label" parent="UIRoot/HUDLayer/GameHudLayout/QuestFeedbackBanner/Margin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.94, 0.78, 1)
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/GameHudLayout/ResourceRibbon"]
 layout_mode = 2
@@ -507,16 +566,6 @@ unique_name_in_owner = true
 layout_mode = 2
 autowrap_mode = 2
 
-[node name="ChallengeBossButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "挑战教学 Boss"
-
-[node name="ChallengeReefButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin/Content"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "ui.survivor.challenge_reef_locked"
-
 [node name="PendingCards" type="VBoxContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel/Margin/Content"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -630,6 +679,17 @@ unique_name_in_owner = true
 layout_mode = 2
 autowrap_mode = 2
 text = "ui.world_map.status_initial"
+
+[node name="RescueContinueButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
+text = "ui.world_map.view_rescued_survivor"
+
+[node name="BossChallengeButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/WorldMapPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+visible = false
 
 [node name="Margin" type="MarginContainer" parent="UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/ProductionPanel"]
 theme_override_constants/margin_left = 18

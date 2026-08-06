@@ -3,5 +3,7 @@
   "display_name_key": "data.quest.first_crew.name",
   "description_key": "data.quest.first_crew.description",
   "objective_type": "recruit_survivor",
-  "target_amount": 1
+  "target_amount": 1,
+  "sort_order": 40,
+  "prerequisite_quest_ids": ["quest_first_sail"]
 }
