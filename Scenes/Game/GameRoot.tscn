@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://Src/SceneFlow/GameRoot.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://Scenes/UI/UIRoot.tscn" id="2_ui"]
@@ -22,6 +22,7 @@
 [ext_resource type="Script" path="res://Src/Exploration/View/OceanMapHUD.gd" id="20_ocean_hud"]
 [ext_resource type="Script" path="res://Src/Merchant/View/MerchantPanel.gd" id="21_merchant_panel"]
 [ext_resource type="Script" path="res://Src/Quest/View/GoalPanel.gd" id="22_goal_panel"]
+[ext_resource type="Script" path="res://Src/UI/GameMenuPanel.gd" id="23_game_menu"]
 
 [node name="GameRoot" type="Node"]
 script = ExtResource("1_game")
@@ -54,6 +55,10 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("8_hud_layout")
+
+[node name="MenuButton" type="Button" parent="UIRoot/HUDLayer/GameHudLayout"]
+layout_mode = 0
+text = "ui.menu.button"
 
 [node name="OceanMapHUD" type="Control" parent="UIRoot/HUDLayer/GameHudLayout"]
 layout_mode = 1
@@ -219,6 +224,60 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 4
 text = "ui.offline_settlement.continue"
+
+[node name="GameMenuPanel" type="PanelContainer" parent="UIRoot/WindowLayer"]
+offset_left = 740.0
+offset_top = 320.0
+offset_right = 1180.0
+offset_bottom = 660.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("23_game_menu")
+
+[node name="Margin" type="MarginContainer" parent="UIRoot/WindowLayer/GameMenuPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 22
+
+[node name="Content" type="VBoxContainer" parent="UIRoot/WindowLayer/GameMenuPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="UIRoot/WindowLayer/GameMenuPanel/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "ui.menu.title"
+horizontal_alignment = 1
+
+[node name="MenuStatusLabel" type="Label" parent="UIRoot/WindowLayer/GameMenuPanel/Margin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.78, 0.52, 1)
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="SaveButton" type="Button" parent="UIRoot/WindowLayer/GameMenuPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "ui.menu.save"
+
+[node name="ReturnMainButton" type="Button" parent="UIRoot/WindowLayer/GameMenuPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "ui.menu.return_main"
+
+[node name="CloseMenuButton" type="Button" parent="UIRoot/WindowLayer/GameMenuPanel/Margin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "ui.menu.close"
 
 [node name="LeftPanelScroll" type="ScrollContainer" parent="UIRoot/HUDLayer/GameHudLayout"]
 layout_mode = 0

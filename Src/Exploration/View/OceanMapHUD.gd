@@ -61,21 +61,21 @@ func _refresh() -> void:
 	if not is_instance_valid(_region_label):
 		return
 	if _session == null or not _session.has_active_state():
-		_region_label.text = "等待海图载入"
+		_region_label.text = GameText.get_text(&"ui.ocean_map.waiting")
 		_hint_label.text = ""
 		_status_label.text = ""
 		return
 	var world_state: WorldState = _session.get_world_state()
 	var region: RegionDefinition = _session.get_region_definition(world_state.current_region_id)
 	if region != null:
-		_region_label.text = "%s  ·  海图 %d, %d" % [region.get_display_name(), region.coordinate.x, region.coordinate.y]
+		_region_label.text = GameText.format(&"ui.ocean_map.region", [region.get_display_name(), region.coordinate.x, region.coordinate.y])
 	if not _hovered_region_name.is_empty():
-		_hint_label.text = "准备驶向：%s" % _hovered_region_name
+		_hint_label.text = GameText.format(&"ui.ocean_map.hover_hint", [_hovered_region_name])
 	elif _session.is_exploration_unlocked():
-		_hint_label.text = "点击相邻漂流点启航  ·  拖动浏览  ·  滚轮缩放"
+		_hint_label.text = GameText.get_text(&"ui.ocean_map.sail_hint")
 	else:
-		_hint_label.text = "先进入「设施」建造船舵，才能驶出当前海域"
-	_status_label.text = _last_status if not _last_status.is_empty() else "探索海面、打捞材料，再升级你的船上设施"
+		_hint_label.text = GameText.get_text(&"ui.ocean_map.build_rudder_hint")
+	_status_label.text = _last_status if not _last_status.is_empty() else GameText.get_text(&"ui.ocean_map.default_status")
 
 
 func _apply_styles() -> void:

@@ -47,6 +47,17 @@ func _ready() -> void:
 	_refresh()
 
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_visible_in_tree() or _session == null:
+		return
+	if event.is_action_pressed(&"confirm") and _selected_building_id != &"" and _has_selected_cell:
+		_on_confirm_pressed()
+		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed(&"cancel") and (_selected_building_id != &"" or _has_selected_cell):
+		_on_cancel_pressed()
+		get_viewport().set_input_as_handled()
+
+
 func bind_session(session: GameSession) -> void:
 	_session = session
 	_inventory_system = _session.get_inventory_system() if _session != null else null
@@ -210,6 +221,7 @@ func _refresh_facility_list() -> void:
 		name_label.text = GameText.format(&"ui.build.facility_entry", [definition.get_display_name(), instance.level])
 		row.add_child(name_label)
 		var upgrade_button: Button = Button.new()
+		upgrade_button.custom_minimum_size = Vector2(0.0, 44.0)
 		if instance.level >= BuildingSystem.MAX_BUILDING_LEVEL:
 			upgrade_button.text = GameText.get_text(&"ui.build.max_level")
 			upgrade_button.disabled = true

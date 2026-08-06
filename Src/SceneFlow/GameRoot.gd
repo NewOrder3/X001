@@ -11,6 +11,8 @@ extends Node
 @onready var _survivor_panel: SurvivorPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/SurvivorPanel
 @onready var _merchant_panel: MerchantPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/MerchantPanel
 @onready var _goal_panel: GoalPanel = $UIRoot/HUDLayer/GameHudLayout/LeftPanelScroll/LeftPanelColumn/GoalPanel
+@onready var _menu_panel: GameMenuPanel = $UIRoot/WindowLayer/GameMenuPanel
+@onready var _ui_root: UIRoot = $UIRoot
 @onready var _offline_settlement_panel: OfflineSettlementPanel = $UIRoot/WindowLayer/OfflineSettlementPanel
 @onready var _resource_ribbon: ResourceRibbon = $UIRoot/HUDLayer/GameHudLayout/ResourceRibbon
 @onready var _ocean_map_hud: OceanMapHUD = $UIRoot/HUDLayer/GameHudLayout/OceanMapHUD
@@ -26,6 +28,10 @@ func _ready() -> void:
 	_dynamic_ocean_map.set_navigation_mode(true)
 	_set_build_mode(false)
 	_goal_panel.navigate_requested.connect(_hud_layout.open_panel)
+	_ui_root.register_window(&"game_menu", _menu_panel)
+	_hud_layout.menu_requested.connect(_open_menu)
+	_menu_panel.close_requested.connect(_close_menu)
+	_menu_panel.return_to_main_menu_requested.connect(_return_to_main_menu)
 	get_viewport().size_changed.connect(_layout_world_views)
 	_bind_views()
 	call_deferred("_layout_world_views")
@@ -57,9 +63,30 @@ func _bind_views() -> void:
 	_survivor_panel.bind_session(_session)
 	_merchant_panel.bind_session(_session)
 	_goal_panel.bind_session(_session)
+	_menu_panel.bind_session(_session)
 	_offline_settlement_panel.show_report(_session.get_last_offline_settlement_report())
 	_resource_ribbon.bind_session(_session)
 	_ocean_map_hud.bind_session(_session)
+
+
+func _open_menu() -> void:
+	if _session != null:
+		_session.get_simulation_clock().pause()
+	_menu_panel.refresh()
+	_ui_root.open_window(&"game_menu")
+
+
+func _close_menu() -> void:
+	_ui_root.close_topmost()
+	if _session != null:
+		_session.get_simulation_clock().start()
+
+
+func _return_to_main_menu() -> void:
+	_ui_root.close_topmost()
+	var router: SceneRouter = get_node_or_null("../../SceneRouter") as SceneRouter
+	if router != null:
+		router.go_to_main_menu()
 
 
 func _set_build_mode(is_enabled: bool) -> void:

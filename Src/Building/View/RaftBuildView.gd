@@ -48,6 +48,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		_select_tile_at_global_position(event.position)
 		return
+	if event is InputEventMouseMotion:
+		var cell: Vector2i = GridMath.world_to_grid(to_local(event.position))
+		set_preview_cell(cell)
+		return
 	if event is InputEventScreenTouch and event.pressed:
 		_select_tile_at_global_position(event.position)
 
@@ -97,7 +101,7 @@ func _draw_building(instance: BuildingInstance) -> void:
 	draw_string(
 		ThemeDB.fallback_font,
 		badge_center + Vector2(-20.0, 7.0),
-		"Lv%d" % instance.level,
+		GameText.get_text(&"ui.build.level_badge") % instance.level,
 		HORIZONTAL_ALIGNMENT_CENTER,
 		40.0,
 		16,

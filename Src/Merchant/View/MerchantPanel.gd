@@ -69,6 +69,7 @@ func _refresh() -> void:
 			var stock: int = _session.get_merchant_stock(offer.id)
 			var precheck: CommandResult = _session.can_buy_merchant_item(offer.id)
 			var button: Button = Button.new()
+			button.custom_minimum_size = Vector2(0.0, 44.0)
 			button.text = GameText.format(&"ui.merchant.offer", [
 				item_name,
 				offer.amount,

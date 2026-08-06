@@ -20,6 +20,9 @@ const TEST_SCRIPTS: Array[String] = [
 	"res://Tests/Unit/test_building_system.gd",
 	"res://Tests/Unit/test_production_system.gd",
 	"res://Tests/Unit/test_raft_build_view.gd",
+	"res://Tests/Unit/test_world_map_panel.gd",
+	"res://Tests/Unit/test_game_menu.gd",
+	"res://Tests/Unit/test_build_keyboard_input.gd",
 ]
 
 var _failed_test_count: int = 0
@@ -27,6 +30,10 @@ var _run_test_count: int = 0
 
 
 func _init() -> void:
+	call_deferred("_run_all_tests")
+
+
+func _run_all_tests() -> void:
 	for script_path: String in TEST_SCRIPTS:
 		_run_script_tests(script_path)
 

@@ -78,6 +78,7 @@ func _refresh() -> void:
 			if definition == null:
 				continue
 			var recruit_button: Button = Button.new()
+			recruit_button.custom_minimum_size = Vector2(0.0, 44.0)
 			recruit_button.text = GameText.format(&"ui.survivor.recruit", [definition.get_display_name()])
 			_apply_portrait(recruit_button, survivor_id)
 			recruit_button.pressed.connect(_recruit.bind(survivor_id))
@@ -123,11 +124,13 @@ func _add_survivor_card(state: SurvivorState, instance: SurvivorInstance) -> voi
 	var actions: HBoxContainer = HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 6)
 	var upgrade_button: Button = Button.new()
+	upgrade_button.custom_minimum_size = Vector2(0.0, 44.0)
 	upgrade_button.text = GameText.format(&"ui.survivor.upgrade", [_format_cost(definition.upgrade_cost)])
 	upgrade_button.disabled = instance.level >= SurvivorSystem.MAX_LEVEL
 	upgrade_button.pressed.connect(_upgrade.bind(instance.survivor_id))
 	actions.add_child(upgrade_button)
 	var lineup_button: Button = Button.new()
+	lineup_button.custom_minimum_size = Vector2(0.0, 44.0)
 	var is_in_lineup: bool = state.lineup_ids.has(instance.survivor_id)
 	lineup_button.text = GameText.get_text(&"ui.survivor.remove_from_lineup" if is_in_lineup else &"ui.survivor.add_to_lineup")
 	lineup_button.pressed.connect(_toggle_lineup.bind(instance.survivor_id))

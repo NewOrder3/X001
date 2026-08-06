@@ -21,6 +21,10 @@ func get_active_state() -> GameState:
 	return _active_state
 
 
+func has_save(slot_id: StringName) -> bool:
+	return _is_valid_slot_id(slot_id) and FileAccess.file_exists(_get_save_path(slot_id))
+
+
 func save_game(slot_id: StringName, saved_at_unix_seconds: int = -1) -> bool:
 	_last_error = ""
 	if _active_state == null:

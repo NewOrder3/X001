@@ -26,6 +26,17 @@ func bind_session(session: GameSession) -> void:
 		var exploration_system: ExplorationSystem = _session.get_exploration_system()
 		if not exploration_system.exploration_completed.is_connected(_on_exploration_completed):
 			exploration_system.exploration_completed.connect(_on_exploration_completed)
+		var building_system: BuildingSystem = _session.get_building_system()
+		if not building_system.building_placed.is_connected(_on_building_changed):
+			building_system.building_placed.connect(_on_building_changed)
+		if not building_system.building_upgraded.is_connected(_on_building_upgraded):
+			building_system.building_upgraded.connect(_on_building_upgraded)
+		var progression_system: ProgressionSystem = _session.get_progression_system()
+		if not progression_system.raft_upgraded.is_connected(_on_progression_changed):
+			progression_system.raft_upgraded.connect(_on_progression_changed)
+		var survival_system: SurvivalSystem = _session.get_survival_system()
+		if not survival_system.survival_changed.is_connected(_on_survival_changed):
+			survival_system.survival_changed.connect(_on_survival_changed)
 	_refresh()
 
 
@@ -56,6 +67,26 @@ func _on_exploration_completed(result: ExplorationResult) -> void:
 	_refresh()
 
 
+func _on_building_changed(_instance_id: StringName, _building_id: StringName, _origin: Vector2i) -> void:
+	_refresh()
+
+
+func _on_building_upgraded(_instance_id: StringName, _new_level: int) -> void:
+	_refresh()
+
+
+func _on_progression_changed(_new_level: int) -> void:
+	_refresh()
+
+
+func _on_survival_changed(_supply: float, _durability: float, _stamina: int) -> void:
+	_refresh()
+
+
+func refresh() -> void:
+	_refresh()
+
+
 func _refresh() -> void:
 	if not is_instance_valid(_current_region_label):
 		return
@@ -79,6 +110,7 @@ func _refresh() -> void:
 	var selected_is_reachable: bool = false
 	for region: RegionDefinition in reachable_regions:
 		var button: Button = Button.new()
+		button.custom_minimum_size = Vector2(0.0, 44.0)
 		button.text = GameText.format(&"ui.world_map.region_button", [
 			region.get_display_name(),
 			region.coordinate.x,

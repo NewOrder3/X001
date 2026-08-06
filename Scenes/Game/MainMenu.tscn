@@ -75,6 +75,13 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "ui.main_menu.start"
 
+[node name="ContinueButton" type="Button" parent="Content/Menu"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 56)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "ui.main_menu.continue"
+
 [node name="QuitButton" type="Button" parent="Content/Menu"]
 custom_minimum_size = Vector2(420, 48)
 layout_mode = 2
@@ -89,4 +96,5 @@ theme_override_colors/font_color = Color(1, 0.72, 0.58, 1)
 horizontal_alignment = 1
 
 [connection signal="pressed" from="Content/Menu/StartButton" to="." method="_on_start_button_pressed"]
+[connection signal="pressed" from="Content/Menu/ContinueButton" to="." method="_on_continue_button_pressed"]
 [connection signal="pressed" from="Content/Menu/QuitButton" to="." method="_on_quit_button_pressed"]

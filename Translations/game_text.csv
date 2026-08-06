@@ -2,6 +2,7 @@ keys,zh_CN
 ui.main_menu.title,沧海余生
 ui.main_menu.subtitle,在风浪之间，搭建最后的归宿
 ui.main_menu.start,开始游戏
+ui.main_menu.continue,继续游戏
 ui.main_menu.quit,退出
 ui.main_menu.start_unavailable,启动流程不可用。
 ui.debug_panel.title,调试面板（F3）
@@ -26,8 +27,31 @@ ui.build.select_building,选择建筑
 ui.build.unavailable,设施不可用
 ui.build.select_with_cost,选择：%s（%s）
 ui.build.status_initial,选择建筑，点击竹筏格位开始。
-ui.build.status_select_tile,选择竹筏格位放置设施。
-ui.build.status_tile_selected,已选择格位（%d，%d），确认后建造。
+ui.build.status_select_tile,选择竹筏格位放置设施（Enter 确认 / Esc 取消）。
+ui.build.status_tile_selected,已选择格位（%d，%d），Enter 确认建造。
+ui.build.level_badge,Lv%d
+ui.ocean_map.waiting,等待海图载入
+ui.ocean_map.region,%s  ·  海图 %d，%d
+ui.ocean_map.hover_hint,准备驶向：%s
+ui.ocean_map.sail_hint,点击相邻漂流点启航  ·  拖动浏览  ·  滚轮缩放
+ui.ocean_map.build_rudder_hint,先进入「设施」建造船舵，才能驶出当前海域
+ui.ocean_map.default_status,探索海面、打捞材料，再升级你的船上设施
+ui.nav.tip_map,航海图（1）
+ui.nav.tip_goal,目标（2）
+ui.nav.tip_build,设施（3）
+ui.nav.tip_supply,补给（4）
+ui.nav.tip_crew,伙伴（5）
+ui.nav.tip_merchant,商人（6）
+ui.nav.tip_menu,菜单
+ui.menu.button,菜单
+ui.menu.title,游戏菜单
+ui.menu.save,保存游戏
+ui.menu.return_main,返回主菜单
+ui.menu.close,继续游戏
+ui.menu.saved,已保存当前进度。
+ui.menu.save_failed,保存失败，请重试。
+ui.menu.no_session,当前没有可保存的游戏。
+message.save.load_failed,读取存档失败。
 ui.build.status_cancelled,已取消建造。
 ui.build.cost_entry,%s×%d
 ui.build.confirm,确认建造

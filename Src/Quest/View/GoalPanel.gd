@@ -70,6 +70,7 @@ func _refresh() -> void:
 		description.text = quest.get_description()
 		card.add_child(description)
 		var action: Button = Button.new()
+		action.custom_minimum_size = Vector2(0.0, 44.0)
 		action.text = GameText.get_text(&"ui.goal.navigate")
 		action.pressed.connect(navigate_requested.emit.bind(_get_panel_id(quest)))
 		card.add_child(action)
