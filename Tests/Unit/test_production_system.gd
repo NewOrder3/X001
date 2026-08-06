@@ -20,7 +20,7 @@ func test_production_batches_cycles_and_consumes_inputs() -> void:
 		PlaceBuildingCommand.new(&"building_campfire", Vector2i(0, 0), 0)
 	)
 	assert_true(build_result.succeeded, build_result.message)
-	_advance_seconds(session, 40)
+	_advance_seconds(session, 50)
 	assert_eq(session.get_item_amount(&"item_raw_fish"), 0)
 	assert_eq(session.get_item_amount(&"item_grilled_fish"), 2)
 
@@ -32,7 +32,7 @@ func test_disabled_facility_and_full_output_stall_without_losing_progress() -> v
 		PlaceBuildingCommand.new(&"building_rain_collector", Vector2i(0, 0), 0)
 	)
 	assert_true(build_result.succeeded, build_result.message)
-	_advance_seconds(session, 10)
+	_advance_seconds(session, 15)
 	var instance_id: StringName = &"instance_rain_collector_1"
 	var stopped: CommandResult = session.execute_set_production_enabled(SetProductionEnabledCommand.new(instance_id, false))
 	assert_true(stopped.succeeded, stopped.message)
@@ -40,10 +40,10 @@ func test_disabled_facility_and_full_output_stall_without_losing_progress() -> v
 	assert_eq(session.get_item_amount(&"item_fresh_water"), 0)
 	var started: CommandResult = session.execute_set_production_enabled(SetProductionEnabledCommand.new(instance_id, true))
 	assert_true(started.succeeded, started.message)
-	_advance_seconds(session, 20)
+	_advance_seconds(session, 45)
 	assert_eq(session.get_item_amount(&"item_fresh_water"), 1)
 	assert_true(session.execute_gather_resources(GatherResourcesCommand.new(&"item_fresh_water", 19)).succeeded)
-	_advance_seconds(session, 30)
+	_advance_seconds(session, 45)
 	var production: ProductionInstance = session.get_production_system().get_instance(session.get_state(), instance_id)
 	assert_eq(production.stall_reason, ProductionInstance.StallReason.OUTPUT_CAPACITY_REACHED)
 	assert_eq(session.get_item_amount(&"item_fresh_water"), 20)
@@ -113,7 +113,7 @@ func test_desalinator_converts_seawater_into_fresh_water() -> void:
 		PlaceBuildingCommand.new(&"building_desalinator", Vector2i(0, 0), 0)
 	).succeeded)
 
-	_advance_seconds(session, 25)
+	_advance_seconds(session, 30)
 
 	assert_eq(session.get_item_amount(&"item_seawater"), 0)
 	assert_eq(session.get_item_amount(&"item_fresh_water"), 1)
@@ -126,9 +126,9 @@ func test_fishing_net_produces_raw_fish_without_input() -> void:
 		PlaceBuildingCommand.new(&"building_fishing_net", Vector2i(0, 0), 0)
 	).succeeded)
 
-	_advance_seconds(session, 30)
+	_advance_seconds(session, 40)
 	assert_eq(session.get_item_amount(&"item_raw_fish"), 1)
-	_advance_seconds(session, 60)
+	_advance_seconds(session, 80)
 	assert_eq(session.get_item_amount(&"item_raw_fish"), 3)
 
 

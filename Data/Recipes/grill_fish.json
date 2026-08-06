@@ -1,7 +1,7 @@
 {
   "id": "recipe_grill_fish",
   "display_name_key": "data.recipe.grill_fish.name",
-  "cycle_seconds": 20,
+  "cycle_seconds": 25,
   "input_items": {
     "item_raw_fish": 1
   },

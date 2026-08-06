@@ -19,7 +19,7 @@ func test_new_game_initializes_survival_from_definition_and_settles_every_five_s
 		session.advance_simulation(0.2)
 	assert_eq(state.supply, 100.0)
 	session.advance_simulation(0.2)
-	assert_true(is_equal_approx(state.supply, 99.95833333333333))
+	assert_true(is_equal_approx(state.supply, 99.91666666666667))
 	assert_true(is_equal_approx(state.durability, 99.99930555555555))
 
 
@@ -140,11 +140,11 @@ func test_one_hour_offline_settlement_consumes_supply_and_recovers_stamina() -> 
 	assert_eq(report.elapsed_seconds, 3600)
 	assert_eq(state.survival_state.supply, 82.0)
 	assert_eq(state.survival_state.durability, 25.0)
-	assert_eq(state.survival_state.stamina, 7)
+	assert_eq(state.survival_state.stamina, 9)
 	assert_eq(report.supply_before, 100.0)
 	assert_eq(report.supply_after, 82.0)
 	assert_eq(report.stamina_before, 3)
-	assert_eq(report.stamina_after, 7)
+	assert_eq(report.stamina_after, 9)
 
 
 func test_four_and_eight_hour_offline_settlements_respect_configured_minimum() -> void:

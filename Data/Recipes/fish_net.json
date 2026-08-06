@@ -1,7 +1,7 @@
 {
   "id": "recipe_fish_net",
   "display_name_key": "data.recipe.fish_net.name",
-  "cycle_seconds": 30,
+  "cycle_seconds": 40,
   "input_items": {},
   "output_items": {
     "item_raw_fish": 1

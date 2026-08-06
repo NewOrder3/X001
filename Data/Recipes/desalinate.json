@@ -1,7 +1,7 @@
 {
   "id": "recipe_desalinate",
   "display_name_key": "data.recipe.desalinate.name",
-  "cycle_seconds": 25,
+  "cycle_seconds": 30,
   "input_items": {
     "item_seawater": 2
   },
